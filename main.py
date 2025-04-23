@@ -1,12 +1,12 @@
+import re, os
 from flask import Flask, redirect, url_for, render_template, flash, session, request
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, User
-import re
 
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
-app.secret_key = 'ADHD'
+app.secret_key = os.urandom(711)
 
 db.init_app(app)
 
@@ -24,7 +24,7 @@ def register():
         username = request.form.get('username')
         password = request.form.get('password')
 
-        if not re.match(r'^[a-zA-Z0-9._%+-]+@mmu.edu.my$', email):
+        if not re.match(r'^[a-zA-Z0-9._%+-]+@[\w.]*mmu.edu.my$', email):
             flash("Email must be from MMU domain!", "error")
             return redirect(url_for('register'))
         
@@ -41,13 +41,13 @@ def register():
 
         hashed_password = generate_password_hash(password)
         new_user = User(email=email, username=username, password=hashed_password)
-
+    
         db.session.add(new_user)
         db.session.commit()
 
         return redirect(url_for('login', email=email))
 
-    return redirect(url_for("register"))
+    return render_template("register.html")
 
     
 @app.route("/login", methods=["GET", "POST"])
@@ -56,13 +56,12 @@ def login():
         username = request.form.get("username")
         password = request.form.get("password")
         
-        # Fetch the user from the database
         user = User.query.filter_by(username=username).first()
 
         if user and check_password_hash(user.password, password):
-            # Login successful – store user info in session
             session["user_id"] = user.id
             flash("Login successful!", "success")
+
             return redirect(url_for("profile", usr=username))
         else:
             flash("Invalid username or password!", "error")
@@ -74,9 +73,24 @@ def login():
 def otp():
     return render_template("otp.html")
 
-@app.route("/<usr>", methods=["POST"])
+@app.route("/logout")
+def logout():
+    session.clear()
+    flash("You have been logged out.", "success")
+    return redirect(url_for("guest"))
+
+@app.route("/profile/<usr>", methods=["GET", "POST"])
 def profile(usr):
-    return render_template("profile.html")
+    if "user_id" not in session:
+        flash("You must be logged in to view this page.", "error")
+        return redirect(url_for("login"))
+    
+    user = User.query.filter_by(username=usr).first()
+    if user:
+        return render_template("profile.html", usr=usr, email=user.email)
+    else:
+        flash("User not found!", "error")
+        return redirect(url_for("login"))
 
 if __name__ == "__main__":
     app.run(debug=True)

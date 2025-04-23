@@ -86,7 +86,7 @@
     <nav class="navbar">
         <ul>
             <li class="logo"><a href="/profile">eBtask</a></li>
-            <li><a href="/profile" class="{% if request.path == '/profile' %}active{% endif %}">Profile</a></li>
+            <li><a href="/profile/{{usr}}" class="{% if request.path.startswith('/profile') %}active{% endif %}">Profile</a></li>
             <li><a href="/lookingFor" class="{% if request.path == '/lookingFor' %}active{% endif %}">Looking For</a></li>
             <li><a href="/offeringTo" class="{% if request.path == '/offeringTo' %}active{% endif %}">Offering To</a></li>
             <li><a href="/history" class="{% if request.path == '/history' %}active{% endif %}">History</a></li>
