@@ -16,7 +16,7 @@ with app.app_context():
 @app.route("/")
 def guest():
     return render_template("guest.html")
-
+wdwdwdwdw
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
