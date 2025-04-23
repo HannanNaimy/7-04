@@ -3,6 +3,7 @@ from flask import Flask, redirect, url_for, render_template, flash, session, req
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, User
 
+
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
@@ -41,7 +42,7 @@ def register():
 
         hashed_password = generate_password_hash(password)
         new_user = User(email=email, username=username, password=hashed_password)
-    
+
         db.session.add(new_user)
         db.session.commit()
 
