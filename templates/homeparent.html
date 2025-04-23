@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>eBtask</title>   
+  <style>
+     * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+     }
+    body {
+        font-family: Arial, sans-serif;
+    }
+    .navbar {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        background: #ffd900;
+        padding: 1% 0 1% 0;
+        z-index: 1000;
+    }
+    .navbar ul {
+        list-style: none;
+        display: flex;
+        align-items: center;
+        justify-content: left;
+        padding: 0;
+        margin: 0;
+    }
+    .navbar ul li {
+        margin-right: 1.5%;
+    }
+    .navbar ul li a {
+        text-decoration: none;
+        color: black;
+        font-size: 1rem;
+        padding: 10px 15px  ;
+    }
+    .logo a {
+        font-size: 1.5rem !important;
+        font-weight: bold !important;
+        margin-left: 0.5rem;
+    }
+    .logo a:hover {
+        background: inherit !important;
+    }
+    .navbar ul li a:hover {
+        background: #ffffff;
+        border-radius: 3px;
+    }
+    .active {
+    background: #f78c00;
+    border-radius: 3px;
+    }
+    .credentials ul{
+        list-style: none;
+        display: flex;
+        gap: 1%;
+        align-items: center;
+        justify-content: right;
+        padding: 0;
+        margin: 0 1% 0 0;
+    }
+    .credentials ul li{
+        text-decoration: underline;
+    }
+    .content {
+        padding-top: 80px;
+        text-align: center;
+    }
+    .content h1{
+        font-size: 3rem;
+        text-align: left;
+        margin-left: 1%;
+    }
+    .content h2{
+        color: #757472;
+        text-align: left;
+        margin-left: 1%;
+    }
+  </style>
+</head>
+<body>
+    <nav class="navbar">
+        <ul>
+            <li class="logo"><a href="/profile">eBtask</a></li>
+            <li><a href="/profile" class="{% if request.path == '/profile' %}active{% endif %}">Profile</a></li>
+            <li><a href="/lookingFor" class="{% if request.path == '/lookingFor' %}active{% endif %}">Looking For</a></li>
+            <li><a href="/offeringTo" class="{% if request.path == '/offeringTo' %}active{% endif %}">Offering To</a></li>
+            <li><a href="/history" class="{% if request.path == '/history' %}active{% endif %}">History</a></li>
+            <li><a href="/guide" class="{% if request.path == '/guide' %}active{% endif %}">Guide</a></li>
+        </ul>
+    </nav>
+    <div class="content">
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+</html>
