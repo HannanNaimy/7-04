@@ -1,0 +1,16 @@
+{% extends "guestparent.html" %}
+
+{% block content %}
+<div class="logreg-container">
+    <h1 class="formtitle">Login</h1>
+    <form method="POST" action="#">
+        <label for="username">Username</label>
+        <input type="text" name="username" placeholder="Enter Your Username" required>
+
+        <label for="password">Password:</label>
+        <input type="password" name="password" placeholder="Enter Your Password" required>
+
+        <button class ="button loginsubmit-button" type="submit">Login</button>
+    </form>
+</div>
+{% endblock %}

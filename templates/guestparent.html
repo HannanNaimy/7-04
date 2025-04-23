@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>eBtask</title>   
+  <style>
+     * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+    }
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: stretch;
+      min-height: 100vh;
+    }
+    .intro {
+      flex: 1;
+      padding: 2%;
+      text-align: left;
+      line-height: normal;
+    }
+    h1 {
+      margin-top: -2%;
+      margin-left: -2%;
+      margin-bottom: 4%;
+      font-size: 3rem;
+      white-space: pre-line;
+    }
+    h2 {
+      margin-bottom: 1rem;
+      font-size: 2.5rem;
+      white-space: pre-line;
+    }       
+    p {
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+      white-space: pre-line;
+    }
+    .button-container {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0%;
+    }
+    .button {
+      padding: 1rem;
+      font-size: 1.3rem;
+      border: none;
+      cursor: pointer;
+      border-radius: 0.5rem;
+      color: white;
+      background-color: #007BFF;
+      transition: background-color 0.3s ease;
+    }
+    .button:hover {
+      background-color: #0056b3;
+    }
+    .register-button {
+      background-color: #d71212;
+    }
+    .register-button:hover {
+      background-color: #6f0b0b;
+    }
+    .rectangle {
+      width: 60%;
+      margin-right: 0%;
+      background-color: #f6df0eb7;
+      border: 3px solid #000000;
+      padding: 0%;
+    }
+    .tabs-container {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap:3%;
+      padding: 3% 3% 0 3%
+    }
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 3%;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #fff;
+      background-color: #000000;
+      border-radius: 10px;
+      pointer-events: none;
+    }
+    .logreg-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 100%; /* Adjust width as needed */
+      height: 93%;
+      padding-top: 0%;
+      background: rgb(255, 255, 255);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+      border-radius: 100px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 50%;
+      border: 10px solid rgb(255, 255, 255);   
+      background-color: #ffffff;
+      padding: 20px;
+    }
+    .formtitle {
+      text-align: center; 
+      margin-top: -20%;
+      margin-bottom: 5%
+    }
+    label{
+        font-size: 1.5rem;
+    }
+    input {
+        width: 200%;
+        height: 300%;
+        padding: 5px;
+        margin-bottom: 20%; /* Spacing between elements */
+        border: 1px solid #000000;
+    }
+    .loginsubmit-button  {
+        margin-top: -5%;
+        background: #007BFF;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+  .otpinput{
+    width:50%;
+  }
+    input[type="number"] {
+        appearance: none;
+    }
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      .rectangle {
+        width: 100%;
+    }
+  }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="intro">
+      <h1>eBtask</h1>
+      {% block content %}{% endblock %}
+    </div>
+    <div class="rectangle">
+      {% block rectangle %}{% endblock %}
+    </div>  
+  </div>
+</body>
+</html>

@@ -1,4 +1,5 @@
 flask
 flask-wtf 
-flask-sqlalchemy 
-email-validator
+flask-sqlalchemy
+flask-mail
+pandas
