@@ -1,1 +1,4 @@
+ADAM
+.gitignore
+/__pycache__
 /.venv

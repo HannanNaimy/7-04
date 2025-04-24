@@ -117,17 +117,22 @@ def logout():
     return redirect(url_for("guest"))
 
 @app.route("/profile/<usr>", methods=["GET", "POST"])
+@app.route("/profile/<usr>", methods=["GET", "POST"])
 def profile(usr):
     if "user_id" not in session:
         flash("You must be logged in to view this page.", "error")
         return redirect(url_for("login"))
-    
+
     user = User.query.filter_by(username=usr).first()
-    if user:
-        return render_template("profile.html", usr=usr, email=user.email)
-    else:
+
+    if not user:
         flash("User not found!", "error")
         return redirect(url_for("login"))
+
+    if user.id == session.get("user_id"):
+        return render_template("ownerprofile.html", usr=usr, email=user.email)
+    else:
+        return render_template("profile.html", usr=usr, email=user.email)
 
 if __name__ == "__main__":
     app.run(debug=True)
