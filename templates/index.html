@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>eBtask - Payment</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .error-msg {
+            color: red;
+            font-weight: bold;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <style>
+            .logo {
+                font-size: 36px;
+                font-weight: 700; /* This makes it extra bold */
+            }
+        </style>
+        
+        <div class="nav">
+            <div class="logo">eBtask</div>
+            <nav>
+                <a href="#"><span>👤</span> Profile</a>
+                <a href="#">Looking For</a>
+                <a href="#">Offering To</a>
+                <a href="#">History</a>
+            </nav>
+            <div class="login">
+                <a href="#">Login Page</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <form method="POST" onsubmit="return validateForm();">
+            <h2>Payment Methods</h2>
+            <p>Choose How You Deposit Money:</p>
+
+            <div class="method-buttons">
+                <label>
+                    <input type="radio" name="method" value="visa" checked>
+                    <div class="method">
+                        <img src="https://img.icons8.com/color/48/000000/mastercard-logo.png" alt="Visa">
+                    </div>
+                </label>
+                <label>
+                    <input type="radio" name="method" value="touch_n_go">
+                    <div class="method">Touch ‘n Go</div>
+                </label>
+            </div>
+
+            <div class="form-group">
+                <div class="input-container">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" placeholder="Name">
+                </div>
+                <div class="input-container">
+                    <label for="expiry">Expiration Date</label>
+                    <input type="text" id="expiry" name="expiry" placeholder="MM/YY">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-container" style="width: 100%;">
+                    <label for="card">Card Number</label>
+                    <input type="text" id="card" name="card" placeholder="XXXX XXXX XXXX XXXX">
+                </div>
+            </div>
+
+            <button class="submit-button" type="submit">Make a Payment</button>
+            <p class="error-msg" id="error-msg">Please fill in all fields before submitting.</p>
+        </form>
+    </main>
+
+    <script>
+        function validateForm() {
+            const name = document.getElementById('name').value.trim();
+            const expiry = document.getElementById('expiry').value.trim();
+            const card = document.getElementById('card').value.trim();
+            const method = document.querySelector('input[name="method"]:checked');
+
+            const errorMsg = document.getElementById('error-msg');
+
+            if (!name || !expiry || !card || !method) {
+                errorMsg.style.display = 'block';
+                return false;
+            }
+
+            errorMsg.style.display = 'none';
+            return true;
+        }
+    </script>
+
+</body>
+</html>
