@@ -6,11 +6,12 @@ from flask_mail import Mail, Message
 from config import Config
 
 app = Flask(__name__) 
-mail = Mail(app)
+
 
 app.config.from_object(Config)
 
 db.init_app(app)
+mail = Mail(app)
 
 with app.app_context():
     db.create_all()
@@ -60,7 +61,7 @@ def register():
 
     return render_template("register.html")
 
-@app.route("/OTP", methods=["POST"])
+@app.route("/OTP", methods=["GET", "POST"])
 def otp():
     if request.method == "POST":
         entered_otp = request.form.get("otp")
