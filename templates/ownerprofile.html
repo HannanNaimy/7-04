@@ -1,0 +1,13 @@
+{% extends "homeparent.html" %}
+
+{%block content%}
+<h1>Hello {{usr}}!</h1> 
+<h2>{{email}}</h2>
+<div class="credentials">
+    <ul>
+        <li><a href="/logout">Log Out</a></li>
+        <li><a href="/contacts">Contacts</a></li>
+        <li><a href="/paymentmethods">Payment Methods</a></li>   
+    </ul>
+</div>
+{%endblock%}
