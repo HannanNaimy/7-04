@@ -5,6 +5,9 @@ READ THIS TO CATCH UP ON OUR WORKFLOW                                           
                                                                                                             AT THE TOP
                                                                                                             TO OPEN/CLOSE
                                                                                                             CERTAIN BARS
+                                                                                                            IF YOU ARE 
+                                                                                                            READING IN
+                                                                                                            VSCODE
 
 ------------------------------------- SETTING UP -----------------------------------------------------------
 
