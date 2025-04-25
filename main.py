@@ -7,14 +7,13 @@ from config import Config
 
 app = Flask(__name__) 
 
-
 app.config.from_object(Config)
 
 db.init_app(app)
 mail = Mail(app)
 
 with app.app_context():
-    db.create_all()
+    db.create_all() 
 
 # Guest Page
 
