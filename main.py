@@ -57,7 +57,7 @@ def register():
         session["temp_username"] = username
         session["temp_password"] = password
         # This sends email containing otp code to the entered email 
-        msg = Message("Your OTP Code", sender="ebtaskwebapp@outlook.com", recipients=[email])
+        msg = Message("Your OTP Code", sender="hannannaimy@gmail.com", recipients=[email])
         msg.body = f"Your OTP code is {otp}. Enter this to complete registration."
         mail.send(msg)
 
