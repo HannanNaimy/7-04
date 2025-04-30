@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Job Post</title>
+  <style>
+    /* Global container styling */
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    /* Progress nodes styling */
+    .progress {
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      list-style: none;
+      padding: 0;
+    }
+    .progress li {
+      width: 32%;
+      padding: 10px;
+      text-align: center;
+      border-top: 2px solid #ccc;
+      position: relative;
+      color: #777;
+    }
+    .progress li.active {
+      font-weight: bold;
+      border-top-color: #f78c00;
+      color: #333;
+    }
+    .progress li::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 100%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 4px;
+      background: #ccc;
+      border-radius: 50%;
+    }
+    .progress li.active::after {
+      background: #f78c00;
+    }
+    
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #555;
+    }
+    input[type="text"],
+    input[type="number"],
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background: #f78c00;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background: #e66e00;
+    }
+    
+    /* QR code mock styling */
+    .qr-mock {
+      width: 200px;
+      height: 200px;
+      background: #eee;
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: #888;
+      border: 2px dashed #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Progress Indicator -->
+    <ul class="progress">
+      <li id="progress1" class="active">Step 1: Job Details</li>
+      <li id="progress2">Step 2: Payment</li>
+      <li id="progress3">Step 3: Complete</li>
+    </ul>
+    
+    <!-- Step 1: Job Details -->
+    <div id="step1">
+      <h2>Add Job Details</h2>
+      <div class="form-group">
+        <label for="jobTitle">Job Title:</label>
+        <input type="text" id="jobTitle" placeholder="Enter job title" />
+      </div>
+      <div class="form-group">
+        <label for="jobDescription">Job Description:</label>
+        <textarea id="jobDescription" rows="4" placeholder="Enter job description"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="commission">Commission Cost:</label>
+        <input type="number" id="commission" placeholder="Enter commission cost" />
+      </div>
+      <button id="toStep2">Submit Job Details</button>
+    </div>
+    
+    <!-- Step 2: Payment -->
+    <div id="step2" style="display: none;">
+      <h2>Payment</h2>
+      <p>Please scan the QR code below to pay the commission amount.</p>
+      <div class="qr-mock">
+        QR CODE
+      </div>
+      <button id="simulatePayment">Simulate Payment</button>
+    </div>
+    
+    <!-- Step 3: Completion -->
+    <div id="step3" style="display: none;">
+      <h2>Post Created!</h2>
+      <p>Your job post has been successfully created.</p>
+      <!-- You might later append the job details as a shadowed rectangle on your Looking For page -->
+    </div>
+  </div>
+
+  <script>
+    // Transition from Step 1 to Step 2
+    document.getElementById('toStep2').addEventListener('click', function() {
+      // Minimal validation
+      var title = document.getElementById('jobTitle').value;
+      var description = document.getElementById('jobDescription').value;
+      var commission = document.getElementById('commission').value;
+      if (title.trim() === "" || description.trim() === "" || commission.trim() === "") {
+        alert("Please fill in all fields.");
+        return;
+      }
+
+      // Hide step 1 and show step 2
+      document.getElementById('step1').style.display = 'none';
+      document.getElementById('step2').style.display = 'block';
+
+      // Update progress indicator
+      document.getElementById('progress1').classList.remove('active');
+      document.getElementById('progress2').classList.add('active');
+    });
+
+    // Transition from Step 2 to Step 3 (simulate payment)
+    document.getElementById('simulatePayment').addEventListener('click', function() {
+      // For a real implementation, this is where you would process payment.
+      // Here, we simply assume payment is successful.
+
+      // Hide step 2 and show step 3
+      document.getElementById('step2').style.display = 'none';
+      document.getElementById('step3').style.display = 'block';
+
+      // Update progress indicator
+      document.getElementById('progress2').classList.remove('active');
+      document.getElementById('progress3').classList.add('active');
+    });
+  </script>
+</body>
+</html>

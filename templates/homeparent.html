@@ -1,115 +1,191 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>eBtask</title>   
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      font-family: Arial, sans-serif;
-    }
-    
-    /* Navbar Container */
-    .navbar {
-      position: fixed;
-      top: 0;
-      width: 100%;
-      background: #ffd900;
-      padding: 1% 0;
-      z-index: 1000;
-      overflow-x: auto; /* Enable horizontal scrolling */
-      white-space: nowrap;
-    }
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>eBtask</title>   
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: Arial, sans-serif;
+      }
+      
+      /* Navbar Container */
+      .navbar {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        background: #ffd900;
+        padding: 1% 0;
+        z-index: 1000;
+        overflow-x: auto; /* Enable horizontal scrolling */
+        white-space: nowrap;
+      }
 
-    .navbar ul {
-      display: flex;
-      align-items: center;
-      justify-content: left;
-      padding: 0;
-      margin: 0;
-      list-style: none;
-      overflow-x: auto; /* Allow navbar to scroll */
-    }
+      .navbar ul {
+        display: flex;
+        align-items: center;
+        justify-content: left;
+        padding: 0;
+        margin: 0;
+        list-style: none;
+        overflow-x: auto; /* Allow navbar to scroll */
+      }
 
-    .navbar ul li {
-      margin-right: 1.5%;
-      flex-shrink: 0; /* Prevent items from shrinking */
-    }
+      .navbar ul li {
+        margin-right: 1.5%;
+        flex-shrink: 0; /* Prevent items from shrinking */
+      }
 
-    .navbar ul li a {
-      text-decoration: none;
-      color: black;
-      font-size: 1rem;
-      padding: 10px 15px;
-    }
+      .navbar ul li a {
+        text-decoration: none;
+        color: black;
+        font-size: 1rem;
+        padding: 10px 15px;
+      }
 
-    .logo a {
-      font-size: 1.5rem !important;
-      font-weight: bold !important;
-      margin-left: 0.5rem;
-    }
+      .logo a {
+        font-size: 1.5rem !important;
+        font-weight: bold !important;
+        margin-left: 0.5rem;
+      }
 
-    .logo a:hover {
-      background: inherit !important;
-    }
+      .logo a:hover {
+        background: inherit !important;
+      }
 
-    .navbar ul li a:hover {
-      background: #ffffff;
-      border-radius: 3px;
-    }
+      .navbar ul li a:hover {
+        background: #ffffff;
+        border-radius: 3px;
+      }
 
-    .active {
-      background: #f78c00;
-      border-radius: 3px;
-    }
+      .active {
+        background: #f78c00;
+        border-radius: 3px;
+      }
 
-    .profile-info {
-      margin-bottom: 20px;
-    }
+      .profile-info {
+        margin-bottom: 20px;
+      }
 
-    .credentials ul {
-      list-style: none;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      padding: 0;
-    }
-    .credentials ul li {
-      font-size: 1rem;
-    }
+      .credentials ul {
+        list-style: none;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        padding: 0;
+      }
+      .credentials ul li {
+        font-size: 1rem;
+      }
+      .credentials ul li a {
+        text-decoration: none;
+        padding: 10px;
+        border: 1px solid #000;
+        border-radius: 5px;
+        background: #ffd900;
+        color: black;
+      }
+      .content {
+        padding-top: 80px;
+        text-align: center;
+      }
+      .content h1 {
+        font-size: 3rem;
+        text-align: left;
+        margin-left: 1%;
+      }
+      .content h2 {
+        color: #757472;
+        text-align: left;
+        margin-left: 1%;
+      }
     .credentials ul li a {
-      text-decoration: none;
-      padding: 10px;
-      border: 1px solid #000;
-      border-radius: 5px;
-      background: #ffd900;
-      color: black;
-    }
-    .content {
-      padding-top: 80px;
+      display: block;
+      width: 100%; /* Make buttons full-width on small screens */
       text-align: center;
     }
-    .content h1 {
-      font-size: 3rem;
+    .jobs-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1% 2%;
       text-align: left;
-      margin-left: 1%;
     }
-    .content h2 {
-      color: #757472;
-      text-align: left;
-      margin-left: 1%;
+
+    /* Header section with title and create post button */
+    .jobs-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
     }
+    
+    .jobs-header h1 {
+      font-size: 2rem;
+      color: #333;
+    }
+    
+    .create-post-button {
+      background: #f78c00;
+      color: #fff;
+      padding: 10px 15px;
+      text-decoration: none;
+      border-radius: 4px;
+      transition: background 0.3s ease;
+    }
+    
+    .create-post-button:hover {
+      background: #e66e00;
+    }
+
+    /* Job listings container styling */
+    .jobs-listings {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    /* Individual job posting styling */
+    .job-post {
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: #f9f9f9;
+    }
+    
+    .job-post h2 {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+      color: #222;
+    }
+    
+    .job-post p {
+      margin-bottom: 8px;
+      color: #555;
+    }
+    
+    .job-meta {
+      font-size: 0.9rem;
+      color: #777;
+    }
+
     @media (max-width: 768px) {
-      .navbar {
-        display: block;
-        overflow-x: scroll;
+      .jobs-header h1 {
+        font-size: 1.8rem;
       }
+      
+      .create-post-button {
+        padding: 8px 12px;
+      }
+      .navbar {
+          display: block;
+          overflow-x: scroll;
+        }
 
       .navbar ul {
         flex-wrap: nowrap;
@@ -124,62 +200,73 @@
       .content {
         padding-top: 100px;
       }
-    }
-    @media (max-width: 600px) {
-    .profile-container {
-        width: 90%;
-      }
-
-  .credentials ul {
+    
+     .credentials ul {
         flex-direction: column;
         gap: 5px;
-      }
+        }
+    }
 
-  .credentials ul li a {
-    display: block;
-    width: 100%; /* Make buttons full-width on small screens */
-    text-align: center;
-  }
-}
-  </style>
-</head>
-<body>
-  <nav class="navbar">
-    <ul>
-        <li class="logo"><a href="/profile/{{ g.user.username }}">eBtask</a></li>
-{% if g.user %}
-<li>
-  <a href="/profile/{{ g.user.username }}"
-     class="{% if request.path == '/profile/' ~ g.user.username %}active{% endif %}">
-    Profile
-  </a>
-</li>
-{% endif %}
-<li>
-  <a href="/lookingFor" class="{% if request.path.startswith('/lookingFor') %}active{% endif %}">
-    Looking For
-  </a>
-</li>
-<li>
-  <a href="/offeringTo" class="{% if request.path.startswith('/offeringTo') %}active{% endif %}">
-    Offering To
-  </a>
-</li>
-<li>
-  <a href="/history" class="{% if request.path.startswith('/history') %}active{% endif %}">
-    History
-  </a>
-</li>
-<li>
-  <a href="/guide" class="{% if request.path.startswith('/guide') %}active{% endif %}">
-    Guide
-  </a>
-</li>        
-    </ul>
-  </nav>
-  <div class="content">
-    {% block content %}
-    {% endblock %}
-  </div>
-</body>
-</html>
+    @media (max-width: 600px) {
+      .jobs-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      
+      .jobs-header h1 {
+        font-size: 1.5rem;
+      }
+      
+      .create-post-button {
+        align-self: stretch;
+        text-align: center;
+      }
+      .profile-container {
+        width: 90%;
+        }
+
+    }
+
+    </style>
+  </head>
+  <body>
+    <nav class="navbar">
+      <ul>
+          <li class="logo"><a href="/profile/{{ g.user.username }}">eBtask</a></li>
+  {% if g.user %}
+  <li>
+    <a href="/profile/{{ g.user.username }}"
+      class="{% if request.path == '/profile/' ~ g.user.username %}active{% endif %}">
+      Profile
+    </a>
+  </li>
+  {% endif %}
+  <li>
+    <a href="/lookingFor" class="{% if request.path.startswith('/lookingFor') %}active{% endif %}">
+      Looking For
+    </a>
+  </li>
+  <li>
+    <a href="/offeringTo" class="{% if request.path.startswith('/offeringTo') %}active{% endif %}">
+      Offering To
+    </a>
+  </li>
+  <li>
+    <a href="/history" class="{% if request.path.startswith('/history') %}active{% endif %}">
+      History
+    </a>
+  </li>
+  <li>
+    <a href="/guide" class="{% if request.path.startswith('/guide') %}active{% endif %}">
+      Guide
+    </a>
+  </li>        
+      </ul>
+    </nav>
+    <div class="content">
+      {% block content %}
+      {% endblock %}
+    </div>
+  </body>
+  </html>

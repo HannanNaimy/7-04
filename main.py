@@ -165,13 +165,23 @@ def lookingFor():
          flash("You must be logged in to view this page.", "error")
          return redirect(url_for("login"))
 
+# Create Post (Jobs) Page
+@app.route("/createjob")
+def createJob():
+    if g.user:
+        return render_template("lookingfor.html")
+    
+    else:
+         flash("You must be logged in to view this page.", "error")
+         return redirect(url_for("login"))
+
 # Offering To Page
 
 # History Page
 
 # Guide
 
-  # Logout Function
+# Logout Function
 
 @app.route("/logout")
 def logout():
