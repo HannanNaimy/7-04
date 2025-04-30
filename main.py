@@ -173,7 +173,6 @@ def createJob():
         title = request.form.get('title')
         description = request.form.get('description')
         commission = float(request.form.get('commission'))  
-        
         user_id = g.user.id  
 
         new_post = JobPost(title=title, description=description, commission=commission, user_id=user_id)
