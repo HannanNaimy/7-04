@@ -172,10 +172,11 @@ def createJob():
     if request.method == 'POST':
         title = request.form.get('title')
         description = request.form.get('description')
-        commission = float(request.form.get('commission'))  
+        commission = float(request.form.get('commission'))
+        on_demand = True if request.form.get('on_demand') else False  
         user_id = g.user.id  
 
-        new_post = JobPost(title=title, description=description, commission=commission, user_id=user_id)
+        new_post = JobPost(title=title, description=description, commission=commission,on_demand=on_demand, user_id=user_id,)
         db.session.add(new_post)
         db.session.commit()
 

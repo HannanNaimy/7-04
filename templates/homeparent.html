@@ -156,6 +156,9 @@
       border: 1px solid #ccc;
       border-radius: 4px;
       background: #f9f9f9;
+      min-height: 300px;         
+      margin-bottom: 15px;       
+      position: relative;       
     }
     
     .job-post h2 {
@@ -172,6 +175,33 @@
     .job-meta {
       font-size: 0.9rem;
       color: #777;
+    }
+
+    .on-demand-tag {
+      display: inline-block;
+      background: rgba(128, 0, 128, 0.2); /* Transparent purple */
+      color: purple;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      margin-top: 10px;
+    }
+
+    .take-button {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: #f78c00;  /* Orange color */
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .take-button:hover {
+      background: #e66e00;
     }
 
     @media (max-width: 768px) {

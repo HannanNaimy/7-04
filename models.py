@@ -13,7 +13,6 @@ class JobPost(db.Model):
     title = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text, nullable=False)
     commission = db.Column(db.Float, nullable=False)
+    on_demand = db.Column(db.Boolean, nullable=False, default=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-
-    # Relationship to access the user who created the post
     user = db.relationship('User', backref=db.backref('job_posts', lazy=True))

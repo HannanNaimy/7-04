@@ -153,14 +153,6 @@
 <body>
   <div class="container">
     <!-- Toggle Button for On-Demand -->
-    <div class="toggle-container">
-      <span class="toggle-label">On-Demand</span>
-      <label class="switch">
-        <input type="checkbox" id="onDemandToggle">
-        <span class="slider"></span>
-      </label>
-    </div>
-
     <ul class="progress">
       <li id="progress1" class="active">Step 1: Job Details</li>
       <li id="progress2">Step 2: Payment</li>
@@ -169,6 +161,13 @@
 
     <!-- Wrap steps within one form -->
     <form id="jobDetailsForm" action="/createjob" method="POST">
+      <div class="toggle-container">
+        <span class="toggle-label">On-Demand</span>
+        <label class="switch">
+          <input type="checkbox" id="onDemandToggle" name="on_demand">
+          <span class="slider"></span>
+        </label>
+      </div>
       <div id="step1">
         <h2>Add Job Details</h2>
         <div class="form-group">
