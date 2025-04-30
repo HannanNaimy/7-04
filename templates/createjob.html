@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Create Job Post</title>
   <style>
-    /* Global container styling */
     body {
       font-family: Arial, sans-serif;
       background: #f0f0f0;
@@ -20,8 +19,57 @@
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    
-    /* Progress nodes styling */
+    /* Toggle switch styling */
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .toggle-container .toggle-label {
+      margin-right: 10px;
+      font-size: 1rem;
+      color: #333;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+    .switch input { 
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    .switch input:checked + .slider {
+      background-color: #f78c00;
+    }
+    .switch input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+    /* Progress indicator styling */
     .progress {
       margin-bottom: 20px;
       display: flex;
@@ -56,7 +104,6 @@
     .progress li.active::after {
       background: #f78c00;
     }
-    
     h2 {
       margin-bottom: 20px;
       color: #333;
@@ -89,8 +136,6 @@
     button:hover {
       background: #e66e00;
     }
-    
-    /* QR code mock styling */
     .qr-mock {
       width: 200px;
       height: 200px;
@@ -107,50 +152,70 @@
 </head>
 <body>
   <div class="container">
-    <!-- Progress Indicator -->
+    <!-- Toggle Button for On-Demand -->
+    <div class="toggle-container">
+      <span class="toggle-label">On-Demand</span>
+      <label class="switch">
+        <input type="checkbox" id="onDemandToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+
     <ul class="progress">
       <li id="progress1" class="active">Step 1: Job Details</li>
       <li id="progress2">Step 2: Payment</li>
       <li id="progress3">Step 3: Complete</li>
     </ul>
-    
-    <!-- Step 1: Job Details -->
-    <div id="step1">
-      <h2>Add Job Details</h2>
-      <div class="form-group">
-        <label for="jobTitle">Job Title:</label>
-        <input type="text" id="jobTitle" placeholder="Enter job title" />
+
+    <!-- Wrap steps within one form -->
+    <form id="jobDetailsForm" action="/createjob" method="POST">
+      <div id="step1">
+        <h2>Add Job Details</h2>
+        <div class="form-group">
+          <label for="jobTitle">Job Title:</label>
+          <input type="text" name="title" id="jobTitle" placeholder="Enter job title" />
+        </div>
+        <div class="form-group">
+          <label for="jobDescription">Job Description:</label>
+          <textarea id="jobDescription" name="description" rows="4" placeholder="Enter job description"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="commission">Commission Cost:</label>
+          <input type="number" name="commission" id="commission" placeholder="Enter commission cost" />
+        </div>
+        <!-- This button does not submit the form; it only transitions the wizard -->
+        <button type="button" id="toStep2">Submit Job Details</button>
       </div>
-      <div class="form-group">
-        <label for="jobDescription">Job Description:</label>
-        <textarea id="jobDescription" rows="4" placeholder="Enter job description"></textarea>
+      
+      <div id="step2" style="display: none;">
+        <h2>Payment</h2>
+        <p>Please scan the QR code below to pay the commission amount.</p>
+        <div class="qr-mock">
+          QR CODE
+        </div>
+        <!-- This button will simulate the payment and then submit the form -->
+        <button type="button" id="simulatePayment">Simulate Payment</button>
       </div>
-      <div class="form-group">
-        <label for="commission">Commission Cost:</label>
-        <input type="number" id="commission" placeholder="Enter commission cost" />
+      
+      <div id="step3" style="display: none;">
+        <h2>Post Created!</h2>
+        <p>Your job post has been successfully created.</p>
       </div>
-      <button id="toStep2">Submit Job Details</button>
-    </div>
-    
-    <!-- Step 2: Payment -->
-    <div id="step2" style="display: none;">
-      <h2>Payment</h2>
-      <p>Please scan the QR code below to pay the commission amount.</p>
-      <div class="qr-mock">
-        QR CODE
-      </div>
-      <button id="simulatePayment">Simulate Payment</button>
-    </div>
-    
-    <!-- Step 3: Completion -->
-    <div id="step3" style="display: none;">
-      <h2>Post Created!</h2>
-      <p>Your job post has been successfully created.</p>
-      <!-- You might later append the job details as a shadowed rectangle on your Looking For page -->
-    </div>
+    </form>
   </div>
 
   <script>
+    // Toggle button functionality for "On-Demand"
+    document.getElementById('onDemandToggle').addEventListener('change', function() {
+      if (this.checked) {
+        console.log("On-Demand is ON");
+        // Add your code to handle the toggled state (on)
+      } else {
+        console.log("On-Demand is OFF");
+        // Add your code to handle the toggled state (off)
+      }
+    });
+
     // Transition from Step 1 to Step 2
     document.getElementById('toStep2').addEventListener('click', function() {
       // Minimal validation
@@ -161,28 +226,27 @@
         alert("Please fill in all fields.");
         return;
       }
-
       // Hide step 1 and show step 2
       document.getElementById('step1').style.display = 'none';
       document.getElementById('step2').style.display = 'block';
-
       // Update progress indicator
       document.getElementById('progress1').classList.remove('active');
       document.getElementById('progress2').classList.add('active');
     });
 
-    // Transition from Step 2 to Step 3 (simulate payment)
+    // Transition from Step 2 to Step 3 and submit form (simulate payment)
     document.getElementById('simulatePayment').addEventListener('click', function() {
-      // For a real implementation, this is where you would process payment.
-      // Here, we simply assume payment is successful.
-
+      // Simulate payment success
       // Hide step 2 and show step 3
       document.getElementById('step2').style.display = 'none';
       document.getElementById('step3').style.display = 'block';
-
       // Update progress indicator
       document.getElementById('progress2').classList.remove('active');
       document.getElementById('progress3').classList.add('active');
+      
+      // After a delay (if you wish) you can submit the form.
+      // For instance, submitting the form immediately:
+      document.getElementById('jobDetailsForm').submit();
     });
   </script>
 </body>

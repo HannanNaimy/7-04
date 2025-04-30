@@ -2,7 +2,7 @@ import re, random
 from flask import Flask, redirect, url_for, render_template, flash, g, session, request
 from flask_mail import Mail, Message 
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User
+from models import db, User, JobPost
 from config import Config
 
 app = Flask(__name__) 
@@ -158,22 +158,36 @@ def profile(usr):
 
 @app.route("/lookingFor")
 def lookingFor():
+    jobs = JobPost.query.all()
     if g.user:
-        return render_template("lookingfor.html")
+        return render_template("lookingfor.html", jobs=jobs)
     
     else:
          flash("You must be logged in to view this page.", "error")
          return redirect(url_for("login"))
 
 # Create Post (Jobs) Page
-@app.route("/createjob")
+@app.route("/createjob", methods=["GET", "POST"])
 def createJob():
+    if request.method == 'POST':
+        title = request.form.get('title')
+        description = request.form.get('description')
+        commission = float(request.form.get('commission'))  
+        
+        user_id = g.user.id  
+
+        new_post = JobPost(title=title, description=description, commission=commission, user_id=user_id)
+        db.session.add(new_post)
+        db.session.commit()
+
+        return redirect(url_for('lookingFor'))
+
     if g.user:
-        return render_template("lookingfor.html")
-    
+        return render_template("createjob.html")
     else:
-         flash("You must be logged in to view this page.", "error")
-         return redirect(url_for("login"))
+        flash("You must be logged in to view this page.", "error")
+        return redirect(url_for("login"))
+
 
 # Offering To Page
 

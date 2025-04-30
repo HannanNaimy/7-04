@@ -3,13 +3,19 @@
 {% block content %}
 <div class="jobs-container">
   <div class="jobs-header">
-    <h1>Looking For Listings</h1>
-    <a href="/createjob" class="create-post-button">Create Post</a>
+    <h1>"Looking For" Listings</h1>
+    <a href="/createjob" target="_blank"  class="create-post-button">Create Post</a>
   </div>
   
   <div class="jobs-listings">
-    <!-- Sample job posting item -->
+    {% for job in jobs %}
     <div class="job-post">
-     
+        <h2>{{ job.title }}</h2>
+        <p>{{ job.description }}</p>
+        <span class="job-meta">Commission: RM{{ job.commission }}</span><br>
+        <span class="job-meta">Posted by: {{ job.user.username }}</span>
+    </div>
+    {% endfor %}
+  </div>
 </div>
 {% endblock %}

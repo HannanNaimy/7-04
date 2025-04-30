@@ -7,3 +7,13 @@ class User(db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     username = db.Column(db.String(12), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
+
+class JobPost(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    commission = db.Column(db.Float, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    # Relationship to access the user who created the post
+    user = db.relationship('User', backref=db.backref('job_posts', lazy=True))
