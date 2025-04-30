@@ -68,43 +68,47 @@
       border-radius: 3px;
     }
 
-    /* Credentials */
+    .profile-info {
+      margin-bottom: 20px;
+    }
+
     .credentials ul {
       list-style: none;
       display: flex;
-      gap: 1%;
-      align-items: center;
-      justify-content: right;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
       padding: 0;
-      margin: 0 1% 0 0;
     }
     .credentials ul li {
-      text-decoration: underline;
+      font-size: 1rem;
     }
-
-    /* Page Content */
+    .credentials ul li a {
+      text-decoration: none;
+      padding: 10px;
+      border: 1px solid #000;
+      border-radius: 5px;
+      background: #ffd900;
+      color: black;
+    }
     .content {
       padding-top: 80px;
       text-align: center;
     }
-
     .content h1 {
       font-size: 3rem;
       text-align: left;
       margin-left: 1%;
     }
-
     .content h2 {
       color: #757472;
       text-align: left;
       margin-left: 1%;
     }
-
-    /* Responsive Adjustments */
     @media (max-width: 768px) {
       .navbar {
         display: block;
-        overflow-x: scroll; /* Scrollable navbar */
+        overflow-x: scroll;
       }
 
       .navbar ul {
@@ -121,17 +125,56 @@
         padding-top: 100px;
       }
     }
+    @media (max-width: 600px) {
+    .profile-container {
+        width: 90%;
+      }
+
+  .credentials ul {
+        flex-direction: column;
+        gap: 5px;
+      }
+
+  .credentials ul li a {
+    display: block;
+    width: 100%; /* Make buttons full-width on small screens */
+    text-align: center;
+  }
+}
   </style>
 </head>
 <body>
   <nav class="navbar">
     <ul>
-      <li class="logo"><a href="/profile">eBtask</a></li>
-      <li><a href="/profile/{{usr}}" class="{% if request.path.startswith('/profile') %}active{% endif %}">Profile</a></li>
-      <li><a href="/lookingFor" class="{% if request.path == '/lookingFor' %}active{% endif %}">Looking For</a></li>
-      <li><a href="/offeringTo" class="{% if request.path == '/offeringTo' %}active{% endif %}">Offering To</a></li>
-      <li><a href="/history" class="{% if request.path == '/history' %}active{% endif %}">History</a></li>
-      <li><a href="/guide" class="{% if request.path == '/guide' %}active{% endif %}">Guide</a></li>
+        <li class="logo"><a href="/profile/{{ g.user.username }}">eBtask</a></li>
+{% if g.user %}
+<li>
+  <a href="/profile/{{ g.user.username }}"
+     class="{% if request.path == '/profile/' ~ g.user.username %}active{% endif %}">
+    Profile
+  </a>
+</li>
+{% endif %}
+<li>
+  <a href="/lookingFor" class="{% if request.path.startswith('/lookingFor') %}active{% endif %}">
+    Looking For
+  </a>
+</li>
+<li>
+  <a href="/offeringTo" class="{% if request.path.startswith('/offeringTo') %}active{% endif %}">
+    Offering To
+  </a>
+</li>
+<li>
+  <a href="/history" class="{% if request.path.startswith('/history') %}active{% endif %}">
+    History
+  </a>
+</li>
+<li>
+  <a href="/guide" class="{% if request.path.startswith('/guide') %}active{% endif %}">
+    Guide
+  </a>
+</li>        
     </ul>
   </nav>
   <div class="content">

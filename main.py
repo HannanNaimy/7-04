@@ -1,8 +1,8 @@
 import re, random
-from flask import Flask, redirect, url_for, render_template, flash, session, request  
+from flask import Flask, redirect, url_for, render_template, flash, g, session, request
+from flask_mail import Mail, Message 
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, User
-from flask_mail import Mail, Message
 from config import Config
 
 app = Flask(__name__) 
@@ -15,6 +15,19 @@ mail = Mail(app)
 with app.app_context():
     db.create_all() 
 
+@app.before_request
+def load_logged_in_user():
+    user_id = session.get("user_id")
+    if user_id is None:
+        g.user = None
+    else:
+        g.user = User.query.get(user_id)
+
+    if g.user:
+        app.jinja_env.globals["g_user"] = g.user
+    else:
+        app.jinja_env.globals["g_user"] = None  
+
 # Guest Page
 
 @app.route("/")
@@ -25,7 +38,9 @@ def guest():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    
+    if g.user:
+        flash("You're already logged in!", "info")
+        return redirect(url_for("profile", usr=g.user.username))
     # This checks if the user got here through submitting the form using "POST" method if not, 
     # it will run |return render_template("register.html")|
     
@@ -99,7 +114,11 @@ def otp():
     
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    if request.method == "POST":
+     if g.user:
+        flash("You're already logged in!", "info")
+        return redirect(url_for("profile", usr=g.user.username))
+
+     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
         
@@ -114,26 +133,43 @@ def login():
             flash("Invalid username or password!", "error")
             return redirect(url_for("login"))
 
-    return render_template("login.html")
+     return render_template("login.html")
+
 
 # Profile Page
 
 @app.route("/profile/<usr>", methods=["GET"])
 def profile(usr):
-    if "user_id" not in session:
+    if g.user is None:
         flash("You must be logged in to view this page.", "error")
         return redirect(url_for("login"))
 
-    user = User.query.filter_by(username=usr).first()
-
-    if not user:
-        flash("User not found!", "error")
-        return redirect(url_for("login"))
-
-    if user.id == session.get("user_id"):
-        return render_template("ownerprofile.html", usr=usr, email=user.email)
+    if g.user.username == usr:
+        return render_template("ownerprofile.html", usr=g.user.username, email=g.user.email)
     else:
-        return render_template("profile.html", usr=usr, email=user.email)
+
+        other_user = User.query.filter_by(username=usr).first()
+        if not other_user:
+            flash("User not found!", "error")
+        return render_template("profile.html", usr=other_user.username, email=other_user.email)
+
+    
+# Looking For Page
+
+@app.route("/lookingFor")
+def lookingFor():
+    if g.user:
+        return render_template("lookingfor.html")
+    
+    else:
+         flash("You must be logged in to view this page.", "error")
+         return redirect(url_for("login"))
+
+# Offering To Page
+
+# History Page
+
+# Guide
 
   # Logout Function
 
