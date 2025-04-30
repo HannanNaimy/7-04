@@ -1,10 +1,84 @@
 {% extends "homeparent.html" %}
 
+{% block styles %}
+  /* Ensure the listed container is a horizontal scroll area (already defined earlier) */
+  .listed-container {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 15px;
+    padding-bottom: 10px;
+  }
+  
+  /* Force a fixed size for listed job posts */
+  .listed-container .job-post {
+    flex: 0 0 250px;    /* Fixed width */
+    height: 350px;      /* Fixed height (tall square) */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    overflow: hidden;
+  }
+  
+  /* Job content occupies top portion */
+  .job-post h2,
+  .job-post p {
+    margin-bottom: 10px;
+  }
+  
+  /* Footer container at the bottom of each job post */
+  .job-footer {
+    margin-top: auto;         /* Pushes this container to the bottom */
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  /* Styles for meta info inside the footer */
+  .job-meta-info {
+    font-size: 0.9rem;
+    color: #777;
+  }
+  
+  /* Override on-demand tag so it only wraps its text */
+  .on-demand-tag {
+    display: inline-block;
+    background: rgba(128, 0, 128, 0.2);
+    color: purple;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+  }
+  
+  /* Button styling (unchanged) */
+  .take-button {
+    background: #f78c00;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  .take-button:hover {
+    background: #e66e00;
+  }
+  
+{% endblock %}
+
+
 {% block content %}
 <div class="profile-container">
   <div class="profile-info">
-    <h1>Hello {{usr}}!</h1> 
-    <h2>{{email}}</h2>
+    <h1>Hello {{ usr }}!</h1> 
+    <h2>{{ email }}</h2>
   </div>
 
   <div class="credentials">
@@ -13,6 +87,38 @@
       <li><a href="/contacts">Contacts</a></li>
       <li><a href="/paymentmethods">Payment Methods</a></li>   
     </ul>
+  </div>
+
+  <!-- New section: Listed posts -->
+  <div class="listed-posts">
+    <h2>Listed</h2>
+    <div class="listed-container">
+      {% if jobs|length == 0 %}
+        <p>No listed posts.</p>
+      {% else %}
+        {% for job in jobs %}
+        <div class="job-post">
+          <h2>{{ job.title }}</h2>
+          {% if job.on_demand %}
+            <div class="on-demand-tag">On-Demand</div>
+          {% endif %}
+          <p>{{ job.description }}</p>
+          <!-- New footer container -->
+          <div class="job-footer">
+            <div class="job-meta-info">
+              <span class="job-meta">Commission: RM{{ job.commission }}</span><br>
+              <span class="job-meta">Posted by: {{ job.user.username }}</span>
+            </div>
+            {% if job.on_demand %}
+              <button class="take-button">Take</button>
+            {% else %}
+              <button class="take-button">Contact</button>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
   </div>
 </div>
 {% endblock %}

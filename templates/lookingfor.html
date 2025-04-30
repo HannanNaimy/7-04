@@ -8,22 +8,26 @@
   </div>
   
   <div class="jobs-listings">
-    {% for job in jobs %}
-    <div class="job-post">
+    {% if jobs|length == 0 %}
+      <p>No job posts available. Please check back later or create one!</p>
+    {% else %}
+      {% for job in jobs %}
+      <div class="job-post">
         <h2>{{ job.title }}</h2>
-        {# If the job is flagged as on-demand, show the tag #}
         {% if job.on_demand %}
           <div class="on-demand-tag">On-Demand</div>
         {% endif %}
         <p>{{ job.description }}</p>
         <span class="job-meta">Commission: RM{{ job.commission }}</span><br>
         <span class="job-meta">Posted by: {{ job.user.username }}</span>
-        {# If the job is on-demand, display the "Take" button at the bottom right #}
         {% if job.on_demand %}
           <button class="take-button">Take</button>
+        {% else %}
+          <button class="take-button">Contact</button>
         {% endif %}
-    </div>
-    {% endfor %}
+      </div>
+      {% endfor %}
+    {% endif %}
   </div>
 </div>
 {% endblock %}

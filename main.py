@@ -143,9 +143,11 @@ def profile(usr):
     if g.user is None:
         flash("You must be logged in to view this page.", "error")
         return redirect(url_for("login"))
-
+    
+    jobs = g.user.job_posts
+    
     if g.user.username == usr:
-        return render_template("ownerprofile.html", usr=g.user.username, email=g.user.email)
+        return render_template("ownerprofile.html", usr=g.user.username, email=g.user.email, jobs=jobs)
     else:
 
         other_user = User.query.filter_by(username=usr).first()
