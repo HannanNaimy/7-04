@@ -182,14 +182,12 @@ def lookingFor():
        db.session.add(new_post)
        db.session.commit()
 
-       flash("Post Created Succesfully!", "success")
+       flash("Post Created Successfully!", "success")
+       return redirect(url_for('lookingFor'))
     
-    # Get all job posts (for the listings)
+    # GET request processing:
     jobs = JobPost.query.all()
-    
-    # Get the count of posts for the current user
     job_count = len(g.user.job_posts) 
-    
     return render_template("lookingfor.html", jobs=jobs, job_count=job_count)
 
 @app.route("/createjob_disabled")

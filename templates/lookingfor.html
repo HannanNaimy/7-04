@@ -5,12 +5,12 @@
   <div class="jobs-header">
     <h1>"Looking For" Listings</h1>
     {% if job_count < 3 %}
-  <a href="javascript:void(0)" id="openCreateJobModal" class="create-post-button">
-    Create Post
-  </a>
-{% else %}
-  <a href="/createjob_disabled"class="create-post-button" title="You have reached the maximum limit of 3 job listings"> Create Post </a>
-{% endif %}
+      <a href="javascript:void(0)" id="openCreateJobModal" class="create-post-button">
+        Create Post
+      </a>
+    {% else %}
+      <a href="/createjob_disabled" class="create-post-button" title="You have reached the maximum limit of 3 job listings">Create Post</a>
+    {% endif %}
   </div>
   
   <div class="jobs-listings">
@@ -37,21 +37,20 @@
   </div>
 </div>
 
-<!-- “Create Post” link becomes a button that opens the modal -->
-
-<!-- Modal container -->
+<!-- Modal for “Create Job” -->
 <div id="createJobModal" class="modal">
   <div class="modal-content">
     <span class="close">&times;</span>
 
+    <!-- Updated progress indicator (only two steps) -->
     <ul class="progress">
       <li id="progress1" class="active">Step 1: Job Details</li>
       <li id="progress2">Step 2: Payment</li>
-      <li id="progress3">Step 3: Complete</li>
     </ul>
     
-    <!-- Create Job Form Content (from createjob.html) -->
+    <!-- Create Job Form -->
     <form id="jobDetailsForm" action="/lookingFor" method="POST">
+      <!-- Step 1: Job Details -->
       <div id="step1">
         <h2>Add Job Details</h2>
         <div class="toggle-container">
@@ -73,65 +72,51 @@
           <label for="commission">Commission Cost:</label>
           <input type="number" name="commission" id="commission" placeholder="Enter commission cost" />
         </div>
-        <!-- This button does not submit the form; it only transitions the wizard -->
+        <!-- When clicked, this button transitions based on the on_demand toggle -->
         <button type="button" id="toStep2">Submit Job Details</button>
       </div>
       
+      <!-- Step 2: Payment -->
       <div id="step2" style="display: none;">
         <h2>Payment</h2>
         <p>Please scan the QR code below to pay the commission amount.</p>
-        <div class="qr-mock">
-          QR CODE
-        </div>
-        <!-- This button will simulate the payment and then submit the form -->
+        <div class="qr-mock">QR CODE</div>
+        <!-- When clicked, payment is simulated and the form is submitted -->
         <button type="button" id="simulatePayment">Simulate Payment</button>
-      </div>
-      
-      <div id="step3" style="display: none;">
-        <h2>Post Created!</h2>
-        <p>Your job post has been successfully created.</p>
       </div>
     </form>
   </div>
 </div>
 
 <script>
-  // Get modal element and the button that opens it
+  // Modal open/close controls
   var modal = document.getElementById("createJobModal");
   var openModalBtn = document.getElementById("openCreateJobModal");
   var closeBtn = document.getElementsByClassName("close")[0];
 
-  // Open modal when the user clicks the "Create Post" button
   openModalBtn.onclick = function() {
     modal.style.display = "block";
   }
-
-  // Close modal when the user clicks the close button (x)
   closeBtn.onclick = function() {
     modal.style.display = "none";
   }
-
-  // Also close modal if the user clicks anywhere outside the modal content
   window.onclick = function(event) {
     if (event.target == modal) {
       modal.style.display = "none";
     }
   }
 
-  // Toggle button functionality for "On-Demand"
+  // Toggle button: log on-demand state (extend if needed)
   document.getElementById('onDemandToggle').addEventListener('change', function() {
     if (this.checked) {
       console.log("On-Demand is ON");
-      // Add your code to handle the toggled state (on)
     } else {
       console.log("On-Demand is OFF");
-      // Add your code to handle the toggled state (off)
     }
   });
 
-  // Transition from Step 1 to Step 2
+  // Transition from Step 1 to next action based on on-demand checkbox
   document.getElementById('toStep2').addEventListener('click', function() {
-    // Minimal validation
     var title = document.getElementById('jobTitle').value;
     var description = document.getElementById('jobDescription').value;
     var commission = document.getElementById('commission').value;
@@ -140,46 +125,27 @@
       return;
     }
     var isOnDemand = document.getElementById('onDemandToggle').checked;
-  
-  // Hide Step 1 regardless of the condition
-  document.getElementById('step1').style.display = 'none';
-  
-  if (isOnDemand) {
-    // If on-demand is enabled, proceed to Step 2 (Payment)
-    document.getElementById('step2').style.display = 'block';
-    document.getElementById('progress1').classList.add('active');
-    document.getElementById('progress2').classList.add('active');
-  } else {
-    // If on-demand is disabled, skip Step 2 and directly show Step 3 (Complete)
-    document.getElementById('step3').style.display = 'block';
-    document.getElementById('progress1').classList.remove('active');
-    document.getElementById('progress3').classList.add('active');
-    
-    // Optionally, auto-submit the form immediately if no payment is required:
-    // document.getElementById('jobDetailsForm').submit();
-  }
-    // Hide step 1 and show step 2
+    // Hide Step 1 and update progress
     document.getElementById('step1').style.display = 'none';
-    document.getElementById('step2').style.display = 'block';
-    // Update progress indicator
     document.getElementById('progress1').classList.remove('active');
-    document.getElementById('progress2').classList.add('active');
+
+    if (isOnDemand) {
+      // If on-demand is enabled, show the Payment step
+      document.getElementById('step2').style.display = 'block';
+      document.getElementById('progress2').classList.add('active');
+    } else {
+      // If on-demand is off, submit the form immediately (skip Payment)
+      document.getElementById('jobDetailsForm').submit();
+    }
   });
 
-  // Transition from Step 2 to Step 3 and submit form (simulate payment)
+  // In the on-demand scenario: when user simulates payment, submit the form.
   document.getElementById('simulatePayment').addEventListener('click', function() {
-    // Simulate payment success
-    // Hide step 2 and show step 3
+    // Hide step 2, update progress if desired, then submit.
     document.getElementById('step2').style.display = 'none';
-    document.getElementById('step3').style.display = 'block';
-    // Update progress indicator
     document.getElementById('progress2').classList.remove('active');
-    document.getElementById('progress3').classList.add('active');
-    
-    // After a delay (if you wish) you can submit the form.
-    // For instance, submitting the form immediately:
+    // Submit the form after simulating payment.
     document.getElementById('jobDetailsForm').submit();
   });
 </script>
-
 {% endblock %}
