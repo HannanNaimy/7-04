@@ -4,7 +4,13 @@
 <div class="jobs-container">
   <div class="jobs-header">
     <h1>"Looking For" Listings</h1>
-    <a href="/createjob" target="_blank" class="create-post-button">Create Post</a>
+    {% if job_count < 3 %}
+  <a href="javascript:void(0)" id="openCreateJobModal" class="create-post-button">
+    Create Post
+  </a>
+{% else %}
+  <a href="/createjob_disabled"class="create-post-button" title="You have reached the maximum limit of 3 job listings"> Create Post </a>
+{% endif %}
   </div>
   
   <div class="jobs-listings">
@@ -30,4 +36,135 @@
     {% endif %}
   </div>
 </div>
+
+<!-- “Create Post” link becomes a button that opens the modal -->
+
+<!-- Modal container -->
+<div id="createJobModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+
+    <ul class="progress">
+      <li id="progress1" class="active">Step 1: Job Details</li>
+      <li id="progress2">Step 2: Payment</li>
+      <li id="progress3">Step 3: Complete</li>
+    </ul>
+    
+    <!-- Create Job Form Content (from createjob.html) -->
+    <form id="jobDetailsForm" action="/lookingFor" method="POST">
+      <div class="toggle-container">
+        <span class="toggle-label">On-Demand</span>
+        <label class="switch">
+          <input type="checkbox" id="onDemandToggle" name="on_demand">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div id="step1">
+        <h2>Add Job Details</h2>
+        <div class="form-group">
+          <label for="jobTitle">Job Title:</label>
+          <input type="text" name="title" id="jobTitle" placeholder="Enter job title" />
+        </div>
+        <div class="form-group">
+          <label for="jobDescription">Job Description:</label>
+          <textarea id="jobDescription" name="description" rows="4" placeholder="Enter job description"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="commission">Commission Cost:</label>
+          <input type="number" name="commission" id="commission" placeholder="Enter commission cost" />
+        </div>
+        <!-- This button does not submit the form; it only transitions the wizard -->
+        <button type="button" id="toStep2">Submit Job Details</button>
+      </div>
+      
+      <div id="step2" style="display: none;">
+        <h2>Payment</h2>
+        <p>Please scan the QR code below to pay the commission amount.</p>
+        <div class="qr-mock">
+          QR CODE
+        </div>
+        <!-- This button will simulate the payment and then submit the form -->
+        <button type="button" id="simulatePayment">Simulate Payment</button>
+      </div>
+      
+      <div id="step3" style="display: none;">
+        <h2>Post Created!</h2>
+        <p>Your job post has been successfully created.</p>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Get modal element and the button that opens it
+  var modal = document.getElementById("createJobModal");
+  var openModalBtn = document.getElementById("openCreateJobModal");
+  var closeBtn = document.getElementsByClassName("close")[0];
+
+  // Open modal when the user clicks the "Create Post" button
+  openModalBtn.onclick = function() {
+    modal.style.display = "block";
+  }
+
+  // Close modal when the user clicks the close button (x)
+  closeBtn.onclick = function() {
+    modal.style.display = "none";
+  }
+
+  // Also close modal if the user clicks anywhere outside the modal content
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  }
+  
+  // (Optional) If you have a multi-step form, include your existing step transitions here.
+  // For example, moving to Step 2 and simulating payment.
+  // Your existing script logic for steps can remain almost the same, as long as the form is inside the modal.
+
+  // Toggle button functionality for "On-Demand"
+  document.getElementById('onDemandToggle').addEventListener('change', function() {
+    if (this.checked) {
+      console.log("On-Demand is ON");
+      // Add your code to handle the toggled state (on)
+    } else {
+      console.log("On-Demand is OFF");
+      // Add your code to handle the toggled state (off)
+    }
+  });
+
+  // Transition from Step 1 to Step 2
+  document.getElementById('toStep2').addEventListener('click', function() {
+    // Minimal validation
+    var title = document.getElementById('jobTitle').value;
+    var description = document.getElementById('jobDescription').value;
+    var commission = document.getElementById('commission').value;
+    if (title.trim() === "" || description.trim() === "" || commission.trim() === "") {
+      alert("Please fill in all fields.");
+      return;
+    }
+    // Hide step 1 and show step 2
+    document.getElementById('step1').style.display = 'none';
+    document.getElementById('step2').style.display = 'block';
+    // Update progress indicator
+    document.getElementById('progress1').classList.remove('active');
+    document.getElementById('progress2').classList.add('active');
+  });
+
+  // Transition from Step 2 to Step 3 and submit form (simulate payment)
+  document.getElementById('simulatePayment').addEventListener('click', function() {
+    // Simulate payment success
+    // Hide step 2 and show step 3
+    document.getElementById('step2').style.display = 'none';
+    document.getElementById('step3').style.display = 'block';
+    // Update progress indicator
+    document.getElementById('progress2').classList.remove('active');
+    document.getElementById('progress3').classList.add('active');
+    
+    // After a delay (if you wish) you can submit the form.
+    // For instance, submitting the form immediately:
+    document.getElementById('jobDetailsForm').submit();
+  });
+</script>
+
 {% endblock %}

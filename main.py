@@ -158,15 +158,37 @@ def profile(usr):
     
 # Looking For Page
 
-@app.route("/lookingFor")
+@app.route("/lookingFor", methods=["GET", "POST"])
 def lookingFor():
-    jobs = JobPost.query.all()
-    if g.user:
-        return render_template("lookingfor.html", jobs=jobs)
+    if not g.user:
+        flash("You must be logged in to view this page.", "error")
+        return redirect(url_for("login"))
     
-    else:
-         flash("You must be logged in to view this page.", "error")
-         return redirect(url_for("login"))
+    if request.method == 'POST':
+       title = request.form.get('title')
+       description = request.form.get('description')
+       commission = float(request.form.get('commission'))
+       on_demand = True if request.form.get('on_demand') else False  
+       user_id = g.user.id  
+
+       new_post = JobPost(
+            title=title,
+            description=description,
+            commission=commission,
+            on_demand=on_demand,
+            user_id=user_id
+        )
+        
+       db.session.add(new_post)
+       db.session.commit()
+    
+    # Get all job posts (for the listings)
+    jobs = JobPost.query.all()
+    
+    # Get the count of posts for the current user
+    job_count = len(g.user.job_posts) 
+    
+    return render_template("lookingfor.html", jobs=jobs, job_count=job_count)
 
 # Create Post (Jobs) Page
 @app.route("/createjob", methods=["GET", "POST"])
@@ -200,6 +222,13 @@ def createJob():
         return redirect(url_for('lookingFor'))
 
     return render_template("createjob.html")
+
+@app.route("/createjob_disabled")
+def createJobDisabled():
+    # This route only flashes a message and then redirects
+    flash("You have reached the maximum limit of 3 job listings.", "error")
+    return redirect(url_for("lookingFor"))
+
 
 
 

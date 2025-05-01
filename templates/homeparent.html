@@ -259,6 +259,175 @@
       color: #a94442;
       border: 1px solid #ebccd1;
     }
+
+    /* Modal overlay covers the whole viewport */
+    .modal {
+      display: none; /* hidden by default */
+      position: fixed;
+      z-index: 10000; /* high z-index so it appears on top */
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto; /* enable scroll if needed */
+      background-color: rgba(0, 0, 0, 0.5); /* semi-transparent background */
+    }
+
+    /* Modal content styling */
+    .modal-content {
+      background-color: #fff;
+      margin: 5% auto;   /* 5% from the top, centered horizontally */
+      padding: 20px;
+      border-radius: 8px;
+      width: 80%;
+      max-width: 600px;
+      position: relative;
+    }
+
+    /* Close button styling */
+    .close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      color: #aaa;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .close:hover,
+    .close:focus {
+      color: #000;
+    }
+
+     /* Toggle switch styling */
+     .toggle-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .toggle-container .toggle-label {
+      margin-right: 10px;
+      font-size: 1rem;
+      color: #333;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+    .switch input { 
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    .switch input:checked + .slider {
+      background-color: #f78c00;
+    }
+    .switch input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+    /* Progress indicator styling */
+    .progress {
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      list-style: none;
+      padding: 0;
+    }
+    .progress li {
+      width: 32%;
+      padding: 10px;
+      text-align: center;
+      border-top: 2px solid #ccc;
+      position: relative;
+      color: #777;
+    }
+    .progress li.active {
+      font-weight: bold;
+      border-top-color: #f78c00;
+      color: #333;
+    }
+    .progress li::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 100%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 4px;
+      background: #ccc;
+      border-radius: 50%;
+    }
+    .progress li.active::after {
+      background: #f78c00;
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #555;
+    }
+    input[type="text"],
+    input[type="number"],
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background: #f78c00;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background: #e66e00;
+    }
+    .qr-mock {
+      width: 200px;
+      height: 200px;
+      background: #eee;
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: #888;
+      border: 2px dashed #ccc;
+    }
     
     /* Responsive adjustments */
     @media (max-width: 1024px) {
@@ -352,7 +521,7 @@
             flashContainer.remove();
           }, 500);
         }
-      }, 1500); // adjust time in milliseconds as needed
+      }, 2100); // adjust time in milliseconds as needed
     });
   </script>
   
