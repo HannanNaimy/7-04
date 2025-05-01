@@ -148,6 +148,42 @@
   .otpinput{
     width:50%;
   }
+  
+  .flash-container {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      width: auto;
+      padding: 10px;
+      text-align: center;
+}
+
+    .flash-message {
+      padding: 10px 20px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      font-weight: bold;
+      /* Optionally define a default appearance */
+      background: #f2dede;
+      color: #a94442;
+      border: 1px solid #ebccd1;
+    }
+
+    /* Optionally, override based on the category */
+    .flash-success {
+      background: #dff0d8;
+      color: #3c763d;
+      border: 1px solid #d6e9c6;
+    }
+
+    .flash-error {
+      background: #f2dede;
+      color: #a94442;
+      border: 1px solid #ebccd1;
+    }
+
     input[type="number"] {
         appearance: none;
     }
@@ -161,6 +197,17 @@
   }
   </style>
 </head>
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+  <div class="flash-container">
+    {% for category, message in messages %}
+      <div class="flash-message flash-{{ category }}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+{% endwith %}
 <body>
   <div class="container">
     <div class="intro">
@@ -171,5 +218,21 @@
       {% block rectangle %}{% endblock %}
     </div rectangle>  
   </div container>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', function() {
+      setTimeout(function(){
+        var flashContainer = document.querySelector('.flash-container');
+        if(flashContainer) {
+          flashContainer.style.transition = "opacity 0.5s ease";
+          flashContainer.style.opacity = 0;
+          setTimeout(function(){
+            flashContainer.remove();
+          }, 500);
+        }
+      }, 1500); // adjust time in milliseconds as needed
+    });
+  </script>
+
 </body>
 </html>

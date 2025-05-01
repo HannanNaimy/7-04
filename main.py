@@ -171,6 +171,15 @@ def lookingFor():
 # Create Post (Jobs) Page
 @app.route("/createjob", methods=["GET", "POST"])
 def createJob():
+    if not g.user:
+        flash("You must be logged in to view this page.", "error")
+        return redirect(url_for("login"))
+    
+    # Check if the user already has 3 listings
+    if len(g.user.job_posts) >= 3:
+        flash("You have reached the maximum limit of 3 job listings.", "error")
+        return redirect(url_for("lookingFor"))
+    
     if request.method == 'POST':
         title = request.form.get('title')
         description = request.form.get('description')
@@ -178,17 +187,20 @@ def createJob():
         on_demand = True if request.form.get('on_demand') else False  
         user_id = g.user.id  
 
-        new_post = JobPost(title=title, description=description, commission=commission,on_demand=on_demand, user_id=user_id,)
+        new_post = JobPost(
+            title=title,
+            description=description,
+            commission=commission,
+            on_demand=on_demand,
+            user_id=user_id
+        )
         db.session.add(new_post)
         db.session.commit()
 
         return redirect(url_for('lookingFor'))
 
-    if g.user:
-        return render_template("createjob.html")
-    else:
-        flash("You must be logged in to view this page.", "error")
-        return redirect(url_for("login"))
+    return render_template("createjob.html")
+
 
 
 # Offering To Page
