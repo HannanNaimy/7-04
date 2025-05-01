@@ -137,7 +137,6 @@ def login():
 
 
 # Profile Page
-
 @app.route("/profile/<usr>", methods=["GET"])
 def profile(usr):
     if g.user is None:
@@ -185,16 +184,30 @@ def lookingFor():
        flash("Post Created Successfully!", "success")
        return redirect(url_for('lookingFor'))
     
-    # GET request processing:
     jobs = JobPost.query.all()
     job_count = len(g.user.job_posts) 
     return render_template("lookingfor.html", jobs=jobs, job_count=job_count)
+
+# Offering To Page
+
+# History Page
+
+# Guide
+
+# Create Job Button Disabled Message
+
+# Job Details Page
+@app.route("/postDetails")
+def postDetails():
+    return render_template("postdetails.html")
 
 @app.route("/createjob_disabled")
 def createJobDisabled():
     # This route only flashes a message and then redirects
     flash("You have reached the maximum limit of 3 job listings.", "error")
     return redirect(url_for("lookingFor"))
+
+# Delete Job Function
 
 @app.route("/deletejob/<int:job_id>", methods=["POST"])
 def deleteJob(job_id):
@@ -221,14 +234,7 @@ def deleteJob(job_id):
     flash("Job post deleted successfully.", "success")
     return redirect(url_for("profile", usr=g.user.username))
 
-# Offering To Page
-
-# History Page
-
-# Guide
-
 # Logout Function
-
 @app.route("/logout")
 def logout():
     session.clear()

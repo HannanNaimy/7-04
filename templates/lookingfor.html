@@ -26,11 +26,9 @@
         <p>{{ job.description }}</p>
         <span class="job-meta">Commission: RM{{ job.commission }}</span><br>
         <span class="job-meta">Posted by: {{ job.user.username }}</span>
-        {% if job.on_demand %}
-          <button class="take-button">Take</button>
-        {% else %}
-          <button class="take-button">Contact</button>
-        {% endif %}
+        <a href="/postDetails">
+          <button class="take-button">See Details</button>
+        </a>
       </div>
       {% endfor %}
     {% endif %}
