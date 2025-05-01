@@ -181,6 +181,8 @@ def lookingFor():
         
        db.session.add(new_post)
        db.session.commit()
+
+       flash("Post Created Succesfully!", "success")
     
     # Get all job posts (for the listings)
     jobs = JobPost.query.all()
@@ -190,47 +192,36 @@ def lookingFor():
     
     return render_template("lookingfor.html", jobs=jobs, job_count=job_count)
 
-# Create Post (Jobs) Page
-@app.route("/createjob", methods=["GET", "POST"])
-def createJob():
-    if not g.user:
-        flash("You must be logged in to view this page.", "error")
-        return redirect(url_for("login"))
-    
-    # Check if the user already has 3 listings
-    if len(g.user.job_posts) >= 3:
-        flash("You have reached the maximum limit of 3 job listings.", "error")
-        return redirect(url_for("lookingFor"))
-    
-    if request.method == 'POST':
-        title = request.form.get('title')
-        description = request.form.get('description')
-        commission = float(request.form.get('commission'))
-        on_demand = True if request.form.get('on_demand') else False  
-        user_id = g.user.id  
-
-        new_post = JobPost(
-            title=title,
-            description=description,
-            commission=commission,
-            on_demand=on_demand,
-            user_id=user_id
-        )
-        db.session.add(new_post)
-        db.session.commit()
-
-        return redirect(url_for('lookingFor'))
-
-    return render_template("createjob.html")
-
 @app.route("/createjob_disabled")
 def createJobDisabled():
     # This route only flashes a message and then redirects
     flash("You have reached the maximum limit of 3 job listings.", "error")
     return redirect(url_for("lookingFor"))
 
-
-
+@app.route("/deletejob/<int:job_id>", methods=["POST"])
+def deleteJob(job_id):
+    # Ensure that a user is logged in
+    if not g.user:
+        flash("You must be logged in to perform that action.", "error")
+        return redirect(url_for("login"))
+    
+    # Look up the job post by its ID
+    job = JobPost.query.get(job_id)
+    if job is None:
+        flash("Job post not found.", "error")
+        return redirect(url_for("profile", usr=g.user.username))
+    
+    # Verify that the current user owns this job post
+    if job.user_id != g.user.id:
+        flash("You do not have permission to delete this job post.", "error")
+        return redirect(url_for("profile", usr=g.user.username))
+    
+    # Delete the job post and commit the changes to the database
+    db.session.delete(job)
+    db.session.commit()
+    
+    flash("Job post deleted successfully.", "success")
+    return redirect(url_for("profile", usr=g.user.username))
 
 # Offering To Page
 

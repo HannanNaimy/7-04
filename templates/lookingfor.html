@@ -52,15 +52,15 @@
     
     <!-- Create Job Form Content (from createjob.html) -->
     <form id="jobDetailsForm" action="/lookingFor" method="POST">
-      <div class="toggle-container">
-        <span class="toggle-label">On-Demand</span>
-        <label class="switch">
-          <input type="checkbox" id="onDemandToggle" name="on_demand">
-          <span class="slider"></span>
-        </label>
-      </div>
       <div id="step1">
         <h2>Add Job Details</h2>
+        <div class="toggle-container">
+          <span class="toggle-label">On-Demand</span>
+          <label class="switch">
+            <input type="checkbox" id="onDemandToggle" name="on_demand">
+            <span class="slider"></span>
+          </label>
+        </div>
         <div class="form-group">
           <label for="jobTitle">Job Title:</label>
           <input type="text" name="title" id="jobTitle" placeholder="Enter job title" />
@@ -117,10 +117,6 @@
       modal.style.display = "none";
     }
   }
-  
-  // (Optional) If you have a multi-step form, include your existing step transitions here.
-  // For example, moving to Step 2 and simulating payment.
-  // Your existing script logic for steps can remain almost the same, as long as the form is inside the modal.
 
   // Toggle button functionality for "On-Demand"
   document.getElementById('onDemandToggle').addEventListener('change', function() {
@@ -143,6 +139,25 @@
       alert("Please fill in all fields.");
       return;
     }
+    var isOnDemand = document.getElementById('onDemandToggle').checked;
+  
+  // Hide Step 1 regardless of the condition
+  document.getElementById('step1').style.display = 'none';
+  
+  if (isOnDemand) {
+    // If on-demand is enabled, proceed to Step 2 (Payment)
+    document.getElementById('step2').style.display = 'block';
+    document.getElementById('progress1').classList.add('active');
+    document.getElementById('progress2').classList.add('active');
+  } else {
+    // If on-demand is disabled, skip Step 2 and directly show Step 3 (Complete)
+    document.getElementById('step3').style.display = 'block';
+    document.getElementById('progress1').classList.remove('active');
+    document.getElementById('progress3').classList.add('active');
+    
+    // Optionally, auto-submit the form immediately if no payment is required:
+    // document.getElementById('jobDetailsForm').submit();
+  }
     // Hide step 1 and show step 2
     document.getElementById('step1').style.display = 'none';
     document.getElementById('step2').style.display = 'block';

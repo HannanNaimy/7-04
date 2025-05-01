@@ -70,6 +70,20 @@
   .take-button:hover {
     background: #e66e00;
   }
+
+  .delete-button {
+    background: red;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-left: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  .delete-button:hover {
+    background: darkred;
+  }
   
 {% endblock %}
 
@@ -103,17 +117,18 @@
             <div class="on-demand-tag">On-Demand</div>
           {% endif %}
           <p>{{ job.description }}</p>
-          <!-- New footer container -->
+          <!-- New footer container with a delete option -->
           <div class="job-footer">
             <div class="job-meta-info">
               <span class="job-meta">Commission: RM{{ job.commission }}</span><br>
               <span class="job-meta">Posted by: {{ job.user.username }}</span>
             </div>
-            {% if job.on_demand %}
-              <button class="take-button">Take</button>
-            {% else %}
-              <button class="take-button">Contact</button>
-            {% endif %}
+            <div class="job-options">
+              <!-- Delete button as a form so we can use POST -->
+              <form action="{{ url_for('deleteJob', job_id=job.id) }}" method="POST" style="display:inline;">
+                <button type="submit" class="delete-button" onclick="return confirm('Are you sure you want to delete this post?');">Delete</button>
+              </form>
+            </div>
           </div>
         </div>
         {% endfor %}
