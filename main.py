@@ -135,6 +135,84 @@ def login():
 
      return render_template("login.html")
 
+@app.route("/forgotPassword", methods=["GET", "POST"])
+def forgotPassword():
+    if request.method == "POST":
+        email = request.form.get("email")
+        # Check if the email exists in the User table
+        user = User.query.filter_by(email=email).first()
+        if user is None:
+            flash("The email address entered does not exist.", "error")
+            return redirect(url_for("forgotPassword"))
+        
+        # Email is found; generate a reset code (6-digit number)
+        reset_code = str(random.randint(100000, 999999))
+        
+        # Store the reset code and email in the session for later verification
+        session["resetCode"] = reset_code
+        session["temp_email"] = email
+        
+        # Send the reset code to the user's email
+        msg = Message("Your Reset Code",
+                      sender="hannannaimy@gmail.com",
+                      recipients=[email])
+        msg.body = f"Your reset code is {reset_code}. Enter this code to reset your password."
+        mail.send(msg)
+        
+        flash("Reset code has been sent to your email!", "success")
+        return redirect(url_for("resetCode"))
+    
+    return render_template("forgotpassword.html")
+
+# Reset Code Page
+@app.route("/resetCode", methods=["GET", "POST"])
+def resetCode():
+    if request.method == "POST":
+        entered_code = request.form.get("reset_code")
+        
+        # Compare the entered code with the one stored in the session
+        if entered_code == session.get("resetCode"):
+            # Optional: Remove the reset code from the session now
+            session.pop("resetCode", None)
+            
+            flash("Reset code verified! Please reset your password.", "success")
+            return redirect(url_for("newPassword"))
+        else:
+            flash("Invalid reset code! Try again.", "error")
+            return redirect(url_for("resetCode"))
+    
+    return render_template("resetcode.html")
+
+@app.route("/newPassword", methods=["GET", "POST"])
+def newPassword():
+    if request.method == "POST":
+        new_password = request.form.get("new_password")
+        
+        # Hash the new password
+        hashed_password = generate_password_hash(new_password)
+        
+        # Retrieve the email from session (set during forgot/reset code process)
+        email = session.get("temp_email")
+        if not email:
+            flash("Session expired. Please start the password reset process again.", "error")
+            return redirect(url_for("forgotPassword"))
+        
+        # Get the user record from the database
+        user = User.query.filter_by(email=email).first()
+        if user:
+            user.password = hashed_password
+            db.session.commit()
+            # Clear the temporary email from session
+            session.pop("temp_email", None)
+            flash("Password updated successfully!", "success")
+            return redirect(url_for("login"))
+        else:
+            flash("User not found.", "error")
+            return redirect(url_for("newPassword"))
+    
+    # For GET requests, simply render the new password form.
+    return render_template("newpassword.html")
+
 
 # Profile Page
 @app.route("/profile/<usr>", methods=["GET"])
