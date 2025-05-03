@@ -1,0 +1,14 @@
+{% extends "guestparent.html" %}
+
+{% block content %}
+<div class="logreg-container">
+    <h1 class="formtitle">Reset Code</h1>
+    <form class="otp" method="POST" action="/resetCode">
+
+        <label for="username">Reset Code</label>
+        <input class="otpinput" type="text" name="reset_code" pattern="\d{6}" maxlength="6" required>
+
+        <button class ="button loginsubmit-button" type="submit">Enter</button>
+    </form>
+</div>
+{% endblock %}
