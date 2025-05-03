@@ -2,7 +2,7 @@ import re, random
 from flask import Flask, redirect, url_for, render_template, flash, g, session, request
 from flask_mail import Mail, Message 
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User, JobPost
+from models import db, User, JobPost, Payment
 from config import Config
 
 app = Flask(__name__) 
@@ -284,6 +284,22 @@ def createJobDisabled():
     # This route only flashes a message and then redirects
     flash("You have reached the maximum limit of 3 job listings.", "error")
     return redirect(url_for("lookingFor"))
+
+@app.route("/paymentmethods", methods=["GET", "POST"])
+def paymentMethods():
+    if request.method == "POST":
+        payment_type = request.form.get("type")
+        id_value = request.form.get("idValue")
+
+        # Save to DB
+        new_payment = Payment(type=payment_type, id_value=id_value)
+        db.session.add(new_payment)
+        db.session.commit()
+
+        flash("Payment method saved successfully!", "success")
+        return redirect(url_for("paymentMethods"))
+
+    return render_template("payment.html")
 
 # Delete Job Function
 
