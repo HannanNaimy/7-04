@@ -1,0 +1,24 @@
+{% extends "homeparent.html" %}
+
+{% block content %}
+<h1>Contact Information</h1>
+<form method="POST">
+    <label for="phone_number">Phone Number:</label>
+    <input type="text" id="phone_number" name="phone_number" value="{{ contact.phone_number if contact else '' }}" required>
+    <br>
+
+    <label for="instagram_username">Instagram Username:</label>
+    <input type="text" id="instagram_username" name="instagram_username" value="{{ contact.instagram_username if contact else '' }}">
+    <br>
+
+    <label for="discord_username">Discord Username:</label>
+    <input type="text" id="discord_username" name="discord_username" value="{{ contact.discord_username if contact else '' }}">
+    <br>
+
+    <button type="submit">Save</button>
+</form>
+
+<div>
+    
+</div>
+{% endblock %}
