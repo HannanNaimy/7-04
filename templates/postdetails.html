@@ -3,7 +3,7 @@
 {% block content %}
 <div class="job-details-container">
   <header class="job-header">
-    <span class="label-looking-for">Looking For></span>
+    <span class="label-looking-for">Looking For&gt;</span>
     <h1 class="job-title">{{ job.title }}</h1>
   </header>
 
@@ -12,9 +12,18 @@
   </section>
   
   <footer class="job-footer">
-    <p class="job-commission">Commission: RM{{ job.commission }}</p>
+    <p class="job-commission">
+      {% if job.on_demand %}
+        Commission: RM{{ job.commission }}
+      {% else %}
+        Salary Range: RM{{ job.salary_range }}
+      {% endif %}
+    </p>
     {% if job.on_demand %}
-      <button class="job-take-button">Take</button>
+      <!-- Wrap the "Take" button in a form to POST to the take_job route -->
+      <form action="{{ url_for('take_job', job_id=job.id) }}" method="POST">
+        <button class="job-take-button" type="submit">Take</button>
+      </form>
     {% else %}
       <button class="job-contact-button">Contact</button>
     {% endif %}

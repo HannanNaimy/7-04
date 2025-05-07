@@ -27,8 +27,12 @@
         <div class="listing-tag">Listing</div>
       {% endif %}
       <p>{{ job.description }}</p>
+      {% if job.on_demand %}
       <span class="job-meta">Commission: RM{{ job.commission }}</span><br>
-      <span class="job-meta">Posted by: {{ job.user.username }}</span>
+      {% else %}
+      <span class="job-meta">Salary Range: RM{{ job.salary_range }}</span><br>
+      {% endif %}
+      <span class="job-meta">Posted by: {{ job.creator.username }}</span>
       <a href="{{ url_for('post_details', job_id=job.id) }}">
         <button class="take-button">See Details</button>
       </a>
