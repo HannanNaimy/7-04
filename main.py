@@ -275,9 +275,10 @@ def lookingFor():
 # Create Job Button Disabled Message
 
 # Job Details Page
-@app.route("/postDetails")
-def postDetails():
-    return render_template("postdetails.html")
+@app.route("/postDetails/<int:job_id>")
+def post_details(job_id):
+    job = JobPost.query.get_or_404(job_id)
+    return render_template("postdetails.html", job=job)
 
 @app.route("/createjob_disabled")
 def createJobDisabled():

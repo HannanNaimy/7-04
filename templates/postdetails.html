@@ -1,1 +1,23 @@
 {% extends "homeparent.html" %}
+
+{% block content %}
+<div class="job-details-container">
+  <header class="job-header">
+    <span class="label-looking-for">Looking For></span>
+    <h1 class="job-title">{{ job.title }}</h1>
+  </header>
+
+  <section class="job-content">
+    <p class="job-description">{{ job.description }}</p>
+  </section>
+  
+  <footer class="job-footer">
+    <p class="job-commission">Commission: RM{{ job.commission }}</p>
+    {% if job.on_demand %}
+      <button class="job-take-button">Take</button>
+    {% else %}
+      <button class="job-contact-button">Contact</button>
+    {% endif %}
+  </footer>
+</div>
+{% endblock %}

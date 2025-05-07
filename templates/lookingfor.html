@@ -17,20 +17,24 @@
     {% if jobs|length == 0 %}
       <p>No job posts available. Please check back later or create one!</p>
     {% else %}
-      {% for job in jobs %}
-      <div class="job-post">
-        <h2>{{ job.title }}</h2>
-        {% if job.on_demand %}
-          <div class="on-demand-tag">On-Demand</div>
-        {% endif %}
-        <p>{{ job.description }}</p>
-        <span class="job-meta">Commission: RM{{ job.commission }}</span><br>
-        <span class="job-meta">Posted by: {{ job.user.username }}</span>
-        <a href="/postDetails">
-          <button class="take-button">See Details</button>
-        </a>
-      </div>
-      {% endfor %}
+    
+    {% for job in jobs %}
+    <div class="job-post">
+      <h2>{{ job.title }}</h2>
+      {% if job.on_demand %}
+        <div class="on-demand-tag">On-Demand</div>
+      {% else %}
+        <div class="listing-tag">Listing</div>
+      {% endif %}
+      <p>{{ job.description }}</p>
+      <span class="job-meta">Commission: RM{{ job.commission }}</span><br>
+      <span class="job-meta">Posted by: {{ job.user.username }}</span>
+      <a href="{{ url_for('post_details', job_id=job.id) }}">
+        <button class="take-button">See Details</button>
+      </a>
+    </div>
+    {% endfor %}
+  
     {% endif %}
   </div>
 </div>
@@ -40,12 +44,11 @@
   <div class="modal-content">
     <span class="close">&times;</span>
 
-    <!-- Updated progress indicator (only two steps) -->
     <ul class="progress">
       <li id="progress1" class="active">Step 1: Job Details</li>
-      <li id="progress2">Step 2: Payment</li>
+      <li id="progress2" style="display: none;">Step 2: Payment</li>
     </ul>
-    
+
     <!-- Create Job Form -->
     <form id="jobDetailsForm" action="/lookingFor" method="POST">
       <!-- Step 1: Job Details -->
@@ -66,11 +69,18 @@
           <label for="jobDescription">Job Description:</label>
           <textarea id="jobDescription" name="description" rows="4" placeholder="Enter job description"></textarea>
         </div>
-        <div class="form-group">
+
+        <div class="form-group" id="commissionGroup" style="display: none;">
           <label for="commission">Commission Cost:</label>
           <input type="number" name="commission" id="commission" placeholder="Enter commission cost" />
         </div>
-        <!-- When clicked, this button transitions based on the on_demand toggle -->
+
+        <div class="form-group salary-range" id="salaryRangeGroup">
+          <label for="minSalary">Enter Range of Salary:</label>
+          <input type="number" name="min_salary" id="minSalary" placeholder="Minimum salary" />
+          <input type="number" name="max_salary" id="maxSalary" placeholder="Maximum salary" />
+        </div>
+
         <button type="button" id="toStep2">Submit Job Details</button>
       </div>
       
@@ -87,7 +97,7 @@
 </div>
 
 <script>
-  // Modal open/close controls
+  // Modal open/close controls (existing code)
   var modal = document.getElementById("createJobModal");
   var openModalBtn = document.getElementById("openCreateJobModal");
   var closeBtn = document.getElementsByClassName("close")[0];
@@ -103,26 +113,51 @@
       modal.style.display = "none";
     }
   }
-
-  // Toggle button: log on-demand state (extend if needed)
   document.getElementById('onDemandToggle').addEventListener('change', function() {
-    if (this.checked) {
-      console.log("On-Demand is ON");
-    } else {
-      console.log("On-Demand is OFF");
-    }
-  });
+  if (this.checked) {
+    // On-Demand is ON: Show commission field, hide salary range, and show progress Step 2.
+    console.log("On-Demand is ON");
+    document.getElementById('commissionGroup').style.display = 'block';
+    document.getElementById('salaryRangeGroup').style.display = 'none';
+    document.getElementById('progress2').style.display = 'list-item'; // Show Step 2 progress
+  } else {
+    // On-Demand is OFF: Hide commission field, show salary range, and hide progress Step 2.
+    console.log("On-Demand is OFF");
+    document.getElementById('commissionGroup').style.display = 'none';
+    document.getElementById('salaryRangeGroup').style.display = 'block';
+    document.getElementById('progress2').style.display = 'none'; // Hide Step 2 progress
+  }
+});
+
 
   // Transition from Step 1 to next action based on on-demand checkbox
   document.getElementById('toStep2').addEventListener('click', function() {
     var title = document.getElementById('jobTitle').value;
     var description = document.getElementById('jobDescription').value;
-    var commission = document.getElementById('commission').value;
-    if (title.trim() === "" || description.trim() === "" || commission.trim() === "") {
+    // When on-demand is activated, commission is required;
+    // otherwise, the salary range must be filled.
+    var isOnDemand = document.getElementById('onDemandToggle').checked;
+    
+    if (title.trim() === "" || description.trim() === "") {
       alert("Please fill in all fields.");
       return;
     }
-    var isOnDemand = document.getElementById('onDemandToggle').checked;
+    
+    if (isOnDemand) {
+      var commission = document.getElementById('commission').value;
+      if (commission.trim() === "") {
+        alert("Please fill in the commission cost.");
+        return;
+      }
+    } else {
+      var minSalary = document.getElementById('minSalary').value;
+      var maxSalary = document.getElementById('maxSalary').value;
+      if (minSalary.trim() === "" || maxSalary.trim() === "") {
+        alert("Please fill in both the minimum and maximum salary.");
+        return;
+      }
+    }
+    
     // Hide Step 1 and update progress
     document.getElementById('step1').style.display = 'none';
     document.getElementById('progress1').classList.remove('active');
@@ -137,13 +172,12 @@
     }
   });
 
-  // In the on-demand scenario: when user simulates payment, submit the form.
+  // Simulated payment (existing code)
   document.getElementById('simulatePayment').addEventListener('click', function() {
-    // Hide step 2, update progress if desired, then submit.
     document.getElementById('step2').style.display = 'none';
     document.getElementById('progress2').classList.remove('active');
-    // Submit the form after simulating payment.
     document.getElementById('jobDetailsForm').submit();
   });
 </script>
+
 {% endblock %}
