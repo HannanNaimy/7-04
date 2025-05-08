@@ -300,8 +300,11 @@ def lookingFor():
         return redirect(url_for('lookingFor'))
     
     jobs = JobPost.query.filter_by(taken=False).all()
-    job_count = len(g.user.job_posts) 
-    return render_template("lookingfor.html", jobs=jobs, job_count=job_count)
+    job_count = len(g.user.job_posts)
+    on_demand_jobs = [job for job in jobs if job.on_demand]
+    listing_jobs = [job for job in jobs if not job.on_demand]
+    return render_template("lookingfor.html", jobs=jobs, job_count=job_count, 
+                           on_demand_jobs=on_demand_jobs, listing_jobs=listing_jobs) 
 
 # Offering To Page
 

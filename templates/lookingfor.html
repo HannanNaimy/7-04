@@ -3,7 +3,7 @@
 {% block content %}
 <div class="jobs-container">
   <div class="jobs-header">
-    <h1>"Looking For" Listings</h1>
+    <h1>"Looking For"</h1>
     {% if job_count < 3 %}
       <a href="javascript:void(0)" id="openCreateJobModal" class="create-post-button">
         Create Post
@@ -13,34 +13,42 @@
     {% endif %}
   </div>
   
+  {% set on_demand_jobs = jobs | selectattr('on_demand', 'equalto', True) | list %}
+  {% set listing_jobs = jobs | rejectattr('on_demand', 'equalto', True) | list %}
+
+  <!-- Section: On-Demand Jobs -->
   <div class="jobs-listings">
-    {% if jobs|length == 0 %}
-      <p>No job posts available. Please check back later or create one!</p>
-    {% else %}
-    
-    {% for job in jobs %}
-    <div class="job-post">
-      <h2>{{ job.title }}</h2>
-      {% if job.on_demand %}
+      {% for job in on_demand_jobs %}
+      <div class="job-post">
+        <h2>{{ job.title }}</h2>
         <div class="on-demand-tag">On-Demand</div>
-      {% else %}
-        <div class="listing-tag">Listing</div>
-      {% endif %}
-      <p>{{ job.description }}</p>
-      {% if job.on_demand %}
-      <span class="job-meta">Commission: RM{{ job.commission }}</span><br>
-      {% else %}
-      <span class="job-meta">Salary Range: RM{{ job.salary_range }}</span><br>
-      {% endif %}
-      <span class="job-meta">Posted by: {{ job.creator.username }}</span>
-      <a href="{{ url_for('post_details', job_id=job.id) }}">
-        <button class="take-button">See Details</button>
-      </a>
-    </div>
-    {% endfor %}
-  
-    {% endif %}
+        <p>{{ job.description }}</p>
+        <span class="job-meta">Commission: RM{{ job.commission }}</span><br>
+        <span class="job-meta">Posted by: {{ job.creator.username }}</span>
+        <a href="{{ url_for('post_details', job_id=job.id) }}">
+          <button class="take-button">See Details</button>
+        </a>
+      </div>
+      {% endfor %}
   </div>
+
+  <!-- Section: Listing Jobs -->
+  <div class="jobs-listings">
+      {% for job in listing_jobs %}
+      <div class="job-post">
+        <h2>{{ job.title }}</h2>
+        <div class="listing-tag">Listing</div>
+        <p>{{ job.description }}</p>
+        <span class="job-meta">Salary Range: RM{{ job.salary_range }}</span><br>
+        <span class="job-meta">Posted by: {{ job.creator.username }}</span>
+        <a href="{{ url_for('post_details', job_id=job.id) }}">
+          <button class="take-button">See Details</button>
+        </a>
+      </div>
+      {% endfor %}
+  </div>
+</div>
+
 </div>
 
 <!-- Modal for “Create Job” -->
