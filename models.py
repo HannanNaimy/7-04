@@ -26,7 +26,7 @@ class JobPost(db.Model):
     taken = db.Column(db.Boolean, default=False)
     taken_by = db.Column(
         db.Integer, 
-        db.ForeignKey('user.id', name="fk_jobpost_taken_by"), 
+        db.ForeignKey('user.id', name="fk_jobpost_taken_by"),
         nullable=True
     )
     user_id = db.Column(

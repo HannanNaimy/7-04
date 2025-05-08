@@ -306,6 +306,16 @@ def lookingFor():
     return render_template("lookingfor.html", jobs=jobs, job_count=job_count, 
                            on_demand_jobs=on_demand_jobs, listing_jobs=listing_jobs) 
 
+
+# Job Status Page
+
+@app.route("/jobstatus", methods=["POST"])
+def jobStatus():
+    if not g.user:
+        flash("You must be logged in to view this page.", "error")
+        return redirect(url_for("login"))
+    
+    return render_template("jobstatus.html")
 # Offering To Page
 
 # History Page
@@ -386,7 +396,7 @@ def deleteJob(job_id):
         return redirect(url_for("profile", usr=g.user.username))
     
     # Verify that the current user owns this job post
-    if job.creator_id != g.user.id:
+    if job.creator.id != g.user.id:
         flash("You do not have permission to delete this job post.", "error")
         return redirect(url_for("profile", usr=g.user.username))
     
