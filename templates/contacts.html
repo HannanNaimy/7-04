@@ -19,6 +19,12 @@
 </form>
 
 <div>
-    
+    {% if contact %}
+      <p><strong>Phone:</strong> {{ contact.phone_number }}</p>
+      <p><strong>Instagram:</strong> {{ contact.instagram_username or "N/A" }}</p>
+      <p><strong>Discord:</strong> {{ contact.discord_username or "N/A" }}</p>
+    {% else %}
+      <p>No contact information available.</p>
+    {% endif %}
 </div>
 {% endblock %}

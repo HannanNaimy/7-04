@@ -341,26 +341,34 @@ def contacts():
         flash("You must be logged in to view this page.", "error")
         return redirect(url_for("login"))
 
+    # Retrieve existing contact information for the logged-in user
+    contact = Contact.query.filter_by(user_id=g.user.id).first()
+
     if request.method == "POST":
         phone_number = request.form.get("phone_number")
         instagram_username = request.form.get("instagram_username")
         discord_username = request.form.get("discord_username")
 
-        # Save contact information to the database
-        new_contact = Contact(
-            user_id=g.user.id,
-            phone_number=phone_number,
-            instagram_username=instagram_username,
-            discord_username=discord_username
-        )
-        db.session.add(new_contact)
+        # If contact already exists, update it
+        if contact:
+            contact.phone_number = phone_number
+            contact.instagram_username = instagram_username
+            contact.discord_username = discord_username
+            flash("Contact information updated successfully!", "success")
+        else:
+            # If no contact exists, create a new one
+            new_contact = Contact(
+                user_id=g.user.id,
+                phone_number=phone_number,
+                instagram_username=instagram_username,
+                discord_username=discord_username
+            )
+            db.session.add(new_contact)
+            flash("Contact information saved successfully!", "success")
+        
         db.session.commit()
-
-        flash("Contact information saved successfully!", "success")
         return redirect(url_for("contacts"))
 
-    # Retrieve existing contact information for the logged-in user
-    contact = Contact.query.filter_by(user_id=g.user.id).first()
     return render_template("contacts.html", contact=contact)
 
 
