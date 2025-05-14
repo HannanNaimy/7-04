@@ -1,7 +1,6 @@
 import re, random
 from flask import Flask, redirect, url_for, render_template, flash, g, session, request
 from flask_mail import Mail, Message 
-from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, User, JobPost, Payment, Contact
 from config import Config
@@ -12,7 +11,6 @@ app.config.from_object(Config)
 
 db.init_app(app)
 mail = Mail(app)
-migrate = Migrate(app, db)
 
 with app.app_context():
     db.create_all() 
