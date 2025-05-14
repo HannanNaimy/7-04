@@ -32,12 +32,12 @@
       {% endfor %}
   </div>
 
-  <!-- Section: Custom Jobs -->
+  <!-- Section: Negotiate Jobs -->
   <div class="jobs-listings">
       {% for job in listing_jobs %}
       <div class="job-post">
         <h2>{{ job.title }}</h2>
-        <div class="listing-tag">Custom</div>
+        <div class="listing-tag">Negotiate</div>
         <p>{{ job.description }}</p>
         <span class="job-meta">Salary Range: RM{{ job.salary_range }}</span><br>
         <span class="job-meta">Posted by: {{ job.creator.username }}</span>

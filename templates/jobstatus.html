@@ -16,17 +16,26 @@
         Commission: RM{{ job.commission }}
     </p>
 
-      <p class="confirmation-status">
-         Confirmation: {{ job.creator_confirmed|int + job.taker_confirmed|int }}/2
-      </p>
-      <!-- Only creators and takers should be able to submit a confirmation -->
-      <form action="{{ url_for('jobStatus', job_id=job.id) }}" method="POST">
-        {% if (g.user.id == job.user_id and job.creator_confirmed) or (g.user.id == job.taken_by and job.taker_confirmed) %}
-          <button class="job-take-button" type="submit" disabled>Already Confirmed</button>
-        {% else %}
-          <button class="job-take-button" type="submit">Confirm Completion</button>
-        {% endif %}
-      </form>
+    <!-- Button now displays the confirmation count in its label -->
+    <form action="{{ url_for('jobStatus', job_id=job.id) }}" method="POST">
+      {% set confirmation_count = job.creator_confirmed|int + job.taker_confirmed|int %}
+      {% if (g.user.id == job.user_id and job.creator_confirmed) or (g.user.id == job.taken_by and job.taker_confirmed) %}
+        <button class="job-take-button" type="submit">Undo Confirmation ({{ confirmation_count }}/2)</button>
+      {% else %}
+        <button class="job-take-button" type="submit">Confirm ({{ confirmation_count }}/2)</button>
+      {% endif %}
+    </form>
+    
+    <!-- Display which party has confirmed -->
+    <div class="confirmation-info">
+      {% if job.creator_confirmed %}
+        <p>{{ job.creator.username }} (creator) has confirmed.</p>
+      {% endif %}
+      {% if job.taker_confirmed %}
+        <p>{{ job.taker.username }} (taker) has confirmed.</p>
+      {% endif %}
+    </div>
+    
   </footer>
 </div>
 {% endblock %}

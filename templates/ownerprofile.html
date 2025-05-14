@@ -117,7 +117,7 @@
           {% if job.on_demand %}
             <div class="on-demand-tag">Instant</div>
           {% else %}
-            <div class="listing-tag">Custom</div>
+            <div class="listing-tag">Negotiate</div>
           {% endif %}
           <p>{{ job.description }}</p>
           <div class="job-footer">
@@ -157,7 +157,7 @@
           {% if job.on_demand %}
             <div class="on-demand-tag">Instant</div>
           {% else %}
-            <div class="listing-tag">Custom</div>
+            <div class="listing-tag">Negotiate</div>
           {% endif %}
           <p>{{ job.description }}</p>
           <div class="job-footer">
@@ -194,7 +194,7 @@
           {% if job.on_demand %}
             <div class="on-demand-tag">Instant</div>
           {% else %}
-            <div class="listing-tag">Custom</div>
+            <div class="listing-tag">Negotiate</div>
           {% endif %}
           <p>{{ job.description }}</p>
           <div class="job-footer">
@@ -204,7 +204,8 @@
               {% else %}
               <span class="job-meta">Salary Range: RM{{ job.salary_range }}</span><br>
               {% endif %}
-              <span class="job-meta">Posted by: {{ job.creator.username }}</span>
+              <span class="job-meta">Posted by: {{ job.creator.username }}</span><br>
+              <span class="job-meta">Taken by: {{ job.taker.username }}</span>
             </div>
             <div class="job-options">
               <form action="{{ url_for('jobStatus', job_id=job.id) }}" method="GET" style="display:inline;">
@@ -219,7 +220,7 @@
   </div>
   
   <div class="listed-posts">
-    <h2 class="label">Jobs Completed</h2>
+    <h2 class="label">Instant-Jobs Completed</h2>
     <!-- Subsection: Created by You -->
     <h3>Created by You</h3>
     <div class="listed-container">
@@ -232,7 +233,7 @@
           {% if job.on_demand %}
             <div class="on-demand-tag">Instant</div>
           {% else %}
-            <div class="listing-tag">Custom</div>
+            <div class="listing-tag">Negotiate</div>
           {% endif %}
           <p>{{ job.description }}</p>
           <div class="job-footer">
@@ -242,13 +243,8 @@
               {% else %}
               <span class="job-meta">Salary Range: RM{{ job.salary_range }}</span><br>
               {% endif %}
-              <span class="job-meta">Posted by: {{ job.creator.username }}</span>
-            </div>
-            <div class="job-options">
-              <!-- Optionally add buttons or details -->
-              <form action="{{ url_for('jobStatus', job_id=job.id) }}" method="GET" style="display:inline;">
-                <button type="submit" class="take-button">Check Status</button>
-              </form>
+              <span class="job-meta">Posted by: {{ job.creator.username }}</span><br>
+              <span class="job-meta">Taken by: {{ job.taker.username }}</span>
             </div>
           </div>
         </div>
@@ -269,7 +265,7 @@
           {% if job.on_demand %}
             <div class="on-demand-tag">Instant</div>
           {% else %}
-            <div class="listing-tag">Custom</div>
+            <div class="listing-tag">Negotiate</div>
           {% endif %}
           <p>{{ job.description }}</p>
           <div class="job-footer">
@@ -281,11 +277,6 @@
               {% endif %}
               <span class="job-meta">Posted by: {{ job.creator.username }}</span>
             </div>
-            <div class="job-options">
-              <form action="{{ url_for('jobStatus', job_id=job.id) }}" method="GET" style="display:inline;">
-                <button type="submit" class="take-button">Check Status</button>
-              </form> 
-          </div>
         </div>
       </div>
         {% endfor %}

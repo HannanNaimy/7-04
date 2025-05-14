@@ -342,29 +342,31 @@ def jobStatus(job_id):
     
     job = JobPost.query.get(job_id)
     if not job:
-         flash("Job not found.", "error")
-         return redirect(url_for("profile", usr=g.user.username))
+        flash("Job not found.", "error")
+        return redirect(url_for("profile", usr=g.user.username))
          
     # Only creator or taker is allowed to update/view.
     if g.user.id != job.user_id and g.user.id != job.taken_by:
-         flash("You are not authorized to update the job status.", "error")
-         return redirect(url_for("profile", usr=g.user.username))
+        flash("You are not authorized to update the job status.", "error")
+        return redirect(url_for("profile", usr=g.user.username))
     
     if request.method == "POST":
-        # Update the appropriate confirmation flag if not already set.
-        if g.user.id == job.user_id and not job.creator_confirmed:
-            job.creator_confirmed = True
-        elif g.user.id == job.taken_by and not job.taker_confirmed:
-            job.taker_confirmed = True
+        # Toggle the confirmation flag: if already confirmed, undo; otherwise, set confirmation.
+        if g.user.id == job.user_id:
+            job.creator_confirmed = not job.creator_confirmed
+        elif g.user.id == job.taken_by:
+            job.taker_confirmed = not job.taker_confirmed
 
+        db.session.commit()
+        
+        # Check if both confirmations are in place
         if job.is_complete:
             flash("Job marked as complete!", "success")
+            return redirect(url_for("profile", usr=g.user.username))
         else:
-            confirmations = int(job.creator_confirmed or 0) + int(job.taker_confirmed or 0)
-            flash(f"Job confirmation updated: {confirmations}/2", "info")
-        db.session.commit()
-        # Redirect after POST to prevent form resubmission on refresh.
-        return redirect(url_for('jobStatus', job_id=job_id))
+            total = int(job.creator_confirmed or 0) + int(job.taker_confirmed or 0)
+            flash(f"Job confirmation updated: {total}/2", "info")
+            return redirect(url_for("jobStatus", job_id=job_id))
     
     # GET request: simply render the job status page.
     return render_template("jobstatus.html", job=job)
