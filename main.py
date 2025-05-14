@@ -1,4 +1,4 @@
-import re, random
+import random
 from flask import Flask, redirect, url_for, render_template, flash, g, session, request
 from flask_mail import Mail, Message 
 from flask_migrate import Migrate
@@ -307,16 +307,43 @@ def lookingFor():
                            on_demand_jobs=on_demand_jobs, listing_jobs=listing_jobs) 
 
 
-# Job Status Page
-
-@app.route("/jobStatus/<int:job_id>", methods=["POST"])
+# Job Status Page   
+@app.route("/jobStatus/<int:job_id>", methods=["GET", "POST"])
 def jobStatus(job_id):
     if not g.user:
         flash("You must be logged in to view this page.", "error")
         return redirect(url_for("login"))
     
-    job = JobPost.query.get_or_404(job_id)
+    job = JobPost.query.get(job_id)
+    if not job:
+         flash("Job not found.", "error")
+         return redirect(url_for("profile", usr=g.user.username))
+         
+    # Only creator or taker is allowed to update/view.
+    if g.user.id != job.user_id and g.user.id != job.taken_by:
+         flash("You are not authorized to update the job status.", "error")
+         return redirect(url_for("profile", usr=g.user.username))
+    
+    if request.method == "POST":
+        # Update the appropriate confirmation flag if not already set.
+        if g.user.id == job.user_id and not job.creator_confirmed:
+            job.creator_confirmed = True
+        elif g.user.id == job.taken_by and not job.taker_confirmed:
+            job.taker_confirmed = True
+
+        if job.is_complete:
+            flash("Job marked as complete!", "success")
+        else:
+            confirmations = int(job.creator_confirmed or 0) + int(job.taker_confirmed or 0)
+            flash(f"Job confirmation updated: {confirmations}/2", "info")
+        db.session.commit()
+        # Redirect after POST to prevent form resubmission on refresh.
+        return redirect(url_for('jobStatus', job_id=job_id))
+    
+    # GET request: simply render the job status page.
     return render_template("jobstatus.html", job=job)
+
+
 # Offering To Page
 
 # History Page

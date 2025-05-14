@@ -13,20 +13,20 @@
   
   <footer class="job-footer">
     <p class="job-commission">
-      {% if job.on_demand %}
         Commission: RM{{ job.commission }}
-      {% else %}
-        Salary Range: RM{{ job.salary_range }}
-      {% endif %}
     </p>
-    {% if job.on_demand %}
-      <!-- Wrap the "Take" button in a form to POST to the take_job route -->
-      <form action="" method="POST">
-        <button class="job-take-button" type="submit">Done</button>
+
+      <p class="confirmation-status">
+         Confirmation: {{ job.creator_confirmed|int + job.taker_confirmed|int }}/2
+      </p>
+      <!-- Only creators and takers should be able to submit a confirmation -->
+      <form action="{{ url_for('jobStatus', job_id=job.id) }}" method="POST">
+        {% if (g.user.id == job.user_id and job.creator_confirmed) or (g.user.id == job.taken_by and job.taker_confirmed) %}
+          <button class="job-take-button" type="submit" disabled>Already Confirmed</button>
+        {% else %}
+          <button class="job-take-button" type="submit">Confirm Completion</button>
+        {% endif %}
       </form>
-    {% else %}
-      <button class="job-contact-button">Contact</button>
-    {% endif %}
   </footer>
 </div>
 {% endblock %}
