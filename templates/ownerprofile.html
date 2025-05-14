@@ -171,7 +171,7 @@
             </div>
             <div class="job-options">
               <!-- Optionally add buttons or details -->
-              <form action="/jobStatus" method="POST" style="display:inline;">
+              <form action="{{ url_for('jobStatus', job_id=job.id) }}" method="POST" style="display:inline;">
                 <button type="submit" class="take-button">Check Status</button>
               </form>
             </div>
@@ -207,7 +207,7 @@
               <span class="job-meta">Posted by: {{ job.creator.username }}</span>
             </div>
             <div class="job-options">
-              <form action="/jobStatus" method="POST" style="display:inline;">
+              <form action="{{ url_for('jobStatus', job_id=job.id) }}" method="POST" style="display:inline;">
                 <button type="submit" class="take-button">Check Status</button>
               </form> 
           </div>

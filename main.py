@@ -309,13 +309,14 @@ def lookingFor():
 
 # Job Status Page
 
-@app.route("/postDetails/<int:job_id>", methods=["POST"])
-def jobStatus():
+@app.route("/jobStatus/<int:job_id>", methods=["POST"])
+def jobStatus(job_id):
     if not g.user:
         flash("You must be logged in to view this page.", "error")
         return redirect(url_for("login"))
     
-    return render_template("jobstatus.html")
+    job = JobPost.query.get_or_404(job_id)
+    return render_template("jobstatus.html", job=job)
 # Offering To Page
 
 # History Page

@@ -1,1 +1,32 @@
 {% extends "homeparent.html" %}
+
+{% block content %}
+<div class="job-details-container">
+  <header class="job-header">
+    <span class="label-looking-for">Looking For&gt;</span>
+    <h1 class="job-title">{{ job.title }}</h1>
+  </header>
+
+  <section class="job-content">
+    <p class="job-description">{{ job.description }}</p>
+  </section>
+  
+  <footer class="job-footer">
+    <p class="job-commission">
+      {% if job.on_demand %}
+        Commission: RM{{ job.commission }}
+      {% else %}
+        Salary Range: RM{{ job.salary_range }}
+      {% endif %}
+    </p>
+    {% if job.on_demand %}
+      <!-- Wrap the "Take" button in a form to POST to the take_job route -->
+      <form action="" method="POST">
+        <button class="job-take-button" type="submit">Done</button>
+      </form>
+    {% else %}
+      <button class="job-contact-button">Contact</button>
+    {% endif %}
+  </footer>
+</div>
+{% endblock %}
