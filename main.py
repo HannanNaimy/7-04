@@ -1,11 +1,10 @@
 import re, random
 from flask import Flask, redirect, url_for, render_template, flash, g, session, request
 from flask_mail import Mail, Message 
-from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User, JobPost, Payment
-from config import Config
 from flask_migrate import Migrate
-from flask import flash
+from werkzeug.security import generate_password_hash, check_password_hash
+from models import db, User, JobPost, Payment, Contact
+from config import Config
 
 app = Flask(__name__) 
 
@@ -220,22 +219,36 @@ def newPassword():
 # Profile Page
 @app.route("/profile/<usr>", methods=["GET"])
 def profile(usr):
-    if g.user is None:
+    if "user_id" not in session:
         flash("You must be logged in to view this page.", "error")
         return redirect(url_for("login"))
-    
-    jobs = g.user.job_posts
-    
-    if g.user.username == usr:
-        return render_template("ownerprofile.html", usr=g.user.username, email=g.user.email, jobs=jobs)
+
+    user = User.query.filter_by(username=usr).first()
+    if not user:
+        flash("User not found!", "error")
+        return redirect(url_for("login"))
+
+    if user.id == session.get("user_id"):
+        # Listed posts: jobs created by you that are still available.
+        listed_jobs = JobPost.query.filter_by(user_id=user.id, taken=False).all()
+        # Ongoing posts - Created by You: jobs that you posted and have been taken.
+        ongoing_created_jobs = JobPost.query.filter_by(user_id=user.id, taken=True).all()
+        # Ongoing posts - Taken by You: jobs that have been taken by you (but not created by you).
+        ongoing_taken_jobs = JobPost.query.filter(
+            JobPost.taken == True,
+            JobPost.taken_by == user.id,
+            JobPost.user_id != user.id  # Ensures you are not the creator
+        ).all()
+        return render_template("ownerprofile.html",
+                               usr=user.username,
+                               email=user.email,
+                               listed_jobs=listed_jobs,
+                               ongoing_created_jobs=ongoing_created_jobs,
+                               ongoing_taken_jobs=ongoing_taken_jobs)
     else:
+        return render_template("profile.html", usr=user.username, email=user.email)
 
-        other_user = User.query.filter_by(username=usr).first()
-        if not other_user:
-            flash("User not found!", "error")
-        return render_template("profile.html", usr=other_user.username, email=other_user.email)
 
-    
 # Looking For Page
 
 @app.route("/lookingFor", methods=["GET", "POST"])
@@ -245,30 +258,64 @@ def lookingFor():
         return redirect(url_for("login"))
     
     if request.method == 'POST':
-       title = request.form.get('title')
-       description = request.form.get('description')
-       commission = float(request.form.get('commission'))
-       on_demand = True if request.form.get('on_demand') else False  
-       user_id = g.user.id  
+        title = request.form.get('title')
+        description = request.form.get('description')
+        on_demand = True if request.form.get('on_demand') else False  
+        user_id = g.user.id  
 
-       new_post = JobPost(
+        if on_demand:
+            # Parse commission for on-demand jobs
+            commission_input = request.form.get('commission')
+            try:
+                commission = float(commission_input)
+            except ValueError:
+                flash("Invalid commission cost. Please enter a numeric value.", "error")
+                return redirect(url_for("lookingFor"))
+            # For on-demand postings, there’s no salary range
+            salary_range_value = None
+        else:
+            # For non on-demand jobs, get the salary range inputs
+            min_salary = request.form.get('min_salary')
+            max_salary = request.form.get('max_salary')
+            if not min_salary or not max_salary:
+                flash("Please enter both a minimum and maximum salary.", "error")
+                return redirect(url_for("lookingFor"))
+            # Commission is not applicable here. Instead, form a salary range string.
+            commission = None
+            salary_range_value = f"{min_salary}-{max_salary}"
+
+        new_post = JobPost(
             title=title,
             description=description,
             commission=commission,
             on_demand=on_demand,
+            salary_range=salary_range_value,
             user_id=user_id
         )
         
-       db.session.add(new_post)
-       db.session.commit()
+        db.session.add(new_post)
+        db.session.commit()
 
-       flash("Post Created Successfully!", "success")
-       return redirect(url_for('lookingFor'))
+        flash("Post Created Successfully!", "success")
+        return redirect(url_for('lookingFor'))
     
-    jobs = JobPost.query.all()
-    job_count = len(g.user.job_posts) 
-    return render_template("lookingfor.html", jobs=jobs, job_count=job_count)
+    jobs = JobPost.query.filter_by(taken=False).all()
+    job_count = len(g.user.job_posts)
+    on_demand_jobs = [job for job in jobs if job.on_demand]
+    listing_jobs = [job for job in jobs if not job.on_demand]
+    return render_template("lookingfor.html", jobs=jobs, job_count=job_count, 
+                           on_demand_jobs=on_demand_jobs, listing_jobs=listing_jobs) 
 
+
+# Job Status Page
+
+@app.route("/jobstatus", methods=["POST"])
+def jobStatus():
+    if not g.user:
+        flash("You must be logged in to view this page.", "error")
+        return redirect(url_for("login"))
+    
+    return render_template("jobstatus.html")
 # Offering To Page
 
 # History Page
@@ -278,9 +325,10 @@ def lookingFor():
 # Create Job Button Disabled Message
 
 # Job Details Page
-@app.route("/postDetails")
-def postDetails():
-    return render_template("postdetails.html")
+@app.route("/postDetails/<int:job_id>")
+def post_details(job_id):
+    job = JobPost.query.get_or_404(job_id)
+    return render_template("postdetails.html", job=job)
 
 @app.route("/createjob_disabled")
 def createJobDisabled():
@@ -293,39 +341,44 @@ def paymentMethods():
     if request.method == "POST":
         payment_type = request.form.get("type")
         id_value = request.form.get("idValue")
-        
-        # Prevent duplicate entries:
-        duplicate = Payment.query.filter_by(type=payment_type, id_value=id_value).first()
-        if duplicate:
-            flash("Payment method already saved.", "info")
-            return redirect(url_for("paymentMethods"))
-            
-        def is_valid_payment_method(payment_type, id_value):
-            patterns = {
-                # Matches either 3-3-4 (e.g. 011-315-8659) or 3-4-4 (e.g. 011-3158-6598) phone formats.
-                "phone": r"^(?:\d{3}-\d{3}-\d{4}|\d{3}-\d{4}-\d{4})$",
-                "ic": r"^\d{6}-\d{2}-\d{4}$",
-                "account": r"^\d{1,16}$",
-                "business": r"^\d{4}\d{8}$"
-            }
-            return bool(re.match(patterns.get(payment_type, ""), id_value))
-        
-        # Validate the DuitNow ID format.
-        if not is_valid_payment_method(payment_type, id_value):
-            flash("Invalid format! Please enter a valid DuitNow ID.", "danger")
-            return redirect(url_for("paymentMethods"))
-        
-        # Save new payment method.
+
+        # Save to DB
         new_payment = Payment(type=payment_type, id_value=id_value)
         db.session.add(new_payment)
         db.session.commit()
-        
+
         flash("Payment method saved successfully!", "success")
         return redirect(url_for("paymentMethods"))
+
+    return render_template("payment.html")
+
+# Take Job Function
+
+@app.route("/take/<int:job_id>", methods=["POST"])
+def take_job(job_id):
+    if not g.user:
+        flash("You must be logged in to take a job.", "error")
+        return redirect(url_for("login"))
     
-    # For GET requests, load all saved payment methods from the database.
-    saved_payments = Payment.query.all()  # (You might want to filter by the current user.)
-    return render_template("payment.html", saved_payments=saved_payments)
+    job = JobPost.query.get_or_404(job_id)
+    
+    # Prevent the posting user from taking the job.
+    if job.creator.id == g.user.id:
+        flash("You cannot take your own job.", "error")
+        return redirect(url_for("post_details", job_id=job_id))
+    
+    # Check if the job is already taken:
+    if job.taken:
+        flash("This job has already been taken.", "error")
+        return redirect(url_for("lookingFor"))
+    
+    # Mark the job as taken.
+    job.taken = True
+    job.taken_by = g.user.id
+    db.session.commit()
+    
+    flash("Job taken successfully. The listing has been removed.", "success")
+    return redirect(url_for("lookingFor"))
 
 # Delete Job Function
 
@@ -343,7 +396,7 @@ def deleteJob(job_id):
         return redirect(url_for("profile", usr=g.user.username))
     
     # Verify that the current user owns this job post
-    if job.user_id != g.user.id:
+    if job.creator.id != g.user.id:
         flash("You do not have permission to delete this job post.", "error")
         return redirect(url_for("profile", usr=g.user.username))
     
@@ -360,6 +413,51 @@ def logout():
     session.clear()
     flash("You have been logged out.", "success")
     return redirect(url_for("guest"))  
+
+@app.route("/contacts", methods=["GET", "POST"])
+def contacts():
+    if not g.user:
+        flash("You must be logged in to view this page.", "error")
+        return redirect(url_for("login"))
+
+    # Retrieve existing contact information for the logged-in user
+    contact = Contact.query.filter_by(user_id=g.user.id).first()
+
+    if request.method == "POST":
+        phone_number = request.form.get("phone_number")
+        instagram_username = request.form.get("instagram_username")
+        discord_username = request.form.get("discord_username")
+
+        # If contact already exists, update it
+        if contact:
+            contact.phone_number = phone_number
+            contact.instagram_username = instagram_username
+            contact.discord_username = discord_username
+            flash("Contact information updated successfully!", "success")
+        else:
+            # If no contact exists, create a new one
+            new_contact = Contact(
+                user_id=g.user.id,
+                phone_number=phone_number,
+                instagram_username=instagram_username,
+                discord_username=discord_username
+            )
+            db.session.add(new_contact)
+            flash("Contact information saved successfully!", "success")
+        
+        db.session.commit()
+        return redirect(url_for("contacts"))
+
+    return render_template("contacts.html", contact=contact)
+
+
+
+
+
+
+
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
