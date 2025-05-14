@@ -309,7 +309,7 @@ def lookingFor():
 
 # Job Status Page
 
-@app.route("/jobstatus", methods=["POST"])
+@app.route("/postDetails/<int:job_id>", methods=["POST"])
 def jobStatus():
     if not g.user:
         flash("You must be logged in to view this page.", "error")

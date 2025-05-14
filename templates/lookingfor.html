@@ -4,7 +4,7 @@
 <div class="jobs-container">
   <div class="jobs-header">
     <h1>"Looking For"</h1>
-    {% if job_count < 3 %}
+    {% if job_count < 7 %}
       <a href="javascript:void(0)" id="openCreateJobModal" class="create-post-button">
         Create Post
       </a>
@@ -16,12 +16,12 @@
   {% set on_demand_jobs = jobs | selectattr('on_demand', 'equalto', True) | list %}
   {% set listing_jobs = jobs | rejectattr('on_demand', 'equalto', True) | list %}
 
-  <!-- Section: On-Demand Jobs -->
+  <!-- Section: Instant Jobs -->
   <div class="jobs-listings">
       {% for job in on_demand_jobs %}
       <div class="job-post">
         <h2>{{ job.title }}</h2>
-        <div class="on-demand-tag">On-Demand</div>
+        <div class="on-demand-tag">Instant</div>
         <p>{{ job.description }}</p>
         <span class="job-meta">Commission: RM{{ job.commission }}</span><br>
         <span class="job-meta">Posted by: {{ job.creator.username }}</span>
@@ -32,12 +32,12 @@
       {% endfor %}
   </div>
 
-  <!-- Section: Listing Jobs -->
+  <!-- Section: Custom Jobs -->
   <div class="jobs-listings">
       {% for job in listing_jobs %}
       <div class="job-post">
         <h2>{{ job.title }}</h2>
-        <div class="listing-tag">Listing</div>
+        <div class="listing-tag">Custom</div>
         <p>{{ job.description }}</p>
         <span class="job-meta">Salary Range: RM{{ job.salary_range }}</span><br>
         <span class="job-meta">Posted by: {{ job.creator.username }}</span>
@@ -67,7 +67,7 @@
       <div id="step1">
         <h2>Add Job Details</h2>
         <div class="toggle-container">
-          <span class="toggle-label">On-Demand</span>
+          <span class="toggle-label">Instant</span>
           <label class="switch">
             <input type="checkbox" id="onDemandToggle" name="on_demand">
             <span class="slider"></span>
@@ -127,14 +127,14 @@
   }
   document.getElementById('onDemandToggle').addEventListener('change', function() {
   if (this.checked) {
-    // On-Demand is ON: Show commission field, hide salary range, and show progress Step 2.
-    console.log("On-Demand is ON");
+    // Instant is ON: Show commission field, hide salary range, and show progress Step 2.
+    console.log("Instant is ON");
     document.getElementById('commissionGroup').style.display = 'block';
     document.getElementById('salaryRangeGroup').style.display = 'none';
     document.getElementById('progress2').style.display = 'list-item'; // Show Step 2 progress
   } else {
-    // On-Demand is OFF: Hide commission field, show salary range, and hide progress Step 2.
-    console.log("On-Demand is OFF");
+    // Instant is OFF: Hide commission field, show salary range, and hide progress Step 2.
+    console.log("Instant is OFF");
     document.getElementById('commissionGroup').style.display = 'none';
     document.getElementById('salaryRangeGroup').style.display = 'block';
     document.getElementById('progress2').style.display = 'none'; // Hide Step 2 progress

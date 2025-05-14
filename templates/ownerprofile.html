@@ -106,7 +106,7 @@
 
   <!-- Section: Listed posts -->
   <div class="listed-posts">
-    <h2 class="label">Listed</h2>
+    <h2 class="label">Jobs Listed</h2>
     <div class="listed-container">
       {% if listed_jobs|length == 0 %}
         <p>No listed posts.</p>
@@ -115,9 +115,9 @@
         <div class="job-post">
           <h2>{{ job.title }}</h2>
           {% if job.on_demand %}
-            <div class="on-demand-tag">On-Demand</div>
+            <div class="on-demand-tag">Instant</div>
           {% else %}
-            <div class="listing-tag">Listing</div>
+            <div class="listing-tag">Custom</div>
           {% endif %}
           <p>{{ job.description }}</p>
           <div class="job-footer">
@@ -144,7 +144,7 @@
 
   <!-- Section: Ongoing posts -->
   <div class="listed-posts">
-    <h2 class="label">Ongoing</h2>
+    <h2 class="label">Instant-Jobs Taken</h2>
     <!-- Subsection: Created by You -->
     <h3>Created by You</h3>
     <div class="listed-container">
@@ -155,9 +155,9 @@
         <div class="job-post">
           <h2>{{ job.title }}</h2>
           {% if job.on_demand %}
-            <div class="on-demand-tag">On-Demand</div>
+            <div class="on-demand-tag">Instant</div>
           {% else %}
-            <div class="listing-tag">Listing</div>
+            <div class="listing-tag">Custom</div>
           {% endif %}
           <p>{{ job.description }}</p>
           <div class="job-footer">
@@ -171,7 +171,7 @@
             </div>
             <div class="job-options">
               <!-- Optionally add buttons or details -->
-              <form action="/jobstatus" method="POST" style="display:inline;">
+              <form action="/jobStatus" method="POST" style="display:inline;">
                 <button type="submit" class="take-button">Check Status</button>
               </form>
             </div>
@@ -192,9 +192,9 @@
         <div class="job-post">
           <h2>{{ job.title }}</h2>
           {% if job.on_demand %}
-            <div class="on-demand-tag">On-Demand</div>
+            <div class="on-demand-tag">Instant</div>
           {% else %}
-            <div class="listing-tag">Listing</div>
+            <div class="listing-tag">Custom</div>
           {% endif %}
           <p>{{ job.description }}</p>
           <div class="job-footer">
@@ -207,7 +207,7 @@
               <span class="job-meta">Posted by: {{ job.creator.username }}</span>
             </div>
             <div class="job-options">
-              <form action="/jobstatus" method="POST" style="display:inline;">
+              <form action="/jobStatus" method="POST" style="display:inline;">
                 <button type="submit" class="take-button">Check Status</button>
               </form> 
           </div>
