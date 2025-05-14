@@ -19,8 +19,7 @@ class JobPost(db.Model):
     user = db.relationship('User', backref=db.backref('job_posts', lazy=True))
 
 class Payment(db.Model):
-
     id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.String(50), nullable=False)         # e.g. "phone", "ic", etc.
-    id_value = db.Column(db.String(100), nullable=False)    # e.g. the phone number, IC number, etc.
+    type = db.Column(db.String(50), nullable=False)         # e.g., "phone", "ic", etc.
+    id_value = db.Column(db.String(100), nullable=False)      # The formatted DuitNow ID
     date_added = db.Column(db.DateTime, default=datetime.utcnow)

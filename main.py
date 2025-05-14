@@ -4,6 +4,8 @@ from flask_mail import Mail, Message
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, User, JobPost, Payment
 from config import Config
+from flask_migrate import Migrate
+from flask import flash
 
 app = Flask(__name__) 
 
@@ -11,6 +13,7 @@ app.config.from_object(Config)
 
 db.init_app(app)
 mail = Mail(app)
+migrate = Migrate(app, db)
 
 with app.app_context():
     db.create_all() 
@@ -290,16 +293,39 @@ def paymentMethods():
     if request.method == "POST":
         payment_type = request.form.get("type")
         id_value = request.form.get("idValue")
-
-        # Save to DB
+        
+        # Prevent duplicate entries:
+        duplicate = Payment.query.filter_by(type=payment_type, id_value=id_value).first()
+        if duplicate:
+            flash("Payment method already saved.", "info")
+            return redirect(url_for("paymentMethods"))
+            
+        def is_valid_payment_method(payment_type, id_value):
+            patterns = {
+                # Matches either 3-3-4 (e.g. 011-315-8659) or 3-4-4 (e.g. 011-3158-6598) phone formats.
+                "phone": r"^(?:\d{3}-\d{3}-\d{4}|\d{3}-\d{4}-\d{4})$",
+                "ic": r"^\d{6}-\d{2}-\d{4}$",
+                "account": r"^\d{1,16}$",
+                "business": r"^\d{4}\d{8}$"
+            }
+            return bool(re.match(patterns.get(payment_type, ""), id_value))
+        
+        # Validate the DuitNow ID format.
+        if not is_valid_payment_method(payment_type, id_value):
+            flash("Invalid format! Please enter a valid DuitNow ID.", "danger")
+            return redirect(url_for("paymentMethods"))
+        
+        # Save new payment method.
         new_payment = Payment(type=payment_type, id_value=id_value)
         db.session.add(new_payment)
         db.session.commit()
-
+        
         flash("Payment method saved successfully!", "success")
         return redirect(url_for("paymentMethods"))
-
-    return render_template("payment.html")
+    
+    # For GET requests, load all saved payment methods from the database.
+    saved_payments = Payment.query.all()  # (You might want to filter by the current user.)
+    return render_template("payment.html", saved_payments=saved_payments)
 
 # Delete Job Function
 
