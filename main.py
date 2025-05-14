@@ -1,4 +1,5 @@
 import random
+from sqlalchemy import or_
 from flask import Flask, redirect, url_for, render_template, flash, g, session, request
 from flask_mail import Mail, Message 
 from flask_migrate import Migrate
@@ -217,6 +218,7 @@ def newPassword():
 
 
 # Profile Page
+
 @app.route("/profile/<usr>", methods=["GET"])
 def profile(usr):
     if "user_id" not in session:
@@ -229,25 +231,49 @@ def profile(usr):
         return redirect(url_for("login"))
 
     if user.id == session.get("user_id"):
-        # Listed posts: jobs created by you that are still available.
+        # Listed posts: jobs created by you and still available.
         listed_jobs = JobPost.query.filter_by(user_id=user.id, taken=False).all()
-        # Ongoing posts - Created by You: jobs that you posted and have been taken.
-        ongoing_created_jobs = JobPost.query.filter_by(user_id=user.id, taken=True).all()
-        # Ongoing posts - Taken by You: jobs that have been taken by you (but not created by you).
+
+        # Ongoing jobs: taken but not completed (i.e. either confirmation flag is not True)
+        ongoing_created_jobs = JobPost.query.filter(
+            JobPost.user_id == user.id,
+            JobPost.taken == True,
+            or_(JobPost.creator_confirmed != True, JobPost.taker_confirmed != True)
+        ).all()
+
         ongoing_taken_jobs = JobPost.query.filter(
             JobPost.taken == True,
             JobPost.taken_by == user.id,
-            JobPost.user_id != user.id  # Ensures you are not the creator
+            JobPost.user_id != user.id,  # Ensures you are not the creator
+            or_(JobPost.creator_confirmed != True, JobPost.taker_confirmed != True)
         ).all()
+
+        # Completed jobs: job is complete if both confirmations are True.
+        completed_created_jobs = JobPost.query.filter(
+            JobPost.user_id == user.id,
+            JobPost.taken == True,
+            JobPost.creator_confirmed == True,
+            JobPost.taker_confirmed == True
+        ).all()
+
+        completed_taken_jobs = JobPost.query.filter(
+            JobPost.taken == True,
+            JobPost.taken_by == user.id,
+            JobPost.user_id != user.id,
+            JobPost.creator_confirmed == True,
+            JobPost.taker_confirmed == True
+        ).all()
+
         return render_template("ownerprofile.html",
                                usr=user.username,
                                email=user.email,
                                listed_jobs=listed_jobs,
                                ongoing_created_jobs=ongoing_created_jobs,
-                               ongoing_taken_jobs=ongoing_taken_jobs)
+                               ongoing_taken_jobs=ongoing_taken_jobs,
+                               completed_created_jobs=completed_created_jobs,
+                               completed_taken_jobs=completed_taken_jobs)
     else:
         return render_template("profile.html", usr=user.username, email=user.email)
-
 
 # Looking For Page
 
@@ -477,15 +503,6 @@ def contacts():
         return redirect(url_for("contacts"))
 
     return render_template("contacts.html", contact=contact)
-
-
-
-
-
-
-
-
-
 
 if __name__ == "__main__":
     app.run(debug=True)
