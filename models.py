@@ -50,8 +50,9 @@ class JobPost(db.Model):
 
 class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.String(50), nullable=False)         # e.g. "phone", "ic", etc.
-    id_value = db.Column(db.String(100), nullable=False)      # e.g. the phone number, IC number, etc.
+    type = db.Column(db.String(50), nullable=False)  # e.g. "Phone Number", "IC Number", etc.
+    id_value = db.Column(db.String(100), nullable=False)
+    is_main = db.Column(db.Boolean, default=False)  # Marks if this record is the main payment method
     date_added = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Contact(db.Model):

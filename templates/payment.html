@@ -185,6 +185,13 @@ p {
       {% for payment in saved_payments %}
         <div class="saved-payment">
           {{ payment.type|capitalize }}: {{ payment.id_value }}
+          {% if payment.is_main %}
+            (main)
+          {% else %}
+            <form method="POST" action="{{ url_for('set_main', payment_id=payment.id) }}" style="display:inline;">
+              <button type="submit" class="set-main-button">Set as main</button>
+            </form>
+          {% endif %}
         </div>
       {% endfor %}
     </div>
@@ -213,7 +220,6 @@ function validatePhone() {
   
   phoneInput.value = formattedValue;
   var valid = (digits.length === 10 || digits.length === 11);
-  
   errorMsg.innerText = valid ? "" : "Incorrect phone format.";
   checkOverallValidity();
 }
@@ -237,7 +243,6 @@ function validateIc() {
   
   icInput.value = formattedValue;
   var valid = (digits.length === 12);
-  
   errorMsg.innerText = valid ? "" : "Incorrect IC format.";
   checkOverallValidity();
 }
@@ -247,19 +252,15 @@ function validateAccount() {
   var errorMsg = document.getElementById('accountError');
   var value = accountInput.value;
   if (value.trim() === "") {
-      errorMsg.innerText = "";
-      checkOverallValidity();
-      return;
+    errorMsg.innerText = "";
+    checkOverallValidity();
+    return;
   }
   
   var digits = value.replace(/\D/g, "");
   var formattedValue = digits.substring(0, 16);
-  
   accountInput.value = formattedValue;
-  
-  // Here, any non-empty account field is considered valid.
   var valid = (digits.length > 0);
-  
   errorMsg.innerText = valid ? "" : "Account number cannot be empty.";
   checkOverallValidity();
 }
@@ -276,14 +277,12 @@ function validateBusiness() {
   
   var digits = value.replace(/\D/g, "");
   var formattedValue = digits;
-  
   if (digits.length >= 12) {
     formattedValue = digits.substring(0, 4) + "-" + digits.substring(4, 12);
   }
   
   businessInput.value = formattedValue;
   var valid = (digits.length === 12);
-  
   errorMsg.innerText = valid ? "" : "Incorrect Business Registration No format.";
   checkOverallValidity();
 }
@@ -299,16 +298,12 @@ function checkOverallValidity() {
   var accountError = document.getElementById('accountError').innerText;
   var businessError = document.getElementById('businessError').innerText;
   
-  // For each field, if it's empty it's considered valid,
-  // otherwise it must have no error.
   var phoneValid    = (phoneValue === ""    || phoneError === "");
   var icValid       = (icValue === ""       || icError === "");
   var accountValid  = (accountValue === ""  || accountError === "");
   var businessValid = (businessValue === "" || businessError === "");
   
-  // Ensure at least one field is filled
   var anyFieldFilled = (phoneValue !== "" || icValue !== "" || accountValue !== "" || businessValue !== "");
-  
   var overallValid = anyFieldFilled && phoneValid && icValid && accountValid && businessValid;
   
   document.getElementById('submitBtn').disabled = !overallValid;
