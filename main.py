@@ -336,10 +336,10 @@ def createJobDisabled():
     flash("You have reached the maximum limit of 3 job listings.", "error")
     return redirect(url_for("lookingFor"))
 
-@app.route('/paymentmethods', methods=['GET', 'POST'])
-def payment_methods():
+@app.route('/editpaymentmethods', methods=['GET', 'POST'])
+def editpayment_methods():
     if request.method == 'POST':
-        # Get user inputs
+        # Get user inputs for all payment types
         phone = request.form.get('phone', '').strip()
         ic = request.form.get('ic', '').strip()
         account = request.form.get('account', '').strip()
@@ -348,41 +348,47 @@ def payment_methods():
         # Validate that at least one field is filled
         if not any([phone, ic, account, business]):
             flash("Please enter at least one payment method.", "danger")
-            return redirect('/paymentmethods')
+            return redirect("/editpaymentmethods")
 
-        # Determine which field was filled
-        if phone:
-            payment_type = "Phone Number"
-            payment_value = phone
-        elif ic:
-            payment_type = "IC Number"
-            payment_value = ic
-        elif account:
-            payment_type = "Account Number"
-            payment_value = account
-        elif business:
-            payment_type = "Business Registration Number"
-            payment_value = business
+        messages = []  # To collect status messages for each type
 
-        # Check for duplicate entries via the Payment table
-        duplicate = Payment.query.filter_by(id_value=payment_value).first()
-        if duplicate:
-            flash("This payment method already exists.", "warning")
-            return redirect('/paymentmethods')
+        # Dictionary mapping each payment type to its corresponding input
+        data = {
+            "Phone Number": phone,
+            "IC Number": ic,
+            "Account Number": account,
+            "Business Registration Number": business
+        }
 
-        # Save the new payment method in the database
-        new_payment = Payment(type=payment_type, id_value=payment_value)
+        for ptype, value in data.items():
+            if value:  # Process the field if it is not empty
+                # Query the Payment table for a record of this type
+                existing = Payment.query.filter_by(type=ptype).first()
+                if existing:
+                    # If the record exists and its number is the same, no change is needed.
+                    if existing.id_value == value:
+                        messages.append(f"{ptype} is already set to that value; no change made.")
+                    else:
+                        # Update the existing record
+                        existing.id_value = value
+                        messages.append(f"{ptype} updated successfully!")
+                else:
+                    # No record exists, so create a new payment method
+                    new_payment = Payment(type=ptype, id_value=value)
+                    db.session.add(new_payment)
+                    messages.append(f"{ptype} added successfully!")
         try:
-            db.session.add(new_payment)
             db.session.commit()
-            flash(f"{payment_type} added successfully!", "success")
         except Exception as e:
             db.session.rollback()
-            flash("An error occurred while saving your payment method.", "danger")
-        
-        return redirect('/paymentmethods')
+            flash("An error occurred while saving your payment method(s).", "danger")
+            return redirect("/editpaymentmethods")
 
-    # For a GET request, query the Payment table and pass the records to the template.
+        # Combine all messages into one success flash
+        flash(" ".join(messages), "success")
+        return redirect("/editpaymentmethods")
+
+    # For a GET request, retrieve all payment method records, ordered by date added
     saved_payments = Payment.query.order_by(Payment.date_added.desc()).all()
     return render_template("payment.html", saved_payments=saved_payments)
 
