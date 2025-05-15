@@ -351,16 +351,21 @@ def jobStatus(job_id):
         return redirect(url_for("profile", usr=g.user.username))
     
     if request.method == "POST":
-        # Toggle the confirmation flag: if already confirmed, undo; otherwise, set confirmation.
+        # If the job is already marked as complete, prevent undo and redirect.
+        if job.creator_confirmed and job.taker_confirmed:
+            flash("Job already marked as complete!", "success")
+            return redirect(url_for("profile", usr=g.user.username))
+
+        # Otherwise, allow updating the confirmation flag.
         if g.user.id == job.user_id:
-            job.creator_confirmed = not job.creator_confirmed
+            job.creator_confirmed = True  # Prevent toggle, always set to True
         elif g.user.id == job.taken_by:
-            job.taker_confirmed = not job.taker_confirmed
+            job.taker_confirmed = True  # Prevent toggle, always set to True
 
         db.session.commit()
         
         # Check if both confirmations are in place
-        if job.is_complete:
+        if job.creator_confirmed and job.taker_confirmed:
             flash("Job marked as complete!", "success")
             return redirect(url_for("profile", usr=g.user.username))
         else:

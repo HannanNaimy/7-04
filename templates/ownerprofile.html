@@ -167,7 +167,8 @@
               {% else %}
               <span class="job-meta">Salary Range: RM{{ job.salary_range }}</span><br>
               {% endif %}
-              <span class="job-meta">Posted by: {{ job.creator.username }}</span>
+              <span class="job-meta">Posted by: {{ job.creator.username }}</span><br>
+              <span class="job-meta">Taken by: {{ job.taker.username }}</span>
             </div>
             <div class="job-options">
               <!-- Optionally add buttons or details -->
