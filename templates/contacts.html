@@ -1,7 +1,7 @@
 {% extends "homeparent.html" %}
 
 {% block content %}
-<h1>Contact Information</h1>
+<h1>Profile Information</h1>
 <form method="POST">
     <label for="phone_number">Phone Number:</label>
     <input type="text" id="phone_number" name="phone_number" value="{{ contact.phone_number if contact else '' }}" required>
