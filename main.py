@@ -306,9 +306,6 @@ def lookingFor():
     return render_template("lookingfor.html", jobs=jobs, job_count=job_count, 
                            on_demand_jobs=on_demand_jobs, listing_jobs=listing_jobs) 
 
-
-# Job Status Page
-
 @app.route("/jobstatus", methods=["POST"])
 def jobStatus():
     if not g.user:
@@ -336,21 +333,89 @@ def createJobDisabled():
     flash("You have reached the maximum limit of 3 job listings.", "error")
     return redirect(url_for("lookingFor"))
 
-@app.route("/paymentmethods", methods=["GET", "POST"])
-def paymentMethods():
-    if request.method == "POST":
-        payment_type = request.form.get("type")
-        id_value = request.form.get("idValue")
+@app.route('/editpaymentmethods', methods=['GET', 'POST'])
+def editpayment_methods():
+    if request.method == 'POST':
+        # Get user inputs for all payment types
+        phone = request.form.get('phone', '').strip()
+        ic = request.form.get('ic', '').strip()
+        account = request.form.get('account', '').strip()
+        business = request.form.get('business', '').strip()
 
-        # Save to DB
-        new_payment = Payment(type=payment_type, id_value=id_value)
-        db.session.add(new_payment)
-        db.session.commit()
+        # Validate that at least one field is filled
+        if not any([phone, ic, account, business]):
+            flash("Please enter at least one payment method.", "danger")
+            return redirect("/editpaymentmethods")
 
-        flash("Payment method saved successfully!", "success")
-        return redirect(url_for("paymentMethods"))
+        messages = []  # To collect status messages for each type
 
-    return render_template("payment.html")
+        # Dictionary mapping each payment type to its corresponding input
+        data = {
+            "Phone Number": phone,
+            "IC Number": ic,
+            "Account Number": account,
+            "Business Registration Number": business
+        }
+
+        for ptype, value in data.items():
+            if value:  # Process the field if it is not empty
+                # Query the Payment table for a record of this type
+                existing = Payment.query.filter_by(type=ptype).first()
+                if existing:
+                    # If the record exists and its number is the same, no change is needed.
+                    if existing.id_value == value:
+                        messages.append(f"{ptype} is already set to that value; no change made.")
+                    else:
+                        # Update the existing record
+                        existing.id_value = value
+                        messages.append(f"{ptype} updated successfully!")
+                else:
+                    # No record exists, so create a new payment method
+                    new_payment = Payment(type=ptype, id_value=value)
+                    db.session.add(new_payment)
+                    messages.append(f"{ptype} added successfully!")
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            flash("An error occurred while saving your payment method(s).", "danger")
+            return redirect("/editpaymentmethods")
+
+        # Combine all messages into one success flash
+        flash(" ".join(messages), "success")
+        return redirect("/editpaymentmethods")
+
+    # For a GET request, retrieve all payment method records, ordered by date added
+    saved_payments = Payment.query.order_by(Payment.date_added.desc()).all()
+    return render_template("payment.html", saved_payments=saved_payments)
+
+# Take Job Function
+
+@app.route("/take/<int:job_id>", methods=["POST"])
+def take_job(job_id):
+    if not g.user:
+        flash("You must be logged in to take a job.", "error")
+        return redirect(url_for("login"))
+    
+    job = JobPost.query.get_or_404(job_id)
+    
+    # Prevent the posting user from taking the job.
+    if job.creator.id == g.user.id:
+        flash("You cannot take your own job.", "error")
+        return redirect(url_for("post_details", job_id=job_id))
+    
+    # Check if the job is already taken:
+    if job.taken:
+        flash("This job has already been taken.", "error")
+        return redirect(url_for("lookingFor"))
+    
+    # Mark the job as taken.
+    job.taken = True
+    job.taken_by = g.user.id
+    db.session.commit()
+    
+    flash("Job taken successfully. The listing has been removed.", "success")
+    return redirect(url_for("lookingFor"))
 
 # Take Job Function
 
@@ -449,15 +514,6 @@ def contacts():
         return redirect(url_for("contacts"))
 
     return render_template("contacts.html", contact=contact)
-
-
-
-
-
-
-
-
-
 
 if __name__ == "__main__":
     app.run(debug=True)
