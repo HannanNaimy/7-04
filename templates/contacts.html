@@ -4,15 +4,15 @@
 <h1>Profile Information</h1>
 <form method="POST">
     <label for="phone_number">Phone Number:</label>
-    <input type="text" id="phone_number" name="phone_number" value="{{ contact.phone_number if contact else '' }}" required>
+    <input type="text" id="phone_number" name="phone_number" value="{{ user.phone_number if contact else '' }}" required>
     <br>
 
     <label for="instagram_username">Instagram Username:</label>
-    <input type="text" id="instagram_username" name="instagram_username" value="{{ contact.instagram_username if contact else '' }}">
+    <input type="text" id="instagram_username" name="instagram_username" value="{{ user.instagram_username if contact else '' }}">
     <br>
 
     <label for="discord_username">Discord Username:</label>
-    <input type="text" id="discord_username" name="discord_username" value="{{ contact.discord_username if contact else '' }}">
+    <input type="text" id="discord_username" name="discord_username" value="{{ user.discord_username if contact else '' }}">
     <br>
 
     <button type="submit">Save</button>
@@ -20,9 +20,14 @@
 
 <div>
     {% if contact %}
-      <p><strong>Phone:</strong> {{ contact.phone_number }}</p>
-      <p><strong>Instagram:</strong> {{ contact.instagram_username or "N/A" }}</p>
-      <p><strong>Discord:</strong> {{ contact.discord_username or "N/A" }}</p>
+      <p><strong>Phone:</strong> {{ user.phone_number }}</p>
+      <p><strong>Instagram:</strong> {{ user.instagram_username or "N/A" }}</p>
+      <p><strong>Discord:</strong> {{ user.discord_username or "N/A" }}</p>
+      <p><strong>Username:</strong> {{ }}</p>
+      <p><strong>Email:</strong> {{  q}}</p>
+
+      <p><strong>Username:</strong> {{ user.username or "usr" }}</p>
+      <p><strong>Email:</strong> {{ user.email or "email" }}</p>
     {% else %}
       <p>No contact information available.</p>
     {% endif %}

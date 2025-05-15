@@ -13,6 +13,9 @@ class User(db.Model):
     email = db.Column(db.String(100), nullable=False)
     username = db.Column(db.String(12), nullable=False)
     password = db.Column(db.String(255), nullable=False)
+    phone_number = db.Column(db.String(15), nullable=False)
+    instagram_username = db.Column(db.String(50), nullable=True)
+    discord_username = db.Column(db.String(50), nullable=True)
 
 class JobPost(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -53,12 +56,3 @@ class Payment(db.Model):
     type = db.Column(db.String(50), nullable=False)         # e.g. "phone", "ic", etc.
     id_value = db.Column(db.String(100), nullable=False)      # e.g. the phone number, IC number, etc.
     date_added = db.Column(db.DateTime, default=datetime.utcnow)
-
-class Contact(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    phone_number = db.Column(db.String(15), nullable=False)
-    instagram_username = db.Column(db.String(50), nullable=True)
-    discord_username = db.Column(db.String(50), nullable=True)
-
-    user = db.relationship('User', backref=db.backref('contacts', lazy=True))

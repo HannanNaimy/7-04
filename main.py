@@ -2,7 +2,7 @@ import re, random
 from flask import Flask, redirect, url_for, render_template, flash, g, session, request
 from flask_mail import Mail, Message 
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User, JobPost, Payment, Contact
+from models import db, User, JobPost, Payment
 from config import Config
 
 app = Flask(__name__) 
