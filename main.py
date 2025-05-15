@@ -3,7 +3,7 @@ from flask import Flask, redirect, url_for, render_template, flash, g, session, 
 from flask_mail import Mail, Message 
 from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User, JobPost, Payment
+from models import db, User, JobPost, Payment, Contact
 from config import Config
 
 app = Flask(__name__) 
@@ -336,21 +336,55 @@ def createJobDisabled():
     flash("You have reached the maximum limit of 3 job listings.", "error")
     return redirect(url_for("lookingFor"))
 
-@app.route("/paymentmethods", methods=["GET", "POST"])
-def paymentMethods():
-    if request.method == "POST":
-        payment_type = request.form.get("type")
-        id_value = request.form.get("idValue")
+@app.route('/paymentmethods', methods=['GET', 'POST'])
+def payment_methods():
+    if request.method == 'POST':
+        # Get user inputs
+        phone = request.form.get('phone', '').strip()
+        ic = request.form.get('ic', '').strip()
+        account = request.form.get('account', '').strip()
+        business = request.form.get('business', '').strip()
 
-        # Save to DB
-        new_payment = Payment(type=payment_type, id_value=id_value)
-        db.session.add(new_payment)
-        db.session.commit()
+        # Validate that at least one field is filled
+        if not any([phone, ic, account, business]):
+            flash("Please enter at least one payment method.", "danger")
+            return redirect('/paymentmethods')
 
-        flash("Payment method saved successfully!", "success")
-        return redirect(url_for("paymentMethods"))
+        # Determine which field was filled
+        if phone:
+            payment_type = "Phone Number"
+            payment_value = phone
+        elif ic:
+            payment_type = "IC Number"
+            payment_value = ic
+        elif account:
+            payment_type = "Account Number"
+            payment_value = account
+        elif business:
+            payment_type = "Business Registration Number"
+            payment_value = business
 
-    return render_template("payment.html")
+        # Check for duplicate entries via the Payment table
+        duplicate = Payment.query.filter_by(id_value=payment_value).first()
+        if duplicate:
+            flash("This payment method already exists.", "warning")
+            return redirect('/paymentmethods')
+
+        # Save the new payment method in the database
+        new_payment = Payment(type=payment_type, id_value=payment_value)
+        try:
+            db.session.add(new_payment)
+            db.session.commit()
+            flash(f"{payment_type} added successfully!", "success")
+        except Exception as e:
+            db.session.rollback()
+            flash("An error occurred while saving your payment method.", "danger")
+        
+        return redirect('/paymentmethods')
+
+    # For a GET request, query the Payment table and pass the records to the template.
+    saved_payments = Payment.query.order_by(Payment.date_added.desc()).all()
+    return render_template("payment.html", saved_payments=saved_payments)
 
 # Take Job Function
 
@@ -449,12 +483,6 @@ def contacts():
         return redirect(url_for("contacts"))
 
     return render_template("contacts.html", contact=contact)
-
-
-
-
-
-
 
 
 
