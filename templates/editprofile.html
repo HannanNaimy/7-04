@@ -17,19 +17,5 @@
 
     <button type="submit">Save</button>
 </form>
-
-<div>
-    {% if contact %}
-      <p><strong>Phone:</strong> {{ user.phone_number }}</p>
-      <p><strong>Instagram:</strong> {{ user.instagram_username or "N/A" }}</p>
-      <p><strong>Discord:</strong> {{ user.discord_username or "N/A" }}</p>
-      <p><strong>Username:</strong> {{ }}</p>
-      <p><strong>Email:</strong> {{  q}}</p>
-
-      <p><strong>Username:</strong> {{ user.username or "usr" }}</p>
-      <p><strong>Email:</strong> {{ user.email or "email" }}</p>
-    {% else %}
-      <p>No contact information available.</p>
-    {% endif %}
-</div>
+ 
 {% endblock %}

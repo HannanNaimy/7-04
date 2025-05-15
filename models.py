@@ -13,7 +13,7 @@ class User(db.Model):
     email = db.Column(db.String(100), nullable=False)
     username = db.Column(db.String(12), nullable=False)
     password = db.Column(db.String(255), nullable=False)
-    phone_number = db.Column(db.String(15), nullable=False)
+    phone_number = db.Column(db.String(15), nullable=True)
     instagram_username = db.Column(db.String(50), nullable=True)
     discord_username = db.Column(db.String(50), nullable=True)
 
