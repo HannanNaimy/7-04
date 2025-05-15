@@ -447,8 +447,48 @@ def editProfile():
 
 @app.route("/changeUsername", methods=["GET", "POST"])
 def changeUsername():
-     return render_template(
-        "editprofile.html")
+    if not g.user:
+        flash("You must be logged in to change your username.", "error")
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+        new_username = request.form.get("username")
+        current_password = request.form.get("password")
+
+        # Verify the current password.
+        if not check_password_hash(g.user.password, current_password):
+            flash("Incorrect password. Please try again.", "error")
+            return redirect(url_for("changeUsername"))
+        
+        if len(new_username) < 4 or len(new_username) > 12:
+            flash("Username must be between 4 and 12 characters.", "error")
+            return redirect(url_for("changeUsername"))
+
+        # Ensure the new username is unique.
+        existing_user = User.query.filter_by(username=new_username).first()
+        if existing_user and existing_user.id != g.user.id:
+            flash("Username already in use. Please choose a different username.", "error")
+            return redirect(url_for("changeUsername"))
+
+        # Update the username.
+        g.user.username = new_username
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            flash("An error occurred while updating your username. Please try again.", "error")
+            return redirect(url_for("changeUsername"))
+
+        flash("Username updated successfully!", "success")
+        return redirect(url_for("editProfile"))
+
+    # For GET requests, render the edit profile page with existing details.
+    return render_template(
+        "editprofile.html",
+        phone_number=g.user.phone_number,
+        instagram_username=g.user.instagram_username,
+        discord_username=g.user.discord_username
+    )
 
 if __name__ == "__main__":
     app.run(debug=True)

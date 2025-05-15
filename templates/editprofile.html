@@ -111,12 +111,27 @@
     <div class="card-body">
       <form method="POST" action="{{ url_for('changeUsername') }}">
         <div class="mb-3">
-          <label for="username" class="form-label">New Username</label>
-          <input type="text" class="form-control" id="username" name="username" placeholder="Enter new username" required>
+            <label for="username" class="form-label">New Username</label>
+            <input type="text" 
+                class="form-control" 
+                id="username" 
+                name="username" 
+                placeholder="Enter new username: 4-12 characters" 
+                required 
+                minlength="4" 
+                maxlength="12"
+                oninvalid="this.setCustomValidity('Username must be between 4 and 12 characters.')"
+                oninput="this.setCustomValidity('')">
         </div>
+
         <div class="mb-3">
           <label for="password" class="form-label">Current Password</label>
-          <input type="password" class="form-control" id="password" name="password" placeholder="Enter your current password" required>
+          <input type="password" 
+                 class="form-control" 
+                 id="password" 
+                 name="password" 
+                 placeholder="Enter your current password" 
+                 required>
         </div>
         <button type="submit" class="btn btn-primary">Change Username</button>
       </form>
@@ -132,15 +147,28 @@
       <form method="POST" action="{{ url_for('editProfile') }}">
         <div class="mb-3">
           <label for="phone_number" class="form-label">Phone Number</label>
-          <input type="text" class="form-control" id="phone_number" name="phone_number" value="{{ phone_number or '' }}" required>
+          <input type="text" 
+                 class="form-control" 
+                 id="phone_number" 
+                 name="phone_number" 
+                 value="{{ phone_number or '' }}" 
+                 required>
         </div>
         <div class="mb-3">
           <label for="instagram_username" class="form-label">Instagram Username</label>
-          <input type="text" class="form-control" id="instagram_username" name="instagram_username" value="{{ instagram_username or '' }}">
+          <input type="text" 
+                 class="form-control" 
+                 id="instagram_username" 
+                 name="instagram_username" 
+                 value="{{ instagram_username or '' }}">
         </div>
         <div class="mb-3">
           <label for="discord_username" class="form-label">Discord Username</label>
-          <input type="text" class="form-control" id="discord_username" name="discord_username" value="{{ discord_username or '' }}">
+          <input type="text" 
+                 class="form-control" 
+                 id="discord_username" 
+                 name="discord_username" 
+                 value="{{ discord_username or '' }}">
         </div>
         <button type="submit" class="btn btn-success">Save Changes</button>
       </form>
