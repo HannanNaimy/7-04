@@ -1,4 +1,4 @@
-import re, random
+import random
 from flask import Flask, redirect, url_for, render_template, flash, g, session, request
 from flask_mail import Mail, Message 
 from flask_migrate import Migrate
