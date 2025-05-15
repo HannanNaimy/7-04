@@ -415,7 +415,7 @@ def logout():
     return redirect(url_for("guest"))  
 
 @app.route("/editProfile", methods=["GET", "POST"])
-def contacts():
+def editProfile():
     if not g.user:
         flash("You must be logged in to view this page.", "error")
         return redirect(url_for("login"))
@@ -434,10 +434,8 @@ def contacts():
         # Commit the updates to the database
         db.session.commit()
         flash("Contact information updated successfully!", "success")
-        return redirect(url_for("contacts"))
-
-    # Render the template with all the required details.
-    # You can pass the entire user object or supply individual fields.
+        return redirect(url_for("editProfile"))
+    
     return render_template(
         "editprofile.html",
         usr=g.user.username,
@@ -447,15 +445,10 @@ def contacts():
         discord_username=g.user.discord_username
     )
 
-
-
-
-
-
-
-
-
-
+@app.route("/changeUsername", methods=["GET", "POST"])
+def changeUsername():
+     return render_template(
+        "editprofile.html")
 
 if __name__ == "__main__":
     app.run(debug=True)
