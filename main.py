@@ -344,27 +344,27 @@ def jobStatus(job_id):
     if not job:
         flash("Job not found.", "error")
         return redirect(url_for("profile", usr=g.user.username))
-         
-    # Only creator or taker is allowed to update/view.
+    
+    # Only allow creator or taker to update/view.
     if g.user.id != job.user_id and g.user.id != job.taken_by:
         flash("You are not authorized to update the job status.", "error")
         return redirect(url_for("profile", usr=g.user.username))
     
     if request.method == "POST":
-        # If the job is already marked as complete, prevent undo and redirect.
+        # If job is already complete, do not allow toggling confirmation.
         if job.creator_confirmed and job.taker_confirmed:
-            flash("Job already marked as complete!", "success")
+            flash("Job is already marked as complete. Confirmation cannot be undone.", "error")
             return redirect(url_for("profile", usr=g.user.username))
 
-        # Otherwise, allow updating the confirmation flag.
+        # Toggle the confirmation flag for the correct user.
         if g.user.id == job.user_id:
-            job.creator_confirmed = True  # Prevent toggle, always set to True
+            job.creator_confirmed = not job.creator_confirmed
         elif g.user.id == job.taken_by:
-            job.taker_confirmed = True  # Prevent toggle, always set to True
+            job.taker_confirmed = not job.taker_confirmed
 
         db.session.commit()
         
-        # Check if both confirmations are in place
+        # Check if both confirmations are now set.
         if job.creator_confirmed and job.taker_confirmed:
             flash("Job marked as complete!", "success")
             return redirect(url_for("profile", usr=g.user.username))
@@ -375,7 +375,6 @@ def jobStatus(job_id):
     
     # GET request: simply render the job status page.
     return render_template("jobstatus.html", job=job)
-
 
 # Offering To Page
 
