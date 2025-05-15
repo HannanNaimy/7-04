@@ -15,6 +15,7 @@ class JobPost(db.Model):
     description = db.Column(db.Text, nullable=False)
     commission = db.Column(db.Float, nullable=False)
     on_demand = db.Column(db.Boolean, nullable=False, default=False)
+    taken = db.Column(db.Boolean, default=False)  # Added column
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User', backref=db.backref('job_posts', lazy=True))
 
