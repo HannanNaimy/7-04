@@ -475,33 +475,6 @@ def set_main(payment_id):
         flash("An error occurred while setting the payment method as main.", "danger")
     return redirect("/editpaymentmethods")
 
-# Take Job Function
-
-@app.route("/take/<int:job_id>", methods=["POST"])
-def take_job(job_id):
-    if not g.user:
-        flash("You must be logged in to take a job.", "error")
-        return redirect(url_for("login"))
-    
-    job = JobPost.query.get_or_404(job_id)
-    
-    # Prevent the posting user from taking the job.
-    if job.creator.id == g.user.id:
-        flash("You cannot take your own job.", "error")
-        return redirect(url_for("post_details", job_id=job_id))
-    
-    # Check if the job is already taken:
-    if job.taken:
-        flash("This job has already been taken.", "error")
-        return redirect(url_for("lookingFor"))
-    
-    # Mark the job as taken.
-    job.taken = True
-    job.taken_by = g.user.id
-    db.session.commit()
-    
-    flash("Job taken successfully. The listing has been removed.", "success")
-    return redirect(url_for("lookingFor"))
 
 # Take Job Function
 
