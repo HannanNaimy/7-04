@@ -1,10 +1,10 @@
-import random
+import re, random
 from sqlalchemy import or_
 from flask import Flask, redirect, url_for, render_template, flash, g, session, request
-from flask_mail import Mail, Message 
-from flask_migrate import Migrate
+from flask_mail import Mail, Message
+from flask_migrate import Migrate 
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User, JobPost, Payment, Contact
+from models import db, User, JobPost, Payment
 from config import Config
 
 app = Flask(__name__) 
@@ -541,41 +541,81 @@ def logout():
     flash("You have been logged out.", "success")
     return redirect(url_for("guest"))  
 
-@app.route("/contacts", methods=["GET", "POST"])
-def contacts():
+@app.route("/editProfile", methods=["GET", "POST"])
+def editProfile():
     if not g.user:
         flash("You must be logged in to view this page.", "error")
         return redirect(url_for("login"))
 
-    # Retrieve existing contact information for the logged-in user
-    contact = Contact.query.filter_by(user_id=g.user.id).first()
-
     if request.method == "POST":
+        # Retrieve new contact details from the form
         phone_number = request.form.get("phone_number")
         instagram_username = request.form.get("instagram_username")
         discord_username = request.form.get("discord_username")
 
-        # If contact already exists, update it
-        if contact:
-            contact.phone_number = phone_number
-            contact.instagram_username = instagram_username
-            contact.discord_username = discord_username
-            flash("Contact information updated successfully!", "success")
-        else:
-            # If no contact exists, create a new one
-            new_contact = Contact(
-                user_id=g.user.id,
-                phone_number=phone_number,
-                instagram_username=instagram_username,
-                discord_username=discord_username
-            )
-            db.session.add(new_contact)
-            flash("Contact information saved successfully!", "success")
-        
-        db.session.commit()
-        return redirect(url_for("contacts"))
+        # Update the user table by setting new values on g.user
+        g.user.phone_number = phone_number
+        g.user.instagram_username = instagram_username
+        g.user.discord_username = discord_username
 
-    return render_template("contacts.html", contact=contact)
+        # Commit the updates to the database
+        db.session.commit()
+        flash("Contact information updated successfully!", "success")
+        return redirect(url_for("editProfile"))
+    
+    return render_template(
+        "editprofile.html",
+        usr=g.user.username,
+        email=g.user.email,
+        phone_number=g.user.phone_number,
+        instagram_username=g.user.instagram_username,
+        discord_username=g.user.discord_username
+    )
+
+@app.route("/changeUsername", methods=["GET", "POST"])
+def changeUsername():
+    if not g.user:
+        flash("You must be logged in to change your username.", "error")
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+        new_username = request.form.get("username")
+        current_password = request.form.get("password")
+
+        # Verify the current password.
+        if not check_password_hash(g.user.password, current_password):
+            flash("Incorrect password. Please try again.", "error")
+            return redirect(url_for("changeUsername"))
+        
+        if len(new_username) < 4 or len(new_username) > 12:
+            flash("Username must be between 4 and 12 characters.", "error")
+            return redirect(url_for("changeUsername"))
+
+        # Ensure the new username is unique.
+        existing_user = User.query.filter_by(username=new_username).first()
+        if existing_user and existing_user.id != g.user.id:
+            flash("Username already in use. Please choose a different username.", "error")
+            return redirect(url_for("changeUsername"))
+
+        # Update the username.
+        g.user.username = new_username
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            flash("An error occurred while updating your username. Please try again.", "error")
+            return redirect(url_for("changeUsername"))
+
+        flash("Username updated successfully!", "success")
+        return redirect(url_for("editProfile"))
+
+    # For GET requests, render the edit profile page with existing details.
+    return render_template(
+        "editprofile.html",
+        phone_number=g.user.phone_number,
+        instagram_username=g.user.instagram_username,
+        discord_username=g.user.discord_username
+    )
 
 if __name__ == "__main__":
     app.run(debug=True)
