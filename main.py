@@ -1,4 +1,5 @@
-import re, random
+import random
+from sqlalchemy import or_
 from flask import Flask, redirect, url_for, render_template, flash, g, session, request
 from flask_mail import Mail, Message 
 from flask_migrate import Migrate
@@ -217,6 +218,7 @@ def newPassword():
 
 
 # Profile Page
+
 @app.route("/profile/<usr>", methods=["GET"])
 def profile(usr):
     if "user_id" not in session:
@@ -229,25 +231,49 @@ def profile(usr):
         return redirect(url_for("login"))
 
     if user.id == session.get("user_id"):
-        # Listed posts: jobs created by you that are still available.
+        # Listed posts: jobs created by you and still available.
         listed_jobs = JobPost.query.filter_by(user_id=user.id, taken=False).all()
-        # Ongoing posts - Created by You: jobs that you posted and have been taken.
-        ongoing_created_jobs = JobPost.query.filter_by(user_id=user.id, taken=True).all()
-        # Ongoing posts - Taken by You: jobs that have been taken by you (but not created by you).
+
+        # Ongoing jobs: taken but not completed (i.e. either confirmation flag is not True)
+        ongoing_created_jobs = JobPost.query.filter(
+            JobPost.user_id == user.id,
+            JobPost.taken == True,
+            or_(JobPost.creator_confirmed != True, JobPost.taker_confirmed != True)
+        ).all()
+
         ongoing_taken_jobs = JobPost.query.filter(
             JobPost.taken == True,
             JobPost.taken_by == user.id,
-            JobPost.user_id != user.id  # Ensures you are not the creator
+            JobPost.user_id != user.id,  # Ensures you are not the creator
+            or_(JobPost.creator_confirmed != True, JobPost.taker_confirmed != True)
         ).all()
+
+        # Completed jobs: job is complete if both confirmations are True.
+        completed_created_jobs = JobPost.query.filter(
+            JobPost.user_id == user.id,
+            JobPost.taken == True,
+            JobPost.creator_confirmed == True,
+            JobPost.taker_confirmed == True
+        ).all()
+
+        completed_taken_jobs = JobPost.query.filter(
+            JobPost.taken == True,
+            JobPost.taken_by == user.id,
+            JobPost.user_id != user.id,
+            JobPost.creator_confirmed == True,
+            JobPost.taker_confirmed == True
+        ).all()
+
         return render_template("ownerprofile.html",
                                usr=user.username,
                                email=user.email,
                                listed_jobs=listed_jobs,
                                ongoing_created_jobs=ongoing_created_jobs,
-                               ongoing_taken_jobs=ongoing_taken_jobs)
+                               ongoing_taken_jobs=ongoing_taken_jobs,
+                               completed_created_jobs=completed_created_jobs,
+                               completed_taken_jobs=completed_taken_jobs)
     else:
         return render_template("profile.html", usr=user.username, email=user.email)
-
 
 # Looking For Page
 
@@ -306,13 +332,49 @@ def lookingFor():
     return render_template("lookingfor.html", jobs=jobs, job_count=job_count, 
                            on_demand_jobs=on_demand_jobs, listing_jobs=listing_jobs) 
 
-@app.route("/jobstatus", methods=["POST"])
-def jobStatus():
+# Job Status Page   
+@app.route("/jobStatus/<int:job_id>", methods=["GET", "POST"])
+def jobStatus(job_id):
     if not g.user:
         flash("You must be logged in to view this page.", "error")
         return redirect(url_for("login"))
     
-    return render_template("jobstatus.html")
+    job = JobPost.query.get(job_id)
+    if not job:
+        flash("Job not found.", "error")
+        return redirect(url_for("profile", usr=g.user.username))
+    
+    # Only allow creator or taker to update/view.
+    if g.user.id != job.user_id and g.user.id != job.taken_by:
+        flash("You are not authorized to update the job status.", "error")
+        return redirect(url_for("profile", usr=g.user.username))
+    
+    if request.method == "POST":
+        # If job is already complete, do not allow toggling confirmation.
+        if job.creator_confirmed and job.taker_confirmed:
+            flash("Job is already marked as complete. Confirmation cannot be undone.", "error")
+            return redirect(url_for("profile", usr=g.user.username))
+
+        # Toggle the confirmation flag for the correct user.
+        if g.user.id == job.user_id:
+            job.creator_confirmed = not job.creator_confirmed
+        elif g.user.id == job.taken_by:
+            job.taker_confirmed = not job.taker_confirmed
+
+        db.session.commit()
+        
+        # Check if both confirmations are now set.
+        if job.creator_confirmed and job.taker_confirmed:
+            flash("Job marked as complete!", "success")
+            return redirect(url_for("profile", usr=g.user.username))
+        else:
+            total = int(job.creator_confirmed or 0) + int(job.taker_confirmed or 0)
+            flash(f"Job confirmation updated: {total}/2", "info")
+            return redirect(url_for("jobStatus", job_id=job_id))
+    
+    # GET request: simply render the job status page.
+    return render_template("jobstatus.html", job=job)
+
 # Offering To Page
 
 # History Page
