@@ -451,6 +451,30 @@ def editpayment_methods():
     saved_payments = Payment.query.order_by(Payment.date_added.desc()).all()
     return render_template("payment.html", saved_payments=saved_payments)
 
+
+#Set Main Payment
+
+@app.route('/setmain/<int:payment_id>', methods=['POST'])
+def set_main(payment_id):
+    payment_to_set = Payment.query.get(payment_id)
+    if not payment_to_set:
+        flash("Payment method not found.", "danger")
+        return redirect("/editpaymentmethods")
+    
+    # For this example, only one saved payment method will be set as main overall.
+    # Reset all methods' is_main flag.
+    for p in Payment.query.all():
+        p.is_main = False
+    payment_to_set.is_main = True
+
+    try:
+        db.session.commit()
+        flash(f"{payment_to_set.type} set as main successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash("An error occurred while setting the payment method as main.", "danger")
+    return redirect("/editpaymentmethods")
+
 # Take Job Function
 
 @app.route("/take/<int:job_id>", methods=["POST"])
