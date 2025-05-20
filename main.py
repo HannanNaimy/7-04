@@ -1,9 +1,10 @@
 import re, random
+from sqlalchemy import or_
 from flask import Flask, redirect, url_for, render_template, flash, g, session, request
-from flask_mail import Mail, Message 
-from flask_migrate import Migrate
+from flask_mail import Mail, Message
+from flask_migrate import Migrate 
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User, JobPost, Payment, Contact
+from models import db, User, JobPost, Payment
 from config import Config
 
 app = Flask(__name__) 
@@ -217,6 +218,7 @@ def newPassword():
 
 
 # Profile Page
+
 @app.route("/profile/<usr>", methods=["GET"])
 def profile(usr):
     if "user_id" not in session:
@@ -229,25 +231,49 @@ def profile(usr):
         return redirect(url_for("login"))
 
     if user.id == session.get("user_id"):
-        # Listed posts: jobs created by you that are still available.
+        # Listed posts: jobs created by you and still available.
         listed_jobs = JobPost.query.filter_by(user_id=user.id, taken=False).all()
-        # Ongoing posts - Created by You: jobs that you posted and have been taken.
-        ongoing_created_jobs = JobPost.query.filter_by(user_id=user.id, taken=True).all()
-        # Ongoing posts - Taken by You: jobs that have been taken by you (but not created by you).
+
+        # Ongoing jobs: taken but not completed (i.e. either confirmation flag is not True)
+        ongoing_created_jobs = JobPost.query.filter(
+            JobPost.user_id == user.id,
+            JobPost.taken == True,
+            or_(JobPost.creator_confirmed != True, JobPost.taker_confirmed != True)
+        ).all()
+
         ongoing_taken_jobs = JobPost.query.filter(
             JobPost.taken == True,
             JobPost.taken_by == user.id,
-            JobPost.user_id != user.id  # Ensures you are not the creator
+            JobPost.user_id != user.id,  # Ensures you are not the creator
+            or_(JobPost.creator_confirmed != True, JobPost.taker_confirmed != True)
         ).all()
+
+        # Completed jobs: job is complete if both confirmations are True.
+        completed_created_jobs = JobPost.query.filter(
+            JobPost.user_id == user.id,
+            JobPost.taken == True,
+            JobPost.creator_confirmed == True,
+            JobPost.taker_confirmed == True
+        ).all()
+
+        completed_taken_jobs = JobPost.query.filter(
+            JobPost.taken == True,
+            JobPost.taken_by == user.id,
+            JobPost.user_id != user.id,
+            JobPost.creator_confirmed == True,
+            JobPost.taker_confirmed == True
+        ).all()
+
         return render_template("ownerprofile.html",
                                usr=user.username,
                                email=user.email,
                                listed_jobs=listed_jobs,
                                ongoing_created_jobs=ongoing_created_jobs,
-                               ongoing_taken_jobs=ongoing_taken_jobs)
+                               ongoing_taken_jobs=ongoing_taken_jobs,
+                               completed_created_jobs=completed_created_jobs,
+                               completed_taken_jobs=completed_taken_jobs)
     else:
         return render_template("profile.html", usr=user.username, email=user.email)
-
 
 # Looking For Page
 
@@ -306,16 +332,49 @@ def lookingFor():
     return render_template("lookingfor.html", jobs=jobs, job_count=job_count, 
                            on_demand_jobs=on_demand_jobs, listing_jobs=listing_jobs) 
 
-
-# Job Status Page
-
-@app.route("/jobstatus", methods=["POST"])
-def jobStatus():
+# Job Status Page   
+@app.route("/jobStatus/<int:job_id>", methods=["GET", "POST"])
+def jobStatus(job_id):
     if not g.user:
         flash("You must be logged in to view this page.", "error")
         return redirect(url_for("login"))
     
-    return render_template("jobstatus.html")
+    job = JobPost.query.get(job_id)
+    if not job:
+        flash("Job not found.", "error")
+        return redirect(url_for("profile", usr=g.user.username))
+    
+    # Only allow creator or taker to update/view.
+    if g.user.id != job.user_id and g.user.id != job.taken_by:
+        flash("You are not authorized to update the job status.", "error")
+        return redirect(url_for("profile", usr=g.user.username))
+    
+    if request.method == "POST":
+        # If job is already complete, do not allow toggling confirmation.
+        if job.creator_confirmed and job.taker_confirmed:
+            flash("Job is already marked as complete. Confirmation cannot be undone.", "error")
+            return redirect(url_for("profile", usr=g.user.username))
+
+        # Toggle the confirmation flag for the correct user.
+        if g.user.id == job.user_id:
+            job.creator_confirmed = not job.creator_confirmed
+        elif g.user.id == job.taken_by:
+            job.taker_confirmed = not job.taker_confirmed
+
+        db.session.commit()
+        
+        # Check if both confirmations are now set.
+        if job.creator_confirmed and job.taker_confirmed:
+            flash("Job marked as complete!", "success")
+            return redirect(url_for("profile", usr=g.user.username))
+        else:
+            total = int(job.creator_confirmed or 0) + int(job.taker_confirmed or 0)
+            flash(f"Job confirmation updated: {total}/2", "info")
+            return redirect(url_for("jobStatus", job_id=job_id))
+    
+    # GET request: simply render the job status page.
+    return render_template("jobstatus.html", job=job)
+
 # Offering To Page
 
 # History Page
@@ -336,21 +395,86 @@ def createJobDisabled():
     flash("You have reached the maximum limit of 3 job listings.", "error")
     return redirect(url_for("lookingFor"))
 
-@app.route("/paymentmethods", methods=["GET", "POST"])
-def paymentMethods():
-    if request.method == "POST":
-        payment_type = request.form.get("type")
-        id_value = request.form.get("idValue")
+@app.route('/editpaymentmethods', methods=['GET', 'POST'])
+def editpayment_methods():
+    if request.method == 'POST':
+        # Get user inputs for all payment types
+        phone = request.form.get('phone', '').strip()
+        ic = request.form.get('ic', '').strip()
+        account = request.form.get('account', '').strip()
+        business = request.form.get('business', '').strip()
 
-        # Save to DB
-        new_payment = Payment(type=payment_type, id_value=id_value)
-        db.session.add(new_payment)
+        # Validate that at least one field is filled
+        if not any([phone, ic, account, business]):
+            flash("Please enter at least one payment method.", "danger")
+            return redirect("/editpaymentmethods")
+
+        messages = []  # To collect status messages for each type
+
+        # Dictionary mapping each payment type to its corresponding input
+        data = {
+            "Phone Number": phone,
+            "IC Number": ic,
+            "Account Number": account,
+            "Business Registration Number": business
+        }
+
+        for ptype, value in data.items():
+            if value:  # Process the field if it is not empty
+                # Query the Payment table for a record of this type
+                existing = Payment.query.filter_by(type=ptype).first()
+                if existing:
+                    # If the record exists and its number is the same, no change is needed.
+                    if existing.id_value == value:
+                        messages.append(f"{ptype} is already set to that value; no change made.")
+                    else:
+                        # Update the existing record
+                        existing.id_value = value
+                        messages.append(f"{ptype} updated successfully!")
+                else:
+                    # No record exists, so create a new payment method
+                    new_payment = Payment(type=ptype, id_value=value)
+                    db.session.add(new_payment)
+                    messages.append(f"{ptype} added successfully!")
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            flash("An error occurred while saving your payment method(s).", "danger")
+            return redirect("/editpaymentmethods")
+
+        # Combine all messages into one success flash
+        flash(" ".join(messages), "success")
+        return redirect("/editpaymentmethods")
+
+    # For a GET request, retrieve all payment method records, ordered by date added
+    saved_payments = Payment.query.order_by(Payment.date_added.desc()).all()
+    return render_template("payment.html", saved_payments=saved_payments)
+
+
+#Set Main Payment
+
+@app.route('/setmain/<int:payment_id>', methods=['POST'])
+def set_main(payment_id):
+    payment_to_set = Payment.query.get(payment_id)
+    if not payment_to_set:
+        flash("Payment method not found.", "danger")
+        return redirect("/editpaymentmethods")
+    
+    # For this example, only one saved payment method will be set as main overall.
+    # Reset all methods' is_main flag.
+    for p in Payment.query.all():
+        p.is_main = False
+    payment_to_set.is_main = True
+
+    try:
         db.session.commit()
+        flash(f"{payment_to_set.type} set as main successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash("An error occurred while setting the payment method as main.", "danger")
+    return redirect("/editpaymentmethods")
 
-        flash("Payment method saved successfully!", "success")
-        return redirect(url_for("paymentMethods"))
-
-    return render_template("payment.html")
 
 # Take Job Function
 
@@ -414,50 +538,81 @@ def logout():
     flash("You have been logged out.", "success")
     return redirect(url_for("guest"))  
 
-@app.route("/contacts", methods=["GET", "POST"])
-def contacts():
+@app.route("/editProfile", methods=["GET", "POST"])
+def editProfile():
     if not g.user:
         flash("You must be logged in to view this page.", "error")
         return redirect(url_for("login"))
 
-    # Retrieve existing contact information for the logged-in user
-    contact = Contact.query.filter_by(user_id=g.user.id).first()
-
     if request.method == "POST":
+        # Retrieve new contact details from the form
         phone_number = request.form.get("phone_number")
         instagram_username = request.form.get("instagram_username")
         discord_username = request.form.get("discord_username")
 
-        # If contact already exists, update it
-        if contact:
-            contact.phone_number = phone_number
-            contact.instagram_username = instagram_username
-            contact.discord_username = discord_username
-            flash("Contact information updated successfully!", "success")
-        else:
-            # If no contact exists, create a new one
-            new_contact = Contact(
-                user_id=g.user.id,
-                phone_number=phone_number,
-                instagram_username=instagram_username,
-                discord_username=discord_username
-            )
-            db.session.add(new_contact)
-            flash("Contact information saved successfully!", "success")
-        
+        # Update the user table by setting new values on g.user
+        g.user.phone_number = phone_number
+        g.user.instagram_username = instagram_username
+        g.user.discord_username = discord_username
+
+        # Commit the updates to the database
         db.session.commit()
-        return redirect(url_for("contacts"))
+        flash("Contact information updated successfully!", "success")
+        return redirect(url_for("editProfile"))
+    
+    return render_template(
+        "editprofile.html",
+        usr=g.user.username,
+        email=g.user.email,
+        phone_number=g.user.phone_number,
+        instagram_username=g.user.instagram_username,
+        discord_username=g.user.discord_username
+    )
 
-    return render_template("contacts.html", contact=contact)
+@app.route("/changeUsername", methods=["GET", "POST"])
+def changeUsername():
+    if not g.user:
+        flash("You must be logged in to change your username.", "error")
+        return redirect(url_for("login"))
 
+    if request.method == "POST":
+        new_username = request.form.get("username")
+        current_password = request.form.get("password")
 
+        # Verify the current password.
+        if not check_password_hash(g.user.password, current_password):
+            flash("Incorrect password. Please try again.", "error")
+            return redirect(url_for("changeUsername"))
+        
+        if len(new_username) < 4 or len(new_username) > 12:
+            flash("Username must be between 4 and 12 characters.", "error")
+            return redirect(url_for("changeUsername"))
 
+        # Ensure the new username is unique.
+        existing_user = User.query.filter_by(username=new_username).first()
+        if existing_user and existing_user.id != g.user.id:
+            flash("Username already in use. Please choose a different username.", "error")
+            return redirect(url_for("changeUsername"))
 
+        # Update the username.
+        g.user.username = new_username
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            flash("An error occurred while updating your username. Please try again.", "error")
+            return redirect(url_for("changeUsername"))
 
+        flash("Username updated successfully!", "success")
+        return redirect(url_for("editProfile"))
 
-
-
-
+    # For GET requests, render the edit profile page with existing details.
+    return render_template(
+        "editprofile.html",
+        phone_number=g.user.phone_number,
+        instagram_username=g.user.instagram_username,
+        discord_username=g.user.discord_username
+    )
 
 if __name__ == "__main__":
     app.run(debug=True)

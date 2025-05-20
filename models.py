@@ -13,6 +13,9 @@ class User(db.Model):
     email = db.Column(db.String(100), nullable=False)
     username = db.Column(db.String(12), nullable=False)
     password = db.Column(db.String(255), nullable=False)
+    phone_number = db.Column(db.String(15), nullable=True)
+    instagram_username = db.Column(db.String(50), nullable=True)
+    discord_username = db.Column(db.String(50), nullable=True)
 
 class JobPost(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -24,41 +27,25 @@ class JobPost(db.Model):
     
     # Indicates if the job has been taken:
     taken = db.Column(db.Boolean, default=False)
-    taken_by = db.Column(
-        db.Integer, 
-        db.ForeignKey('user.id', name="fk_jobpost_taken_by"),
-        nullable=True
-    )
-    user_id = db.Column(
-        db.Integer, 
-        db.ForeignKey('user.id', name="fk_jobpost_user"), 
-        nullable=False
-    )
+    taken_by = db.Column(db.Integer, db.ForeignKey('user.id', name="fk_jobpost_taken_by"), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', name="fk_jobpost_user"), nullable=False)
     
-    # Relationship for the job creator (poster)
-    creator = db.relationship(
-        'User', 
-        foreign_keys=[user_id],
-        backref=db.backref('job_posts', lazy=True)
-    )
-    # Relationship for the job taker
-    taker = db.relationship(
-        'User',
-        foreign_keys=[taken_by],
-        post_update=True
-    )
+    # Relationships
+    creator = db.relationship('User', foreign_keys=[user_id], backref=db.backref('job_posts', lazy=True))
+    taker = db.relationship('User', foreign_keys=[taken_by], post_update=True)
+    
+    # Added confirmation flags:
+    creator_confirmed = db.Column(db.Boolean, default=False)
+    taker_confirmed = db.Column(db.Boolean, default=False)
+    
+    @property
+    def is_complete(self):
+        """Job is complete only when both the creator and the taker have confirmed."""
+        return self.creator_confirmed and self.taker_confirmed
 
 class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.String(50), nullable=False)         # e.g. "phone", "ic", etc.
-    id_value = db.Column(db.String(100), nullable=False)      # e.g. the phone number, IC number, etc.
+    type = db.Column(db.String(50), nullable=False)  # e.g. "Phone Number", "IC Number", etc.
+    id_value = db.Column(db.String(100), nullable=False)
+    is_main = db.Column(db.Boolean, default=False)  # Marks if this record is the main payment method
     date_added = db.Column(db.DateTime, default=datetime.utcnow)
-
-class Contact(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    phone_number = db.Column(db.String(15), nullable=False)
-    instagram_username = db.Column(db.String(50), nullable=True)
-    discord_username = db.Column(db.String(50), nullable=True)
-
-    user = db.relationship('User', backref=db.backref('contacts', lazy=True))

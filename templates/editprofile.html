@@ -1,0 +1,178 @@
+{% extends "homeparent.html" %}
+
+{% block styles %}
+  /* Container styling */
+  .container {
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 0 15px;
+  }
+
+  h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+  }
+
+  hr {
+    border: 0;
+    height: 1px;
+    background: #e0e0e0;
+    margin-bottom: 30px;
+  }
+
+  /* Card styling */
+  .card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: none;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    background-color: #fff;
+  }
+
+  .card-header {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    padding: 15px 20px;
+    border-bottom: 1px solid #e0e0e0;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+  }
+
+  .card-body {
+    padding: 20px;
+  }
+
+  /* Form element styling */
+  .form-label {
+    font-weight: 500;
+    margin-bottom: 5px;
+  }
+
+  .form-control {
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    padding: 10px 12px;
+  }
+
+  .form-control:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+    border-color: #80bdff;
+  }
+
+  /* Button styling */
+  .btn {
+    min-width: 140px;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+  }
+
+  .btn-primary {
+    background-color: #007bff;
+    border: none;
+  }
+
+  .btn-primary:hover {
+    background-color: #0069d9;
+  }
+
+  .btn-success {
+    background-color: #28a745;
+    border: none;
+  }
+
+  .btn-success:hover {
+    background-color: #218838;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 576px) {
+    .container {
+      padding: 0 10px;
+    }
+  }
+
+{% endblock %}
+ 
+{% block content %}
+<div class="container mt-4">
+  <h1>Edit Profile</h1>
+  <hr>
+
+  <!-- Change Username Section -->
+  <div class="card mb-4">   
+    <div class="card-header">
+      Change Username
+    </div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('changeUsername') }}">
+        <div class="mb-3">
+            <label for="username" class="form-label">New Username</label>
+            <input type="text" 
+                class="form-control" 
+                id="username" 
+                name="username" 
+                placeholder="Enter new username: 4-12 characters" 
+                required 
+                minlength="4" 
+                maxlength="12"
+                oninvalid="this.setCustomValidity('Username must be between 4 and 12 characters.')"
+                oninput="this.setCustomValidity('')">
+        </div>
+
+        <div class="mb-3">
+          <label for="password" class="form-label">Current Password</label>
+          <input type="password" 
+                 class="form-control" 
+                 id="password" 
+                 name="password" 
+                 placeholder="Enter your current password" 
+                 required>
+        </div>
+        <button type="submit" class="btn btn-primary">Change Username</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Update Contact Information Section -->
+  <div class="card">
+    <div class="card-header">
+      Update Contact Information
+    </div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('editProfile') }}">
+        <div class="mb-3">
+          <label for="phone_number" class="form-label">Phone Number</label>
+          <input type="text" 
+                 class="form-control" 
+                 id="phone_number" 
+                 name="phone_number" 
+                 value="{{ phone_number or '' }}" 
+                 required>
+        </div>
+        <div class="mb-3">
+          <label for="instagram_username" class="form-label">Instagram Username</label>
+          <input type="text" 
+                 class="form-control" 
+                 id="instagram_username" 
+                 name="instagram_username" 
+                 value="{{ instagram_username or '' }}">
+        </div>
+        <div class="mb-3">
+          <label for="discord_username" class="form-label">Discord Username</label>
+          <input type="text" 
+                 class="form-control" 
+                 id="discord_username" 
+                 name="discord_username" 
+                 value="{{ discord_username or '' }}">
+        </div>
+        <button type="submit" class="btn btn-success">Save Changes</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
