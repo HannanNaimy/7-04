@@ -1,5 +1,13 @@
 {% extends "homeparent.html" %}
 
+{% block meta %}
+  {{ super() }}
+  {# Only add meta refresh if the job is still incomplete #}
+  {% if not (job.creator_confirmed and job.taker_confirmed) %}
+    <meta http-equiv="refresh" content="2">
+  {% endif %}
+{% endblock %}
+
 {% block content %}
 <div class="job-details-container">
   <header class="job-header">
@@ -16,12 +24,16 @@
       Commission: RM{{ job.commission }}
     </p>
 
-    <!-- Button for toggling confirmation (no number cap in label) -->
+    <!-- Confirmation button with prompt. Once confirmed it cannot be undone. -->
     <form action="{{ url_for('jobStatus', job_id=job.id) }}" method="POST">
       {% if (g.user.id == job.user_id and job.creator_confirmed) or (g.user.id == job.taken_by and job.taker_confirmed) %}
-        <button class="job-take-button" type="submit">Undo Confirmation</button>
+        <button class="job-take-button" type="submit" disabled>Confirmed</button>
       {% else %}
-        <button class="job-take-button" type="submit">Confirm</button>
+        <button class="job-take-button"
+                type="submit"
+                onclick="return confirm('Are you sure? Once confirmed it cannot be undone');">
+          Confirm
+        </button>
       {% endif %}
     </form>
     

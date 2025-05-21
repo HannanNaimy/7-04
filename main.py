@@ -1,6 +1,6 @@
 import re, random
 from sqlalchemy import or_
-from flask import Flask, redirect, url_for, render_template, flash, g, session, request
+from flask import Flask, redirect, url_for, render_template, flash, make_response, g, session, request
 from flask_mail import Mail, Message
 from flask_migrate import Migrate 
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -344,26 +344,26 @@ def jobStatus(job_id):
         flash("Job not found.", "error")
         return redirect(url_for("profile", usr=g.user.username))
     
-    # Only allow creator or taker to update/view.
+    # Only allow creator or taker.
     if g.user.id != job.user_id and g.user.id != job.taken_by:
         flash("You are not authorized to update the job status.", "error")
         return redirect(url_for("profile", usr=g.user.username))
     
     if request.method == "POST":
-        # If job is already complete, do not allow toggling confirmation.
+        # Do not allow changes if job is already complete.
         if job.creator_confirmed and job.taker_confirmed:
             flash("Job is already marked as complete. Confirmation cannot be undone.", "error")
             return redirect(url_for("profile", usr=g.user.username))
-
-        # Toggle the confirmation flag for the correct user.
+        
+        # Set (not toggle) the confirmation for the current user.
         if g.user.id == job.user_id:
-            job.creator_confirmed = not job.creator_confirmed
+            job.creator_confirmed = True
         elif g.user.id == job.taken_by:
-            job.taker_confirmed = not job.taker_confirmed
+            job.taker_confirmed = True
 
         db.session.commit()
         
-        # Check if both confirmations are now set.
+        # If both confirmed, redirect immediately.
         if job.creator_confirmed and job.taker_confirmed:
             flash("Job marked as complete!", "success")
             return redirect(url_for("profile", usr=g.user.username))
@@ -372,8 +372,16 @@ def jobStatus(job_id):
             flash(f"Job confirmation updated: {total}/2", "info")
             return redirect(url_for("jobStatus", job_id=job_id))
     
-    # GET request: simply render the job status page.
-    return render_template("jobstatus.html", job=job)
+    # For GET requests, if complete, redirect immediately.
+    if job.creator_confirmed and job.taker_confirmed:
+        return redirect(url_for("profile", usr=g.user.username))
+    
+    # Otherwise, render the page.
+    response = make_response(render_template("jobstatus.html", job=job))
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 # Offering To Page
 
