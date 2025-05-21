@@ -4,7 +4,7 @@ from flask import Flask, redirect, url_for, render_template, flash, make_respons
 from flask_mail import Mail, Message
 from flask_migrate import Migrate 
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User, JobPost, Payment
+from models import db, User, JobPost, Payment, OfferPost
 from config import Config
 
 app = Flask(__name__) 
@@ -342,31 +342,32 @@ def offeringTo():
     if request.method == 'POST':
         title = request.form.get('title')
         description = request.form.get('description')
-        on_demand = True if request.form.get('on_demand') else False  
+        # Determine on-demand status from the checkbox.
+        on_demand = True if request.form.get('on_demand') else False
         user_id = g.user.id  
 
         if on_demand:
-            # Parse commission for on-demand jobs
+            # For on-demand offers, commission is required.
             commission_input = request.form.get('commission')
             try:
                 commission = float(commission_input)
             except ValueError:
                 flash("Invalid commission cost. Please enter a numeric value.", "error")
-                return redirect(url_for("lookingFor"))
-            # For on-demand postings, there’s no salary range
+                return redirect(url_for("offeringTo"))
+            # on-demand postings don't have a salary range.
             salary_range_value = None
         else:
-            # For non on-demand jobs, get the salary range inputs
+            # For standard offers, commission is not applicable.
             min_salary = request.form.get('min_salary')
             max_salary = request.form.get('max_salary')
             if not min_salary or not max_salary:
                 flash("Please enter both a minimum and maximum salary.", "error")
-                return redirect(url_for("lookingFor"))
-            # Commission is not applicable here. Instead, form a salary range string.
+                return redirect(url_for("offeringTo"))
             commission = None
             salary_range_value = f"{min_salary}-{max_salary}"
 
-        new_post = JobPost(
+        # Create a new OfferPost instead of JobPost.
+        new_offer = OfferPost(
             title=title,
             description=description,
             commission=commission,
@@ -375,18 +376,20 @@ def offeringTo():
             user_id=user_id
         )
         
-        db.session.add(new_post)
+        db.session.add(new_offer)
         db.session.commit()
 
-        flash("Post Created Successfully!", "success")
-        return redirect(url_for('lookingFor'))
+        flash("Offer Created Successfully!", "success")
+        return redirect(url_for('offeringTo'))
     
-    jobs = JobPost.query.filter_by(taken=False).all()
-    job_count = len(g.user.job_posts)
-    on_demand_jobs = [job for job in jobs if job.on_demand]
-    listing_jobs = [job for job in jobs if not job.on_demand]
-    return render_template("lookingfor.html", jobs=jobs, job_count=job_count, 
-                           on_demand_jobs=on_demand_jobs, listing_jobs=listing_jobs) 
+    # For GET requests, list only those offers that are not yet accepted.
+    offers = OfferPost.query.filter_by(accepted=False).all()
+    offer_count = len(g.user.offer_posts)
+    on_demand_offers = [offer for offer in offers if offer.on_demand]
+    listing_offers = [offer for offer in offers if not offer.on_demand]
+    return render_template("offeringto.html", offers=offers, offer_count=offer_count, 
+                           on_demand_offers=on_demand_offers, listing_offers=listing_offers)
+ 
 
 # Job Status Page   
 @app.route("/jobStatus/<int:job_id>", methods=["GET", "POST"])
@@ -452,6 +455,11 @@ def jobStatus(job_id):
 def post_details(job_id):
     job = JobPost.query.get_or_404(job_id)
     return render_template("postdetails.html", job=job)
+
+@app.route("/postDetails/<int:offer_id>")
+def offer_details(offer_id):
+    offer = OfferPost.query.get_or_404(offer_id)
+    return render_template("offerdetails.html", offer=offer)
 
 @app.route("/createjob_disabled")
 def createJobDisabled():

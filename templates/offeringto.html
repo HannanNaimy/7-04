@@ -1,8 +1,8 @@
 {% extends "homeparent.html" %}
 
 {% block content %}
-<div class="offers-container">
-  <div class="offers-header">
+<div class="jobs-container">
+  <div class="jobs-header">
     <h1>Offering To</h1>
     {% if offer_count < 7 %}
       <a href="javascript:void(0)" id="openCreateOfferModal" class="create-post-button">
@@ -17,14 +17,14 @@
   {% set listing_offers = offers | rejectattr('on_demand', 'equalto', True) | list %}
 
   <!-- Section: Instant Offers -->
-  <div class="offers-listings">
+  <div class="jobs-listings">
       {% for offer in on_demand_offers %}
-      <div class="offer-post">
+      <div class="job-post">
         <h2>{{ offer.title }}</h2>
         <div class="on-demand-tag">Instant</div>
         <p>{{ offer.description }}</p>
-        <span class="offer-meta">Commission: RM{{ offer.commission }}</span><br>
-        <span class="offer-meta">Posted by: {{ offer.creator.username }}</span>
+        <span class="job-meta">Commission: RM{{ offer.commission }}</span><br>
+        <span class="job-meta">Posted by: {{ offer.creator.username }}</span>
         <a href="{{ url_for('offer_details', offer_id=offer.id) }}">
           <button class="take-button">See Details</button>
         </a>
@@ -33,14 +33,14 @@
   </div>
 
   <!-- Section: Negotiate Offers -->
-  <div class="offers-listings">
+  <div class="jobs-listings">
       {% for offer in listing_offers %}
-      <div class="offer-post">
+      <div class="job-post">
         <h2>{{ offer.title }}</h2>
         <div class="listing-tag">Negotiate</div>
         <p>{{ offer.description }}</p>
-        <span class="offer-meta">Salary Range: RM{{ offer.salary_range }}</span><br>
-        <span class="offer-meta">Posted by: {{ offer.creator.username }}</span>
+        <span class="job-meta">Salary Range: RM{{ offer.salary_range }}</span><br>
+        <span class="job-meta">Posted by: {{ offer.creator.username }}</span>
         <a href="{{ url_for('offer_details', offer_id=offer.id) }}">
           <button class="take-button">See Details</button>
         </a>
@@ -104,15 +104,15 @@
 
   openModalBtn.onclick = function() {
     modal.style.display = "block";
-  }
+  };
   closeBtn.onclick = function() {
     modal.style.display = "none";
-  }
+  };
   window.onclick = function(event) {
     if (event.target == modal) {
       modal.style.display = "none";
     }
-  }
+  };
 
   // Toggle instant switch controls which fields are shown.
   document.getElementById('onDemandToggle').addEventListener('change', function() {
@@ -155,7 +155,7 @@
       }
     }
     
-    // Submit the form immediately since there's no payment step.
+    // Submit the form immediately.
     document.getElementById('offerDetailsForm').submit();
   });
 </script>
