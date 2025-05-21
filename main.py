@@ -456,7 +456,7 @@ def post_details(job_id):
     job = JobPost.query.get_or_404(job_id)
     return render_template("postdetails.html", job=job)
 
-@app.route("/postDetails/<int:offer_id>")
+@app.route("/offerDetails/<int:offer_id>")
 def offer_details(offer_id):
     offer = OfferPost.query.get_or_404(offer_id)
     return render_template("offerdetails.html", offer=offer)
