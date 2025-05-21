@@ -43,6 +43,33 @@ class JobPost(db.Model):
         """Job is complete only when both the creator and the taker have confirmed."""
         return self.creator_confirmed and self.taker_confirmed
 
+class OfferPost(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    commission = db.Column(db.Float, nullable=True)
+    on_demand = db.Column(db.Boolean, nullable=False, default=False)
+    salary_range = db.Column(db.String(50), nullable=True)
+    
+    # Indicates if the offer has been accepted:
+    accepted = db.Column(db.Boolean, default=False)
+    accepted_by = db.Column(db.Integer, db.ForeignKey('user.id', name="fk_offerpost_accepted_by"), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', name="fk_offerpost_user"), nullable=False)
+    
+    # Relationships
+    creator = db.relationship('User', foreign_keys=[user_id], backref=db.backref('offer_posts', lazy=True))
+    responder = db.relationship('User', foreign_keys=[accepted_by], post_update=True)
+    
+    # Added confirmation flags:
+    creator_confirmed = db.Column(db.Boolean, default=False)
+    responder_confirmed = db.Column(db.Boolean, default=False)
+    
+    @property
+    def is_complete(self):
+        """Offer is complete only when both the creator and the responder have confirmed."""
+        return self.creator_confirmed and self.responder_confirmed
+
+
 class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(50), nullable=False)  # e.g. "Phone Number", "IC Number", etc.
