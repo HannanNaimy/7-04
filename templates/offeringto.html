@@ -1,47 +1,47 @@
 {% extends "homeparent.html" %}
 
 {% block content %}
-<div class="jobs-container">
-  <div class="jobs-header">
+<div class="offers-container">
+  <div class="offers-header">
     <h1>Offering To</h1>
-    {% if job_count < 7 %}
-      <a href="javascript:void(0)" id="openCreateJobModal" class="create-post-button">
-        Create Post
+    {% if offer_count < 7 %}
+      <a href="javascript:void(0)" id="openCreateOfferModal" class="create-post-button">
+        Create Offer
       </a>
     {% else %}
-      <a href="/createjob_disabled" class="create-post-button" title="You have reached the maximum limit of 3 job listings">Create Post</a>
+      <a href="/createoffer_disabled" class="create-post-button" title="You have reached the maximum limit of 3 offers">Create Offer</a>
     {% endif %}
   </div>
   
-  {% set on_demand_jobs = jobs | selectattr('on_demand', 'equalto', True) | list %}
-  {% set listing_jobs = jobs | rejectattr('on_demand', 'equalto', True) | list %}
+  {% set on_demand_offers = offers | selectattr('on_demand', 'equalto', True) | list %}
+  {% set listing_offers = offers | rejectattr('on_demand', 'equalto', True) | list %}
 
-  <!-- Section: Instant Jobs -->
-  <div class="jobs-listings">
-      {% for job in on_demand_jobs %}
-      <div class="job-post">
-        <h2>{{ job.title }}</h2>
+  <!-- Section: Instant Offers -->
+  <div class="offers-listings">
+      {% for offer in on_demand_offers %}
+      <div class="offer-post">
+        <h2>{{ offer.title }}</h2>
         <div class="on-demand-tag">Instant</div>
-        <p>{{ job.description }}</p>
-        <span class="job-meta">Commission: RM{{ job.commission }}</span><br>
-        <span class="job-meta">Posted by: {{ job.creator.username }}</span>
-        <a href="{{ url_for('post_details', job_id=job.id) }}">
+        <p>{{ offer.description }}</p>
+        <span class="offer-meta">Commission: RM{{ offer.commission }}</span><br>
+        <span class="offer-meta">Posted by: {{ offer.creator.username }}</span>
+        <a href="{{ url_for('offer_details', offer_id=offer.id) }}">
           <button class="take-button">See Details</button>
         </a>
       </div>
       {% endfor %}
   </div>
 
-  <!-- Section: Negotiate Jobs -->
-  <div class="jobs-listings">
-      {% for job in listing_jobs %}
-      <div class="job-post">
-        <h2>{{ job.title }}</h2>
+  <!-- Section: Negotiate Offers -->
+  <div class="offers-listings">
+      {% for offer in listing_offers %}
+      <div class="offer-post">
+        <h2>{{ offer.title }}</h2>
         <div class="listing-tag">Negotiate</div>
-        <p>{{ job.description }}</p>
-        <span class="job-meta">Salary Range: RM{{ job.salary_range }}</span><br>
-        <span class="job-meta">Posted by: {{ job.creator.username }}</span>
-        <a href="{{ url_for('post_details', job_id=job.id) }}">
+        <p>{{ offer.description }}</p>
+        <span class="offer-meta">Salary Range: RM{{ offer.salary_range }}</span><br>
+        <span class="offer-meta">Posted by: {{ offer.creator.username }}</span>
+        <a href="{{ url_for('offer_details', offer_id=offer.id) }}">
           <button class="take-button">See Details</button>
         </a>
       </div>
@@ -49,20 +49,20 @@
   </div>
 </div>
 
-<!-- Modal for “Create Job” -->
-<div id="createJobModal" class="modal">
+<!-- Modal for “Create Offer” -->
+<div id="createOfferModal" class="modal">
   <div class="modal-content">
     <span class="close">&times;</span>
 
     <ul class="progress">
-      <li id="progress1" class="active">Step 1: Job Details</li>
+      <li id="progress1" class="active">Step 1: Offer Details</li>
     </ul>
 
-    <!-- Create Job Form -->
-    <form id="jobDetailsForm" action="/lookingFor" method="POST">
-      <!-- Step 1: Job Details -->
+    <!-- Create Offer Form -->
+    <form id="offerDetailsForm" action="/offeringTo" method="POST">
+      <!-- Step 1: Offer Details -->
       <div id="step1">
-        <h2>Add Job Details</h2>
+        <h2>Add Offer Details</h2>
         <div class="toggle-container">
           <span class="toggle-label">Instant</span>
           <label class="switch">
@@ -71,16 +71,16 @@
           </label>
         </div>
         <div class="form-group">
-          <label for="jobTitle">Job Title:</label>
-          <input type="text" name="title" id="jobTitle" placeholder="Enter job title" />
+          <label for="offerTitle">Offer Title:</label>
+          <input type="text" name="title" id="offerTitle" placeholder="Enter offer title" />
         </div>
         <div class="form-group">
-          <label for="jobDescription">Job Description:</label>
-          <textarea id="jobDescription" name="description" rows="4" placeholder="Enter job description"></textarea>
+          <label for="offerDescription">Offer Description:</label>
+          <textarea id="offerDescription" name="description" rows="4" placeholder="Enter offer description"></textarea>
         </div>
 
         <div class="form-group" id="commissionGroup" style="display: none;">
-          <label for="commission">Commission + Product Cost (What you'll pay the taker):</label>
+          <label for="commission">Commission + Product Cost (What you'll pay the responder):</label>
           <input type="number" name="commission" id="commission" placeholder="Enter commission cost" />
         </div>
 
@@ -90,7 +90,7 @@
           <input type="number" name="max_salary" id="maxSalary" placeholder="Maximum salary" />
         </div>
 
-        <button type="button" id="toStep1">Submit Job Details</button>
+        <button type="button" id="toStep1">Submit Offer Details</button>
       </div>
     </form>
   </div>
@@ -98,8 +98,8 @@
 
 <script>
   // Modal open/close controls.
-  var modal = document.getElementById("createJobModal");
-  var openModalBtn = document.getElementById("openCreateJobModal");
+  var modal = document.getElementById("createOfferModal");
+  var openModalBtn = document.getElementById("openCreateOfferModal");
   var closeBtn = document.getElementsByClassName("close")[0];
 
   openModalBtn.onclick = function() {
@@ -131,8 +131,8 @@
 
   // When the Submit button is clicked, validate and submit the form immediately.
   document.getElementById('toStep1').addEventListener('click', function() {
-    var title = document.getElementById('jobTitle').value;
-    var description = document.getElementById('jobDescription').value;
+    var title = document.getElementById('offerTitle').value;
+    var description = document.getElementById('offerDescription').value;
     var isOnDemand = document.getElementById('onDemandToggle').checked;
     
     if (title.trim() === "" || description.trim() === "") {
@@ -155,8 +155,8 @@
       }
     }
     
-    // Submit the form immediately since there's no payment step
-    document.getElementById('jobDetailsForm').submit();
+    // Submit the form immediately since there's no payment step.
+    document.getElementById('offerDetailsForm').submit();
   });
 </script>
 

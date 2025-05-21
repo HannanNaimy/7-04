@@ -330,6 +330,62 @@ def lookingFor():
     on_demand_jobs = [job for job in jobs if job.on_demand]
     listing_jobs = [job for job in jobs if not job.on_demand]
     return render_template("lookingfor.html", jobs=jobs, job_count=job_count, 
+                           on_demand_jobs=on_demand_jobs, listing_jobs=listing_jobs)
+
+# Offering To Page
+@app.route("/offeringTo", methods=["GET", "POST"])
+def offeringTo():
+    if not g.user:
+        flash("You must be logged in to view this page.", "error")
+        return redirect(url_for("login"))
+    
+    if request.method == 'POST':
+        title = request.form.get('title')
+        description = request.form.get('description')
+        on_demand = True if request.form.get('on_demand') else False  
+        user_id = g.user.id  
+
+        if on_demand:
+            # Parse commission for on-demand jobs
+            commission_input = request.form.get('commission')
+            try:
+                commission = float(commission_input)
+            except ValueError:
+                flash("Invalid commission cost. Please enter a numeric value.", "error")
+                return redirect(url_for("lookingFor"))
+            # For on-demand postings, there’s no salary range
+            salary_range_value = None
+        else:
+            # For non on-demand jobs, get the salary range inputs
+            min_salary = request.form.get('min_salary')
+            max_salary = request.form.get('max_salary')
+            if not min_salary or not max_salary:
+                flash("Please enter both a minimum and maximum salary.", "error")
+                return redirect(url_for("lookingFor"))
+            # Commission is not applicable here. Instead, form a salary range string.
+            commission = None
+            salary_range_value = f"{min_salary}-{max_salary}"
+
+        new_post = JobPost(
+            title=title,
+            description=description,
+            commission=commission,
+            on_demand=on_demand,
+            salary_range=salary_range_value,
+            user_id=user_id
+        )
+        
+        db.session.add(new_post)
+        db.session.commit()
+
+        flash("Post Created Successfully!", "success")
+        return redirect(url_for('lookingFor'))
+    
+    jobs = JobPost.query.filter_by(taken=False).all()
+    job_count = len(g.user.job_posts)
+    on_demand_jobs = [job for job in jobs if job.on_demand]
+    listing_jobs = [job for job in jobs if not job.on_demand]
+    return render_template("lookingfor.html", jobs=jobs, job_count=job_count, 
                            on_demand_jobs=on_demand_jobs, listing_jobs=listing_jobs) 
 
 # Job Status Page   
