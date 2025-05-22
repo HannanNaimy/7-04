@@ -2,7 +2,7 @@ import os
 
 class Config:
     SQLALCHEMY_DATABASE_URI = 'sqlite:///users.db'
-    SECRET_KEY = os.urandom(11)
+    SECRET_KEY = os.urandom(11) 
 
     # Mail Configuration
     MAIL_SERVER = "smtp.gmail.com"
