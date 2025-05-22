@@ -396,26 +396,25 @@ def createJobDisabled():
     return redirect(url_for("lookingFor"))
 
 @app.route('/editpaymentmethods', methods=['GET', 'POST'])
-def editpayment_methods():
+def edit_payment_methods():
     if not g.user:
         flash("You must be logged in to view this page.", "error")
         return redirect(url_for("login"))
 
     if request.method == 'POST':
-        # Get user inputs for all payment types
+        # Get user inputs for all payment types.
         phone = request.form.get('phone', '').strip()
         ic = request.form.get('ic', '').strip()
         account = request.form.get('account', '').strip()
         business = request.form.get('business', '').strip()
 
-        # Validate that at least one field is filled
+        # Validate that at least one field is filled.
         if not any([phone, ic, account, business]):
             flash("Please enter at least one payment method.", "danger")
             return redirect("/editpaymentmethods")
 
-        messages = []  # To collect status messages for each type
-
-        # Dictionary mapping each payment type to its corresponding input
+        messages = []  # Collect status messages for each type.
+        # Map each payment type to its corresponding submitted value.
         data = {
             "Phone Number": phone,
             "IC Number": ic,
@@ -424,19 +423,18 @@ def editpayment_methods():
         }
 
         for ptype, value in data.items():
-            if value:  # Process the field if it is not empty
-                # Query the Payment table for a record of this type **specific to the current user**
+            if value:  # Process this field if it is not empty.
+                # Query the Payment table for a record of this type for the current user.
                 existing = Payment.query.filter_by(type=ptype, user_id=g.user.id).first()
                 if existing:
-                    # If the record exists and its number is the same, no change is needed.
                     if existing.id_value == value:
                         messages.append(f"{ptype} is already set to that value; no change made.")
                     else:
-                        # Update the existing record
+                        # Update the record with the new value.
                         existing.id_value = value
                         messages.append(f"{ptype} updated successfully!")
                 else:
-                    # No record exists for the current user, so create a new payment method
+                    # Create a new payment method record linked with the current user.
                     new_payment = Payment(type=ptype, id_value=value, user_id=g.user.id)
                     db.session.add(new_payment)
                     messages.append(f"{ptype} added successfully!")
@@ -448,11 +446,10 @@ def editpayment_methods():
             flash("An error occurred while saving your payment method(s).", "danger")
             return redirect("/editpaymentmethods")
 
-        # Combine all messages into one success flash
         flash(" ".join(messages), "success")
         return redirect("/editpaymentmethods")
 
-    # For a GET request, retrieve only payment methods for the **logged-in user**
+    # For a GET request, retrieve only the payment methods for the logged-in user.
     saved_payments = Payment.query.filter_by(user_id=g.user.id).order_by(Payment.date_added.desc()).all()
     return render_template("payment.html", saved_payments=saved_payments)
 

@@ -8,7 +8,7 @@
   {% endif %}
 {% endwith %}
 
-{% block style %}
+{% block styles %}
 /* Base Reset */
 * {
   margin: 0;
@@ -139,7 +139,7 @@ p {
   <p>Receiving money will be done through <strong>DuitNow</strong> only.</p>
   
   <form method="POST" action="/editpaymentmethods">
-    <p>Please fill in one of the following fields:</p>
+    <p>Please fill in any of the following fields:</p>
     
     <!-- Phone Number -->
     <div class="form-group">
@@ -177,7 +177,7 @@ p {
       </div>
     </div>
     
-    <button id="submitBtn" class="submit-button" type="submit" disabled>Add Payment Method</button>
+    <button id="submitBtn" class="submit-button" type="submit" disabled>Add/Update Payment Method(s)</button>
   </form>
   
   <!-- Display saved payment methods if present -->
@@ -262,7 +262,7 @@ function validateAccount() {
   var digits = value.replace(/\D/g, "");
   var formattedValue = digits.substring(0, 16);
   accountInput.value = formattedValue;
-  // Assuming any non-empty numerical entry is acceptable
+  // Accept any non-empty numerical entry as valid
   var valid = (digits.length > 0);
   errorMsg.innerText = valid ? "" : "Account number cannot be empty.";
   checkOverallValidity();
@@ -291,7 +291,7 @@ function validateBusiness() {
 }
 
 function checkOverallValidity() {
-  // Ensure that exactly one field is filled in properly.
+  // Allow submission if one or more (i.e., at least one) fields are filled in correctly.
   var countFilled = 0;
   
   var phoneValue = document.getElementById('phone').value.trim();
@@ -309,9 +309,8 @@ function checkOverallValidity() {
   if (accountValue !== "" && accountError === "") { countFilled++; }
   if (businessValue !== "" && businessError === "") { countFilled++; }
   
-  // Valid if exactly one field is filled and valid.
-  var valid = (countFilled === 1);
-  document.getElementById('submitBtn').disabled = !valid;
+  // Valid if at least one field is filled and valid.
+  document.getElementById('submitBtn').disabled = (countFilled < 1);
 }
 
 window.onload = function() {
@@ -319,4 +318,3 @@ window.onload = function() {
 };
 </script>
 {% endblock %}
-
