@@ -28,6 +28,9 @@ class JobPost(db.Model):
     on_demand = db.Column(db.Boolean, nullable=False, default=False)
     salary_range = db.Column(db.String(50), nullable=True)
     
+    # New: Date Created column to record when the job post was created.
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+
     # Indicates if the job has been taken:
     taken = db.Column(db.Boolean, default=False)
     taken_by = db.Column(db.Integer, db.ForeignKey('user.id', name="fk_jobpost_taken_by"), nullable=True)

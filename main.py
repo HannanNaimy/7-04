@@ -453,29 +453,48 @@ def edit_payment_methods():
     saved_payments = Payment.query.filter_by(user_id=g.user.id).order_by(Payment.date_added.desc()).all()
     return render_template("payment.html", saved_payments=saved_payments)
 
+# History Page
 @app.route("/history")
 def historyPage():
     if not g.user:
         flash("You must be logged in to view this page.", "error")
         return redirect(url_for("login"))
-    
-    # Retrieve jobs created by the current user.
+        
+    events = []
+
+    # Jobs created by the user.
     created_jobs = JobPost.query.filter_by(user_id=g.user.id).all()
+    for job in created_jobs:
+        events.append({
+            "date": job.date_created,  # Ensure you have a date_created column in your model
+            "text": f"You created job '{job.title}'."
+        })
 
-    # Retrieve jobs taken by the current user.
+    # Jobs taken by the user.
     taken_jobs = JobPost.query.filter_by(taken_by=g.user.id).all()
+    for job in taken_jobs:
+        events.append({
+            "date": job.date_created,  # Use an appropriate timestamp (e.g. taken_date if available)
+            "text": f"You took job '{job.title}'."
+        })
 
-    # Retrieve jobs that are complete, where the user is either the creator or the taker.
+    # Jobs completed (where both confirmations are true) in which the user is involved.
     completed_jobs = JobPost.query.filter(
         JobPost.creator_confirmed.is_(True),
         JobPost.taker_confirmed.is_(True),
         ((JobPost.user_id == g.user.id) | (JobPost.taken_by == g.user.id))
     ).all()
+    for job in completed_jobs:
+        events.append({
+            "date": job.date_created,
+            "text": f"Job '{job.title}' completed."
+        })
 
-    return render_template("history.html",
-                           created_jobs=created_jobs,
-                           taken_jobs=taken_jobs,
-                           completed_jobs=completed_jobs)
+    # Sort events by date (most recent first)
+    events.sort(key=lambda x: x["date"], reverse=True)
+
+    return render_template("history.html", events=events)
+
 
 
 #Set Main Payment
