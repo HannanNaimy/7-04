@@ -138,23 +138,9 @@ p {
   <h2>Receiving Payment Methods</h2>
   <p>Receiving money will be done through <strong>DuitNow</strong> only.</p>
   
-  <form method="POST" action="/paymentmethods">
-    <div class="form-group">
-      <label for="duitnowType">DuitNow ID Type</label>
-      <select id="duitnowType" name="type" onchange="updateDuitNowPlaceholder()" required>
-        <option value="phone">Phone Number</option>
-        <option value="ic">IC Number</option>
-        <option value="account">Account Number</option>
-        <option value="business">Business Registration No</option>
-      </select>
-    </div>
-    
-    <div class="form-group">
-      <label for="duitnowInput">Enter DuitNow ID</label>
-      <input type="text" id="duitnowInput" name="idValue" placeholder="Enter your Phone Number" required />
-      <!-- Placeholder for displaying any format error -->
-      <div id="formatError" style="color: red;"></div>
   <form method="POST" action="/editpaymentmethods">
+    <p>Please fill in one of the following fields:</p>
+    
     <!-- Phone Number -->
     <div class="form-group">
       <label for="phone">Phone Number</label>
@@ -191,10 +177,9 @@ p {
       </div>
     </div>
     
-    <button id="submitBtn" class="submit-button" type="submit">Add Payment Method</button>
+    <button id="submitBtn" class="submit-button" type="submit" disabled>Add Payment Method</button>
   </form>
   
-  <!-- Display saved payment methods below the form -->
   <!-- Display saved payment methods if present -->
   {% if saved_payments %}
     <h3>Saved Payment Methods</h3>
@@ -277,6 +262,7 @@ function validateAccount() {
   var digits = value.replace(/\D/g, "");
   var formattedValue = digits.substring(0, 16);
   accountInput.value = formattedValue;
+  // Assuming any non-empty numerical entry is acceptable
   var valid = (digits.length > 0);
   errorMsg.innerText = valid ? "" : "Account number cannot be empty.";
   checkOverallValidity();
@@ -287,9 +273,9 @@ function validateBusiness() {
   var errorMsg = document.getElementById('businessError');
   var value = businessInput.value;
   if (value.trim() === "") {
-      errorMsg.innerText = "";
-      checkOverallValidity();
-      return;
+    errorMsg.innerText = "";
+    checkOverallValidity();
+    return;
   }
   
   var digits = value.replace(/\D/g, "");
@@ -305,6 +291,9 @@ function validateBusiness() {
 }
 
 function checkOverallValidity() {
+  // Ensure that exactly one field is filled in properly.
+  var countFilled = 0;
+  
   var phoneValue = document.getElementById('phone').value.trim();
   var icValue = document.getElementById('ic').value.trim();
   var accountValue = document.getElementById('account').value.trim();
@@ -315,15 +304,14 @@ function checkOverallValidity() {
   var accountError = document.getElementById('accountError').innerText;
   var businessError = document.getElementById('businessError').innerText;
   
-  var phoneValid    = (phoneValue === ""    || phoneError === "");
-  var icValid       = (icValue === ""       || icError === "");
-  var accountValid  = (accountValue === ""  || accountError === "");
-  var businessValid = (businessValue === "" || businessError === "");
+  if (phoneValue !== "" && phoneError === "") { countFilled++; }
+  if (icValue !== "" && icError === "") { countFilled++; }
+  if (accountValue !== "" && accountError === "") { countFilled++; }
+  if (businessValue !== "" && businessError === "") { countFilled++; }
   
-  var anyFieldFilled = (phoneValue !== "" || icValue !== "" || accountValue !== "" || businessValue !== "");
-  var overallValid = anyFieldFilled && phoneValid && icValid && accountValid && businessValid;
-  
-  document.getElementById('submitBtn').disabled = !overallValid;
+  // Valid if exactly one field is filled and valid.
+  var valid = (countFilled === 1);
+  document.getElementById('submitBtn').disabled = !valid;
 }
 
 window.onload = function() {
@@ -331,3 +319,4 @@ window.onload = function() {
 };
 </script>
 {% endblock %}
+

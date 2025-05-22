@@ -17,6 +17,9 @@ class User(db.Model):
     instagram_username = db.Column(db.String(50), nullable=True)
     discord_username = db.Column(db.String(50), nullable=True)
 
+    # Relationship to Payment methods
+    payments = db.relationship('Payment', backref='user', lazy=True)
+
 class JobPost(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
@@ -45,7 +48,13 @@ class JobPost(db.Model):
 
 class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.String(50), nullable=False)  # e.g. "Phone Number", "IC Number", etc.
+    type = db.Column(db.String(50), nullable=False)  # e.g., "Phone Number", "IC Number", etc.
     id_value = db.Column(db.String(100), nullable=False)
     is_main = db.Column(db.Boolean, default=False)  # Marks if this record is the main payment method
     date_added = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Associate payment method with a specific user
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', name="fk_payment_user"), nullable=False)
+
+    def __repr__(self):
+        return f"<Payment {self.type}: {self.id_value} for user {self.user_id}>"

@@ -397,6 +397,10 @@ def createJobDisabled():
 
 @app.route('/editpaymentmethods', methods=['GET', 'POST'])
 def editpayment_methods():
+    if not g.user:
+        flash("You must be logged in to view this page.", "error")
+        return redirect(url_for("login"))
+
     if request.method == 'POST':
         # Get user inputs for all payment types
         phone = request.form.get('phone', '').strip()
@@ -421,8 +425,8 @@ def editpayment_methods():
 
         for ptype, value in data.items():
             if value:  # Process the field if it is not empty
-                # Query the Payment table for a record of this type
-                existing = Payment.query.filter_by(type=ptype).first()
+                # Query the Payment table for a record of this type **specific to the current user**
+                existing = Payment.query.filter_by(type=ptype, user_id=g.user.id).first()
                 if existing:
                     # If the record exists and its number is the same, no change is needed.
                     if existing.id_value == value:
@@ -432,10 +436,11 @@ def editpayment_methods():
                         existing.id_value = value
                         messages.append(f"{ptype} updated successfully!")
                 else:
-                    # No record exists, so create a new payment method
-                    new_payment = Payment(type=ptype, id_value=value)
+                    # No record exists for the current user, so create a new payment method
+                    new_payment = Payment(type=ptype, id_value=value, user_id=g.user.id)
                     db.session.add(new_payment)
                     messages.append(f"{ptype} added successfully!")
+
         try:
             db.session.commit()
         except Exception as e:
@@ -447,10 +452,9 @@ def editpayment_methods():
         flash(" ".join(messages), "success")
         return redirect("/editpaymentmethods")
 
-    # For a GET request, retrieve all payment method records, ordered by date added
-    saved_payments = Payment.query.order_by(Payment.date_added.desc()).all()
+    # For a GET request, retrieve only payment methods for the **logged-in user**
+    saved_payments = Payment.query.filter_by(user_id=g.user.id).order_by(Payment.date_added.desc()).all()
     return render_template("payment.html", saved_payments=saved_payments)
-
 
 #Set Main Payment
 
