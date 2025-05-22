@@ -275,7 +275,7 @@ def profile(usr):
     else:
         return render_template("profile.html", usr=user.username, email=user.email)
 
-# Looking For Page
+# Looking For Page  
 
 @app.route("/lookingFor", methods=["GET", "POST"])
 def lookingFor():
@@ -530,6 +530,20 @@ def deleteJob(job_id):
     
     flash("Job post deleted successfully.", "success")
     return redirect(url_for("profile", usr=g.user.username))
+
+# User Search Function
+@app.route("/search", methods=["GET"])
+def search():
+    # Retrieve the username from the query parameter 'q'
+    username = request.args.get("q", "").strip()
+    
+    if not username:
+        flash("Please enter a username to search.", "error")
+        # Change the destination as you see fit; here, it goes back to the current user's profile.
+        return redirect(url_for("profile", usr=g.user.username))
+    
+    # Redirect to the profile page for the searched username.
+    return redirect(url_for("profile", usr=username))
 
 # Logout Function
 @app.route("/logout")

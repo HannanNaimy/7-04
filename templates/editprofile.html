@@ -89,6 +89,26 @@
     background-color: #218838;
   }
 
+  .current-contact-info {
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 5px;
+  }
+
+.current-contact-info h5 {
+  margin-bottom: 15px;
+  font-size: 1.25rem;
+  color: #333;
+  }
+
+.current-contact-info p {
+  margin-bottom: 10px;
+  font-size: 1rem;
+  color: #555;
+  }
+
+
   /* Responsive adjustments */
   @media (max-width: 576px) {
     .container {
@@ -144,6 +164,15 @@
       Update Contact Information
     </div>
     <div class="card-body">
+      <!-- Display current contact information -->
+      <div class="current-contact-info mb-4">
+        <h5>Current Contact Information</h5>
+        <p><strong>Phone Number:</strong> {{ phone_number or 'N/A' }}</p>
+        <p><strong>Instagram Username:</strong> {{ instagram_username or 'N/A' }}</p>
+        <p><strong>Discord Username:</strong> {{ discord_username or 'N/A' }}</p>
+      </div>
+
+      <!-- Update contact form -->
       <form method="POST" action="{{ url_for('editProfile') }}">
         <div class="mb-3">
           <label for="phone_number" class="form-label">Phone Number</label>
