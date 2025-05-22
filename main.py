@@ -409,15 +409,15 @@ def jobStatus(job_id):
         return redirect(url_for("profile", usr=g.user.username))
     
     if request.method == "POST":
-        # Do not allow changes if job is already complete.
+        # Do not allow changes if both users have already confirmed
         if job.creator_confirmed and job.taker_confirmed:
             flash("Job is already marked as complete. Confirmation cannot be undone.", "error")
             return redirect(url_for("profile", usr=g.user.username))
-        
-        # Set (not toggle) the confirmation for the current user.
-        if g.user.id == job.user_id:
+
+        # Allow only unconfirmed users to confirm
+        if g.user.id == job.user_id and not job.creator_confirmed:
             job.creator_confirmed = True
-        elif g.user.id == job.taken_by:
+        elif g.user.id == job.taken_by and not job.taker_confirmed:
             job.taker_confirmed = True
 
         db.session.commit()

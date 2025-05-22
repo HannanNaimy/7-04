@@ -26,7 +26,9 @@
 
     <!-- Confirmation button with prompt. Once confirmed it cannot be undone. -->
     <form action="{{ url_for('jobStatus', job_id=job.id) }}" method="POST">
-      {% if (g.user.id == job.user_id and job.creator_confirmed) or (g.user.id == job.taken_by and job.taker_confirmed) %}
+      {% if job.creator_confirmed and job.taker_confirmed %}
+        <button class="job-take-button" type="submit" disabled>Confirmed (Job Complete)</button>
+      {% elif (g.user.id == job.user_id and job.creator_confirmed) or (g.user.id == job.taken_by and job.taker_confirmed) %}
         <button class="job-take-button" type="submit" disabled>Confirmed</button>
       {% else %}
         <button class="job-take-button"
