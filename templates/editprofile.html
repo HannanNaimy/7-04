@@ -108,6 +108,16 @@
   color: #555;
   }
 
+  .profile-pic {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;     /* ensures the image fills the space and is cropped appropriately */
+  border-radius: 50%;    /* makes the image circular */
+  border: 2px solid #ddd;
+  display: block;        /* allows margin auto centering */
+  margin-left: auto;
+  margin-right: auto;
+}
 
   /* Responsive adjustments */
   @media (max-width: 576px) {
@@ -123,6 +133,44 @@
   <h1>Edit Profile</h1>
   <hr>
 
+  <!-- Change Profile Picture Section -->
+<div class="card mb-4">
+  <div class="card-header">
+    Change Profile Picture
+  </div>
+  <div class="card-body text-center">
+    <!-- Display current profile picture -->
+    <div class="current-profile-pic mb-3">
+      {% if g_user and g_user.profile_picture %}
+        {# If the stored path starts with "static/", remove it so that url_for can work correctly #}
+        {% set pic_path = g_user.profile_picture %}
+        {% if pic_path.startswith("static/") %}
+          {% set relative_path = pic_path[7:] %}
+        {% else %}
+          {% set relative_path = pic_path %}
+        {% endif %}
+        <img src="{{ url_for('static', filename=relative_path) }}" alt="Profile Picture" class="profile-pic">
+      {% else %}
+        <img src="{{ url_for('static', filename='profile_pictures/default.png') }}" alt="Profile Picture" class="profile-pic">
+      {% endif %}
+    </div>
+    
+    <!-- Form to update profile picture -->
+    <form method="POST" action="{{ url_for('profilePic') }}" enctype="multipart/form-data">
+      <div class="mb-3">
+        <label for="profile_picture" class="form-label">Upload New Profile Picture</label>
+        <input type="file" 
+               class="form-control" 
+               id="profile_picture" 
+               name="profile_picture" 
+               accept="image/*"
+               required>
+      </div>
+      <button type="submit" class="btn btn-secondary">Update Profile Picture</button>
+    </form>
+  </div>
+</div>
+
   <!-- Change Username Section -->
   <div class="card mb-4">   
     <div class="card-header">
@@ -133,15 +181,15 @@
         <div class="mb-3">
             <label for="username" class="form-label">New Username</label>
             <input type="text" 
-                class="form-control" 
-                id="username" 
-                name="username" 
-                placeholder="Enter new username: 4-12 characters" 
-                required 
-                minlength="4" 
-                maxlength="12"
-                oninvalid="this.setCustomValidity('Username must be between 4 and 12 characters.')"
-                oninput="this.setCustomValidity('')">
+                   class="form-control" 
+                   id="username" 
+                   name="username" 
+                   placeholder="Enter new username: 4-12 characters" 
+                   required 
+                   minlength="4" 
+                   maxlength="12"
+                   oninvalid="this.setCustomValidity('Username must be between 4 and 12 characters.')"
+                   oninput="this.setCustomValidity('')">
         </div>
 
         <div class="mb-3">
@@ -205,3 +253,4 @@
   </div>
 </div>
 {% endblock %}
+
