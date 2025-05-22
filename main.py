@@ -4,9 +4,9 @@ from flask import Flask, redirect, url_for, render_template, flash, g, session, 
 from flask_mail import Mail, Message
 from flask_migrate import Migrate 
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 from models import db, User, JobPost, Payment
 from config import Config
-
 app = Flask(__name__) 
 
 app.config.from_object(Config)
@@ -361,9 +361,13 @@ def jobStatus(job_id):
         elif g.user.id == job.taken_by:
             job.taker_confirmed = not job.taker_confirmed
 
+        # If both confirmations are now true, update the completion date.
+        if job.creator_confirmed and job.taker_confirmed:
+            job.date_completed = datetime.utcnow()
+
         db.session.commit()
         
-        # Check if both confirmations are now set.
+        # Check if job is now complete.
         if job.creator_confirmed and job.taker_confirmed:
             flash("Job marked as complete!", "success")
             return redirect(url_for("profile", usr=g.user.username))
@@ -375,9 +379,8 @@ def jobStatus(job_id):
     # GET request: simply render the job status page.
     return render_template("jobstatus.html", job=job)
 
-# Offering To Page
 
-# History Page
+# Offering To Page
 
 # Guide
 
@@ -459,43 +462,43 @@ def historyPage():
     if not g.user:
         flash("You must be logged in to view this page.", "error")
         return redirect(url_for("login"))
-        
+    
     events = []
-
-    # Jobs created by the user.
+    
+    # Added events for jobs created by the user.
     created_jobs = JobPost.query.filter_by(user_id=g.user.id).all()
     for job in created_jobs:
         events.append({
-            "date": job.date_created,  # Ensure you have a date_created column in your model
-            "text": f"You created job '{job.title}'."
+            "date": job.date_created,
+            "text": f"You created the job '{job.title}' on {job.date_created.strftime('%Y-%m-%d %H:%M:%S')}."
         })
-
-    # Jobs taken by the user.
+    
+    # Added events for jobs taken by the user.
     taken_jobs = JobPost.query.filter_by(taken_by=g.user.id).all()
     for job in taken_jobs:
-        events.append({
-            "date": job.date_created,  # Use an appropriate timestamp (e.g. taken_date if available)
-            "text": f"You took job '{job.title}'."
-        })
-
-    # Jobs completed (where both confirmations are true) in which the user is involved.
+        if job.date_taken:
+            events.append({
+                "date": job.date_taken,
+                "text": f"You took the job '{job.title}' on {job.date_taken.strftime('%Y-%m-%d %H:%M:%S')}."
+            })
+    
+    # Added events for jobs completed (both confirmations set) in which the user is involved.
     completed_jobs = JobPost.query.filter(
-        JobPost.creator_confirmed.is_(True),
-        JobPost.taker_confirmed.is_(True),
+        JobPost.creator_confirmed == True,
+        JobPost.taker_confirmed == True,
         ((JobPost.user_id == g.user.id) | (JobPost.taken_by == g.user.id))
     ).all()
     for job in completed_jobs:
-        events.append({
-            "date": job.date_created,
-            "text": f"Job '{job.title}' completed."
-        })
-
-    # Sort events by date (most recent first)
-    events.sort(key=lambda x: x["date"], reverse=True)
-
+        if job.date_completed:
+            events.append({
+                "date": job.date_completed,
+                "text": f"Job '{job.title}' was completed on {job.date_completed.strftime('%Y-%m-%d %H:%M:%S')}."
+            })
+    
+    # Sort events by date (most recent first).
+    events.sort(key=lambda e: e["date"], reverse=True)
+    
     return render_template("history.html", events=events)
-
-
 
 #Set Main Payment
 
@@ -522,7 +525,6 @@ def set_main(payment_id):
 
 
 # Take Job Function
-
 @app.route("/take/<int:job_id>", methods=["POST"])
 def take_job(job_id):
     if not g.user:
@@ -544,6 +546,8 @@ def take_job(job_id):
     # Mark the job as taken.
     job.taken = True
     job.taken_by = g.user.id
+    job.date_taken = datetime.utcnow()  # Update the date_taken field.
+    
     db.session.commit()
     
     flash("Job taken successfully. The listing has been removed.", "success")

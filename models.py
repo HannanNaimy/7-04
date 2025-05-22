@@ -28,9 +28,11 @@ class JobPost(db.Model):
     on_demand = db.Column(db.Boolean, nullable=False, default=False)
     salary_range = db.Column(db.String(50), nullable=True)
     
-    # New: Date Created column to record when the job post was created.
+    # Date fields:
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
-
+    date_taken = db.Column(db.DateTime, nullable=True)
+    date_completed = db.Column(db.DateTime, nullable=True)
+    
     # Indicates if the job has been taken:
     taken = db.Column(db.Boolean, default=False)
     taken_by = db.Column(db.Integer, db.ForeignKey('user.id', name="fk_jobpost_taken_by"), nullable=True)
@@ -40,7 +42,7 @@ class JobPost(db.Model):
     creator = db.relationship('User', foreign_keys=[user_id], backref=db.backref('job_posts', lazy=True))
     taker = db.relationship('User', foreign_keys=[taken_by], post_update=True)
     
-    # Added confirmation flags:
+    # Confirmation flags:
     creator_confirmed = db.Column(db.Boolean, default=False)
     taker_confirmed = db.Column(db.Boolean, default=False)
     
@@ -48,6 +50,7 @@ class JobPost(db.Model):
     def is_complete(self):
         """Job is complete only when both the creator and the taker have confirmed."""
         return self.creator_confirmed and self.taker_confirmed
+
 
 class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
