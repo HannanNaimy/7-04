@@ -453,6 +453,31 @@ def edit_payment_methods():
     saved_payments = Payment.query.filter_by(user_id=g.user.id).order_by(Payment.date_added.desc()).all()
     return render_template("payment.html", saved_payments=saved_payments)
 
+@app.route("/history")
+def historyPage():
+    if not g.user:
+        flash("You must be logged in to view this page.", "error")
+        return redirect(url_for("login"))
+    
+    # Retrieve jobs created by the current user.
+    created_jobs = JobPost.query.filter_by(user_id=g.user.id).all()
+
+    # Retrieve jobs taken by the current user.
+    taken_jobs = JobPost.query.filter_by(taken_by=g.user.id).all()
+
+    # Retrieve jobs that are complete, where the user is either the creator or the taker.
+    completed_jobs = JobPost.query.filter(
+        JobPost.creator_confirmed.is_(True),
+        JobPost.taker_confirmed.is_(True),
+        ((JobPost.user_id == g.user.id) | (JobPost.taken_by == g.user.id))
+    ).all()
+
+    return render_template("history.html",
+                           created_jobs=created_jobs,
+                           taken_jobs=taken_jobs,
+                           completed_jobs=completed_jobs)
+
+
 #Set Main Payment
 
 @app.route('/setmain/<int:payment_id>', methods=['POST'])
