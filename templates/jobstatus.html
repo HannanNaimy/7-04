@@ -1,9 +1,17 @@
 {% extends "homeparent.html" %}
 
+{% block meta %}
+  {{ super() }}
+  {# Only add meta refresh if the job is still incomplete #}
+  {% if not (job.creator_confirmed and job.taker_confirmed) %}
+    <meta http-equiv="refresh" content="2">
+  {% endif %}
+{% endblock %}
+
 {% block content %}
 <div class="job-details-container">
   <header class="job-header">
-    <span class="label-looking-for">Looking For&gt;</span>
+    <span class="label-looking-for">Looking For &gt;</span>
     <h1 class="job-title">{{ job.title }}</h1>
   </header>
 
@@ -13,27 +21,42 @@
   
   <footer class="job-footer">
     <p class="job-commission">
-        Commission: RM{{ job.commission }}
+      Commission: RM{{ job.commission }}
     </p>
 
-    <!-- Button now displays the confirmation count in its label -->
+    <!-- Confirmation button with prompt. Once confirmed it cannot be undone. -->
     <form action="{{ url_for('jobStatus', job_id=job.id) }}" method="POST">
-      {% set confirmation_count = job.creator_confirmed|int + job.taker_confirmed|int %}
-      {% if (g.user.id == job.user_id and job.creator_confirmed) or (g.user.id == job.taken_by and job.taker_confirmed) %}
-        <button class="job-take-button" type="submit">Undo Confirmation ({{ confirmation_count }}/2)</button>
+      {% if job.creator_confirmed and job.taker_confirmed %}
+        <button class="job-take-button" type="submit" disabled>Confirmed (Job Complete)</button>
+      {% elif (g.user.id == job.user_id and job.creator_confirmed) or (g.user.id == job.taken_by and job.taker_confirmed) %}
+        <button class="job-take-button" type="submit" disabled>Confirmed</button>
       {% else %}
-        <button class="job-take-button" type="submit">Confirm ({{ confirmation_count }}/2)</button>
+        <button class="job-take-button"
+                type="submit"
+                onclick="return confirm('Are you sure? Once confirmed it cannot be undone');">
+          Confirm
+        </button>
       {% endif %}
     </form>
     
-    <!-- Display which party has confirmed -->
-    <div class="confirmation-info">
-      {% if job.creator_confirmed %}
-        <p>{{ job.creator.username }} (creator) has confirmed.</p>
-      {% endif %}
-      {% if job.taker_confirmed %}
-        <p>{{ job.taker.username }} (taker) has confirmed.</p>
-      {% endif %}
+    <!-- Display confirmation statuses for creator and taker -->
+    <div class="confirmation-status">
+      <p>
+        {{ job.creator.username }} (creator)
+        {% if job.creator_confirmed %}
+          has confirmed.
+        {% else %}
+          has not confirmed.
+        {% endif %}
+      </p>
+      <p>
+        {{ job.taker.username }} (taker)
+        {% if job.taker_confirmed %}
+          has confirmed.
+        {% else %}
+          has not confirmed.
+        {% endif %}
+      </p>
     </div>
     
   </footer>
