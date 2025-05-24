@@ -16,6 +16,7 @@ class User(db.Model):
     phone_number = db.Column(db.String(15), nullable=True)
     instagram_username = db.Column(db.String(50), nullable=True)
     discord_username = db.Column(db.String(50), nullable=True)
+    profile_picture = db.Column(db.String(150), nullable=True, default='static/profiles/default.png')
 
 class JobPost(db.Model):
     id = db.Column(db.Integer, primary_key=True)

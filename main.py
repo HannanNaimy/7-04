@@ -1,22 +1,30 @@
-import re, random
+import os, re, random
 from sqlalchemy import or_
 from flask import Flask, redirect, url_for, render_template, flash, g, session, request
 from flask_mail import Mail, Message
 from flask_migrate import Migrate 
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from models import db, User, JobPost, Payment
 from config import Config
 
 app = Flask(__name__) 
-
 app.config.from_object(Config)
+app.config["UPLOAD_FOLDER"] = Config.UPLOAD_FOLDER
+
+# Ensure upload folder exists
+if not os.path.exists(app.config["UPLOAD_FOLDER"]):
+    os.makedirs(app.config["UPLOAD_FOLDER"])
 
 db.init_app(app)
 mail = Mail(app)
 migrate = Migrate(app, db)
 
-with app.app_context():
-    db.create_all() 
+# ALLOWED_EXTENSIONS should be defined here for modularity
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.before_request
 def load_logged_in_user():
@@ -26,13 +34,9 @@ def load_logged_in_user():
     else:
         g.user = User.query.get(user_id)
 
-    if g.user:
-        app.jinja_env.globals["g_user"] = g.user
-    else:
-        app.jinja_env.globals["g_user"] = None  
-
+    app.jinja_env.globals["g_user"] = g.user if g.user else None
+ 
 # Guest Page
-
 @app.route("/")
 def guest():
     return render_template("guest.html")
@@ -273,9 +277,9 @@ def profile(usr):
                                completed_created_jobs=completed_created_jobs,
                                completed_taken_jobs=completed_taken_jobs)
     else:
-        return render_template("profile.html", usr=user.username, email=user.email)
-
-# Looking For Page
+        # Pass the user instance to the template so that 'user.profile_picture' is defined.
+        return render_template("profile.html", user=user)
+# Looking For Page  
 
 @app.route("/lookingFor", methods=["GET", "POST"])
 def lookingFor():
@@ -530,6 +534,53 @@ def deleteJob(job_id):
     
     flash("Job post deleted successfully.", "success")
     return redirect(url_for("profile", usr=g.user.username))
+
+# User Search Function
+@app.route("/search", methods=["GET"])
+def search():
+    # Retrieve the username from the query parameter 'q'
+    username = request.args.get("q", "").strip()
+    
+    if not username:
+        flash("Please enter a username to search.", "error")
+        # Change the destination as you see fit; here, it goes back to the current user's profile.
+        return redirect(url_for("profile", usr=g.user.username))
+    
+    # Redirect to the profile page for the searched username.
+    return redirect(url_for("profile", usr=username))
+
+
+# Profile Picture Upload Function
+@app.route("/profilePic", methods=["POST"])
+def profilePic():
+    if not g.user:
+        flash("You must be logged in to update your profile picture.", "error")
+        return redirect(url_for("login"))
+
+    if "profile_picture" not in request.files:
+        flash("No file selected.", "error")
+        return redirect(url_for("editProfile"))
+
+    file = request.files["profile_picture"]
+
+    if file.filename == "":
+        flash("No file selected.", "error")
+        return redirect(url_for("editProfile"))
+
+    if not allowed_file(file.filename):
+        flash("Invalid file type. Please upload a PNG, JPG, JPEG, or GIF.", "error")
+        return redirect(url_for("editProfile"))
+
+    filename = secure_filename(file.filename)
+    filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+    file.save(filepath)
+
+    # Update user profile picture in the database
+    g.user.profile_picture = filepath
+    db.session.commit()
+
+    flash("Profile picture updated successfully!", "success")
+    return redirect(url_for("editProfile"))
 
 # Logout Function
 @app.route("/logout")
