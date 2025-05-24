@@ -4,10 +4,10 @@ from flask import Flask, redirect, url_for, render_template, flash, make_respons
 from flask_mail import Mail, Message
 from flask_migrate import Migrate 
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User, JobPost, Payment, OfferPost
 from werkzeug.utils import secure_filename
+from datetime import datetime
+from models import db, User, JobPost, Payment, OfferPost
 from config import Config
-
 app = Flask(__name__) 
 app.config.from_object(Config)
 app.config["UPLOAD_FOLDER"] = Config.UPLOAD_FOLDER
@@ -424,9 +424,13 @@ def jobStatus(job_id):
         elif g.user.id == job.taken_by and not job.taker_confirmed:
             job.taker_confirmed = True
 
+        # If both confirmations are now true, update the completion date.
+        if job.creator_confirmed and job.taker_confirmed:
+            job.date_completed = datetime.utcnow()
+
         db.session.commit()
         
-        # If both confirmed, redirect immediately.
+       # If both confirmed, redirect immediately.
         if job.creator_confirmed and job.taker_confirmed:
             flash("Job marked as complete!", "success")
             return redirect(url_for("profile", usr=g.user.username))
@@ -446,9 +450,8 @@ def jobStatus(job_id):
     response.headers["Expires"] = "0"
     return response
 
-# Offering To Page
 
-# History Page
+# Offering To Page
 
 # Guide
 
@@ -472,22 +475,25 @@ def createJobDisabled():
     return redirect(url_for("lookingFor"))
 
 @app.route('/editpaymentmethods', methods=['GET', 'POST'])
-def editpayment_methods():
+def edit_payment_methods():
+    if not g.user:
+        flash("You must be logged in to view this page.", "error")
+        return redirect(url_for("login"))
+
     if request.method == 'POST':
-        # Get user inputs for all payment types
+        # Get user inputs for all payment types.
         phone = request.form.get('phone', '').strip()
         ic = request.form.get('ic', '').strip()
         account = request.form.get('account', '').strip()
         business = request.form.get('business', '').strip()
 
-        # Validate that at least one field is filled
+        # Validate that at least one field is filled.
         if not any([phone, ic, account, business]):
             flash("Please enter at least one payment method.", "danger")
             return redirect("/editpaymentmethods")
 
-        messages = []  # To collect status messages for each type
-
-        # Dictionary mapping each payment type to its corresponding input
+        messages = []  # Collect status messages for each type.
+        # Map each payment type to its corresponding submitted value.
         data = {
             "Phone Number": phone,
             "IC Number": ic,
@@ -496,22 +502,22 @@ def editpayment_methods():
         }
 
         for ptype, value in data.items():
-            if value:  # Process the field if it is not empty
-                # Query the Payment table for a record of this type
-                existing = Payment.query.filter_by(type=ptype).first()
+            if value:  # Process this field if it is not empty.
+                # Query the Payment table for a record of this type for the current user.
+                existing = Payment.query.filter_by(type=ptype, user_id=g.user.id).first()
                 if existing:
-                    # If the record exists and its number is the same, no change is needed.
                     if existing.id_value == value:
                         messages.append(f"{ptype} is already set to that value; no change made.")
                     else:
-                        # Update the existing record
+                        # Update the record with the new value.
                         existing.id_value = value
                         messages.append(f"{ptype} updated successfully!")
                 else:
-                    # No record exists, so create a new payment method
-                    new_payment = Payment(type=ptype, id_value=value)
+                    # Create a new payment method record linked with the current user.
+                    new_payment = Payment(type=ptype, id_value=value, user_id=g.user.id)
                     db.session.add(new_payment)
                     messages.append(f"{ptype} added successfully!")
+
         try:
             db.session.commit()
         except Exception as e:
@@ -519,14 +525,56 @@ def editpayment_methods():
             flash("An error occurred while saving your payment method(s).", "danger")
             return redirect("/editpaymentmethods")
 
-        # Combine all messages into one success flash
         flash(" ".join(messages), "success")
         return redirect("/editpaymentmethods")
 
-    # For a GET request, retrieve all payment method records, ordered by date added
-    saved_payments = Payment.query.order_by(Payment.date_added.desc()).all()
+    # For a GET request, retrieve only the payment methods for the logged-in user.
+    saved_payments = Payment.query.filter_by(user_id=g.user.id).order_by(Payment.date_added.desc()).all()
     return render_template("payment.html", saved_payments=saved_payments)
 
+# History Page
+@app.route("/history")
+def historyPage():
+    if not g.user:
+        flash("You must be logged in to view this page.", "error")
+        return redirect(url_for("login"))
+    
+    events = []
+    
+    # Added events for jobs created by the user.
+    created_jobs = JobPost.query.filter_by(user_id=g.user.id).all()
+    for job in created_jobs:
+        events.append({
+            "date": job.date_created,
+            "text": f"You created the job '{job.title}' on {job.date_created.strftime('%Y-%m-%d %H:%M:%S')}."
+        })
+    
+    # Added events for jobs taken by the user.
+    taken_jobs = JobPost.query.filter_by(taken_by=g.user.id).all()
+    for job in taken_jobs:
+        if job.date_taken:
+            events.append({
+                "date": job.date_taken,
+                "text": f"You took the job '{job.title}' on {job.date_taken.strftime('%Y-%m-%d %H:%M:%S')}."
+            })
+    
+    # Added events for jobs completed (both confirmations set) in which the user is involved.
+    completed_jobs = JobPost.query.filter(
+        JobPost.creator_confirmed == True,
+        JobPost.taker_confirmed == True,
+        ((JobPost.user_id == g.user.id) | (JobPost.taken_by == g.user.id))
+    ).all()
+    for job in completed_jobs:
+        if job.date_completed:
+            events.append({
+                "date": job.date_completed,
+                "text": f"Job '{job.title}' was completed on {job.date_completed.strftime('%Y-%m-%d %H:%M:%S')}."
+            })
+    
+    # Sort events by date (most recent first).
+    events.sort(key=lambda e: e["date"], reverse=True)
+    
+    return render_template("history.html", events=events)
 
 #Set Main Payment
 
@@ -553,7 +601,6 @@ def set_main(payment_id):
 
 
 # Take Job Function
-
 @app.route("/take/<int:job_id>", methods=["POST"])
 def take_job(job_id):
     if not g.user:
@@ -575,6 +622,8 @@ def take_job(job_id):
     # Mark the job as taken.
     job.taken = True
     job.taken_by = g.user.id
+    job.date_taken = datetime.utcnow()  # Update the date_taken field.
+    
     db.session.commit()
     
     flash("Job taken successfully. The listing has been removed.", "success")

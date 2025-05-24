@@ -8,7 +8,7 @@
   {% endif %}
 {% endwith %}
 
-{% block style %}
+{% block styles %}
 /* Base Reset */
 * {
   margin: 0;
@@ -55,13 +55,14 @@ nav a, .login a {
 /* Main Content */
 main {
   padding: 40px 60px;
-  height: calc(100% - 80px);
+  min-height: calc(100vh - 80px);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   background-color: #f9f9f9;
 }
 
+/* Form Styling */
 form {
   width: 100%;
   max-width: 1000px;
@@ -71,11 +72,13 @@ form {
 h2 {
   font-size: 26px;
   margin-bottom: 20px;
+  text-align: center;
 }
 
 p {
   font-size: 20px;
   margin-bottom: 10px;
+  text-align: center;
 }
 
 /* Form Fields */
@@ -114,31 +117,50 @@ p {
   cursor: pointer;
   color: black;
   box-shadow: 2px 2px 8px gray;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Saved Payment Methods */
 .saved-methods {
-  margin-top: 150px !important;
+  margin-top: 50px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
 }
 
 .saved-payment {
-  padding: 10px;
-  margin: 10px auto;
-  max-width: 400px;
+  padding: 15px;
   border: 1px solid #ccc;
   background-color: #f3f3f3;
   border-radius: 8px;
-  text-align: left;
+  text-align: center;
   font-size: 16px;
+  width: 300px;
+  box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.set-main-button {
+  margin-top: 10px;
+  padding: 8px 14px;
+  background-color: #007BFF;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
 }
 {% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container" style="padding: 20px;">
   <h2>Receiving Payment Methods</h2>
   <p>Receiving money will be done through <strong>DuitNow</strong> only.</p>
   
   <form method="POST" action="/editpaymentmethods">
+    <p>Please fill in any of the following fields:</p>
+    
     <!-- Phone Number -->
     <div class="form-group">
       <label for="phone">Phone Number</label>
@@ -175,20 +197,20 @@ p {
       </div>
     </div>
     
-    <button id="submitBtn" class="submit-button" type="submit">Add Payment Method</button>
+    <button id="submitBtn" class="submit-button" type="submit" disabled>Add/Update Payment Method(s)</button>
   </form>
   
   <!-- Display saved payment methods if present -->
   {% if saved_payments %}
-    <h3>Saved Payment Methods</h3>
+    <h3 style="text-align: center; margin-top: 50px;">Saved Payment Methods</h3>
     <div class="saved-methods">
       {% for payment in saved_payments %}
         <div class="saved-payment">
-          {{ payment.type|capitalize }}: {{ payment.id_value }}
+          <strong>{{ payment.type|capitalize }}</strong>: {{ payment.id_value }}
           {% if payment.is_main %}
-            (main)
+            <p style="margin-top: 10px; font-size: 14px; color: green;">(main)</p>
           {% else %}
-            <form method="POST" action="{{ url_for('set_main', payment_id=payment.id) }}" style="display:inline;">
+            <form method="POST" action="{{ url_for('set_main', payment_id=payment.id) }}" style="margin-top: 10px;">
               <button type="submit" class="set-main-button">Set as main</button>
             </form>
           {% endif %}
@@ -270,9 +292,9 @@ function validateBusiness() {
   var errorMsg = document.getElementById('businessError');
   var value = businessInput.value;
   if (value.trim() === "") {
-      errorMsg.innerText = "";
-      checkOverallValidity();
-      return;
+    errorMsg.innerText = "";
+    checkOverallValidity();
+    return;
   }
   
   var digits = value.replace(/\D/g, "");
@@ -288,6 +310,8 @@ function validateBusiness() {
 }
 
 function checkOverallValidity() {
+  var countFilled = 0;
+  
   var phoneValue = document.getElementById('phone').value.trim();
   var icValue = document.getElementById('ic').value.trim();
   var accountValue = document.getElementById('account').value.trim();
@@ -298,15 +322,12 @@ function checkOverallValidity() {
   var accountError = document.getElementById('accountError').innerText;
   var businessError = document.getElementById('businessError').innerText;
   
-  var phoneValid    = (phoneValue === ""    || phoneError === "");
-  var icValid       = (icValue === ""       || icError === "");
-  var accountValid  = (accountValue === ""  || accountError === "");
-  var businessValid = (businessValue === "" || businessError === "");
+  if (phoneValue !== "" && phoneError === "") { countFilled++; }
+  if (icValue !== "" && icError === "") { countFilled++; }
+  if (accountValue !== "" && accountError === "") { countFilled++; }
+  if (businessValue !== "" && businessError === "") { countFilled++; }
   
-  var anyFieldFilled = (phoneValue !== "" || icValue !== "" || accountValue !== "" || businessValue !== "");
-  var overallValid = anyFieldFilled && phoneValid && icValid && accountValid && businessValid;
-  
-  document.getElementById('submitBtn').disabled = !overallValid;
+  document.getElementById('submitBtn').disabled = (countFilled < 1);
 }
 
 window.onload = function() {

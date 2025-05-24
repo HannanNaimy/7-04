@@ -1,0 +1,74 @@
+{% extends "homeparent.html" %}
+
+{% block styles %}
+body {
+  background-color: #f9f9f9;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+}
+
+.timeline-container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: #fff;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.timeline {
+  position: relative;
+  margin: 20px 0;
+  padding-left: 40px;
+  border-left: 2px solid #ddd;
+}
+
+.timeline-event {
+  position: relative;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+}
+
+.timeline-event:before {
+  content: '';
+  position: absolute;
+  left: -11px;
+  top: 5px;
+  width: 20px;
+  height: 20px;
+  background: #007BFF;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 2px #007BFF;
+}
+
+.timeline-date {
+  font-size: 0.85rem;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.timeline-text {
+  font-size: 1rem;
+  color: #333;
+}
+{% endblock %}
+
+{% block content %}
+<div class="timeline-container">
+  <h2>Your Job History Timeline</h2>
+  <div class="timeline">
+    {% if events and events|length > 0 %}
+      {% for event in events %}
+        <div class="timeline-event">
+          <div class="timeline-date">{{ event.date.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+          <div class="timeline-text">{{ event.text }}</div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p>No history events to display.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

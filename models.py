@@ -18,6 +18,9 @@ class User(db.Model):
     discord_username = db.Column(db.String(50), nullable=True)
     profile_picture = db.Column(db.String(150), nullable=True, default='static/profiles/default.png')
 
+    # Relationship to Payment methods
+    payments = db.relationship('Payment', backref='user', lazy=True)
+
 class JobPost(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
@@ -25,6 +28,11 @@ class JobPost(db.Model):
     commission = db.Column(db.Float, nullable=True)
     on_demand = db.Column(db.Boolean, nullable=False, default=False)
     salary_range = db.Column(db.String(50), nullable=True)
+    
+    # Date fields:
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+    date_taken = db.Column(db.DateTime, nullable=True)
+    date_completed = db.Column(db.DateTime, nullable=True)
     
     # Indicates if the job has been taken:
     taken = db.Column(db.Boolean, default=False)
@@ -35,7 +43,7 @@ class JobPost(db.Model):
     creator = db.relationship('User', foreign_keys=[user_id], backref=db.backref('job_posts', lazy=True))
     taker = db.relationship('User', foreign_keys=[taken_by], post_update=True)
     
-    # Added confirmation flags:
+    # Confirmation flags:
     creator_confirmed = db.Column(db.Boolean, default=False)
     taker_confirmed = db.Column(db.Boolean, default=False)
     
@@ -43,7 +51,7 @@ class JobPost(db.Model):
     def is_complete(self):
         """Job is complete only when both the creator and the taker have confirmed."""
         return self.creator_confirmed and self.taker_confirmed
-
+      
 class OfferPost(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
@@ -73,7 +81,13 @@ class OfferPost(db.Model):
 
 class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.String(50), nullable=False)  # e.g. "Phone Number", "IC Number", etc.
+    type = db.Column(db.String(50), nullable=False)  # e.g., "Phone Number", "IC Number", etc.
     id_value = db.Column(db.String(100), nullable=False)
     is_main = db.Column(db.Boolean, default=False)  # Marks if this record is the main payment method
     date_added = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Associate payment method with a specific user
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', name="fk_payment_user"), nullable=False)
+
+    def __repr__(self):
+        return f"<Payment {self.type}: {self.id_value} for user {self.user_id}>"
