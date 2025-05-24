@@ -1,0 +1,30 @@
+{% extends "homeparent.html" %}
+
+{% block content %}
+<div class="job-details-container">
+  <header class="job-header">
+    <span class="label-looking-for">Offering To&gt;</span>
+    <h1 class="job-title">{{ offer.title }}</h1>
+  </header>
+
+  <section class="job-content">
+    <p class="job-description">{{ offer.description }}</p>
+  </section>
+  
+  <footer class="job-footer">
+    <p class="job-commission">
+      {% if offer.on_demand %}
+        Commission: RM{{ offer.commission }}
+      {% else %}
+        Salary Range: RM{{ offer.salary_range }}
+      {% endif %}
+    </p>
+    {% if offer.on_demand %}
+      <!-- Wrap the "Take" button in a form to POST to the take_offer route -->
+        <button class="job-take-button" type="submit">Take</button>
+    {% else %}
+      <button class="job-contact-button">Contact</button>
+    {% endif %}
+  </footer>
+</div>
+{% endblock %}

@@ -1,0 +1,163 @@
+{% extends "homeparent.html" %}
+
+{% block content %}
+<div class="jobs-container">
+  <div class="jobs-header">
+    <h1>"Offering To"</h1>
+    {% if offer_count < 7 %}
+      <a href="javascript:void(0)" id="openCreateOfferModal" class="create-post-button">
+        Create Offer
+      </a>
+    {% else %}
+      <a href="/createoffer_disabled" class="create-post-button" title="You have reached the maximum limit of 3 offers">Create Offer</a>
+    {% endif %}
+  </div>
+  
+  {% set on_demand_offers = offers | selectattr('on_demand', 'equalto', True) | list %}
+  {% set listing_offers = offers | rejectattr('on_demand', 'equalto', True) | list %}
+
+  <!-- Section: Instant Offers -->
+  <div class="jobs-listings">
+      {% for offer in on_demand_offers %}
+      <div class="job-post">
+        <h2>{{ offer.title }}</h2>
+        <div class="on-demand-tag">Instant</div>
+        <p>{{ offer.description }}</p>
+        <span class="job-meta">Commission: RM{{ offer.commission }}</span><br>
+        <span class="job-meta">Posted by: {{ offer.creator.username }}</span>
+        <a href="{{ url_for('offer_details', offer_id=offer.id) }}">
+          <button class="take-button">See Details</button>
+        </a>
+      </div>
+      {% endfor %}
+  </div>
+
+  <!-- Section: Negotiate Offers -->
+  <div class="jobs-listings">
+      {% for offer in listing_offers %}
+      <div class="job-post">
+        <h2>{{ offer.title }}</h2>
+        <div class="listing-tag">Negotiate</div>
+        <p>{{ offer.description }}</p>
+        <span class="job-meta">Salary Range: RM{{ offer.salary_range }}</span><br>
+        <span class="job-meta">Posted by: {{ offer.creator.username }}</span>
+        <a href="{{ url_for('offer_details', offer_id=offer.id) }}">
+          <button class="take-button">See Details</button>
+        </a>
+      </div>
+      {% endfor %}
+  </div>
+</div>
+
+<!-- Modal for “Create Offer” -->
+<div id="createOfferModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+
+    <ul class="progress">
+      <li id="progress1" class="active">Step 1: Offer Details</li>
+    </ul>
+
+    <!-- Create Offer Form -->
+    <form id="offerDetailsForm" action="/offeringTo" method="POST">
+      <!-- Step 1: Offer Details -->
+      <div id="step1">
+        <h2>Add Offer Details</h2>
+        <div class="toggle-container">
+          <span class="toggle-label">Instant</span>
+          <label class="switch">
+            <input type="checkbox" id="onDemandToggle" name="on_demand">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="form-group">
+          <label for="offerTitle">Offer Title:</label>
+          <input type="text" name="title" id="offerTitle" placeholder="Enter offer title" />
+        </div>
+        <div class="form-group">
+          <label for="offerDescription">Offer Description:</label>
+          <textarea id="offerDescription" name="description" rows="4" placeholder="Enter offer description"></textarea>
+        </div>
+
+        <div class="form-group" id="commissionGroup" style="display: none;">
+          <label for="commission">Commission:</label>
+          <input type="number" name="commission" id="commission" placeholder="Enter commission cost" />
+        </div>
+
+        <div class="form-group salary-range" id="salaryRangeGroup">
+          <label for="minSalary">Enter Range of Salary:</label>
+          <input type="number" name="min_salary" id="minSalary" placeholder="Minimum salary" />
+          <input type="number" name="max_salary" id="maxSalary" placeholder="Maximum salary" />
+        </div>
+
+        <button type="button" id="toStep1">Submit Offer Details</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Modal open/close controls.
+  var modal = document.getElementById("createOfferModal");
+  var openModalBtn = document.getElementById("openCreateOfferModal");
+  var closeBtn = document.getElementsByClassName("close")[0];
+
+  openModalBtn.onclick = function() {
+    modal.style.display = "block";
+  };
+  closeBtn.onclick = function() {
+    modal.style.display = "none";
+  };
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  };
+
+  // Toggle instant switch controls which fields are shown.
+  document.getElementById('onDemandToggle').addEventListener('change', function() {
+    if (this.checked) {
+      // When Instant is ON: Show commission field, hide salary range.
+      console.log("Instant is ON");
+      document.getElementById('commissionGroup').style.display = 'block';
+      document.getElementById('salaryRangeGroup').style.display = 'none';
+    } else {
+      // When Instant is OFF: Hide commission field, show salary range.
+      console.log("Instant is OFF");
+      document.getElementById('commissionGroup').style.display = 'none';
+      document.getElementById('salaryRangeGroup').style.display = 'block';
+    }
+  });
+
+  // When the Submit button is clicked, validate and submit the form immediately.
+  document.getElementById('toStep1').addEventListener('click', function() {
+    var title = document.getElementById('offerTitle').value;
+    var description = document.getElementById('offerDescription').value;
+    var isOnDemand = document.getElementById('onDemandToggle').checked;
+    
+    if (title.trim() === "" || description.trim() === "") {
+      alert("Please fill in all fields.");
+      return;
+    }
+    
+    if (isOnDemand) {
+      var commission = document.getElementById('commission').value;
+      if (commission.trim() === "") {
+        alert("Please fill in the commission cost.");
+        return;
+      }
+    } else {
+      var minSalary = document.getElementById('minSalary').value;
+      var maxSalary = document.getElementById('maxSalary').value;
+      if (minSalary.trim() === "" || maxSalary.trim() === "") {
+        alert("Please fill in both the minimum and maximum salary.");
+        return;
+      }
+    }
+    
+    // Submit the form immediately.
+    document.getElementById('offerDetailsForm').submit();
+  });
+</script>
+
+{% endblock %}

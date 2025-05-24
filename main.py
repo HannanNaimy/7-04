@@ -1,22 +1,30 @@
-import re, random
+import os, re, random
 from sqlalchemy import or_
-from flask import Flask, redirect, url_for, render_template, flash, g, session, request
+from flask import Flask, redirect, url_for, render_template, flash, make_response, g, session, request
 from flask_mail import Mail, Message
 from flask_migrate import Migrate 
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from datetime import datetime
-from models import db, User, JobPost, Payment
+from models import db, User, JobPost, Payment, OfferPost
 from config import Config
 app = Flask(__name__) 
-
 app.config.from_object(Config)
+app.config["UPLOAD_FOLDER"] = Config.UPLOAD_FOLDER
+
+# Ensure upload folder exists
+if not os.path.exists(app.config["UPLOAD_FOLDER"]):
+    os.makedirs(app.config["UPLOAD_FOLDER"])
 
 db.init_app(app)
 mail = Mail(app)
 migrate = Migrate(app, db)
 
-with app.app_context():
-    db.create_all() 
+# ALLOWED_EXTENSIONS should be defined here for modularity
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.before_request
 def load_logged_in_user():
@@ -26,13 +34,9 @@ def load_logged_in_user():
     else:
         g.user = User.query.get(user_id)
 
-    if g.user:
-        app.jinja_env.globals["g_user"] = g.user
-    else:
-        app.jinja_env.globals["g_user"] = None  
-
+    app.jinja_env.globals["g_user"] = g.user if g.user else None
+ 
 # Guest Page
-
 @app.route("/")
 def guest():
     return render_template("guest.html")
@@ -273,9 +277,9 @@ def profile(usr):
                                completed_created_jobs=completed_created_jobs,
                                completed_taken_jobs=completed_taken_jobs)
     else:
-        return render_template("profile.html", usr=user.username, email=user.email)
-
-# Looking For Page
+        # Pass the user instance to the template so that 'user.profile_picture' is defined.
+        return render_template("profile.html", user=user)
+# Looking For Page  
 
 @app.route("/lookingFor", methods=["GET", "POST"])
 def lookingFor():
@@ -330,7 +334,66 @@ def lookingFor():
     on_demand_jobs = [job for job in jobs if job.on_demand]
     listing_jobs = [job for job in jobs if not job.on_demand]
     return render_template("lookingfor.html", jobs=jobs, job_count=job_count, 
-                           on_demand_jobs=on_demand_jobs, listing_jobs=listing_jobs) 
+                           on_demand_jobs=on_demand_jobs, listing_jobs=listing_jobs)
+
+# Offering To Page
+@app.route("/offeringTo", methods=["GET", "POST"])
+def offeringTo():
+    if not g.user:
+        flash("You must be logged in to view this page.", "error")
+        return redirect(url_for("login"))
+    
+    if request.method == 'POST':
+        title = request.form.get('title')
+        description = request.form.get('description')
+        # Determine on-demand status from the checkbox.
+        on_demand = True if request.form.get('on_demand') else False
+        user_id = g.user.id  
+
+        if on_demand:
+            # For on-demand offers, commission is required.
+            commission_input = request.form.get('commission')
+            try:
+                commission = float(commission_input)
+            except ValueError:
+                flash("Invalid commission cost. Please enter a numeric value.", "error")
+                return redirect(url_for("offeringTo"))
+            # on-demand postings don't have a salary range.
+            salary_range_value = None
+        else:
+            # For standard offers, commission is not applicable.
+            min_salary = request.form.get('min_salary')
+            max_salary = request.form.get('max_salary')
+            if not min_salary or not max_salary:
+                flash("Please enter both a minimum and maximum salary.", "error")
+                return redirect(url_for("offeringTo"))
+            commission = None
+            salary_range_value = f"{min_salary}-{max_salary}"
+
+        # Create a new OfferPost instead of JobPost.
+        new_offer = OfferPost(
+            title=title,
+            description=description,
+            commission=commission,
+            on_demand=on_demand,
+            salary_range=salary_range_value,
+            user_id=user_id
+        )
+        
+        db.session.add(new_offer)
+        db.session.commit()
+
+        flash("Offer Created Successfully!", "success")
+        return redirect(url_for('offeringTo'))
+    
+    # For GET requests, list only those offers that are not yet accepted.
+    offers = OfferPost.query.filter_by(accepted=False).all()
+    offer_count = len(g.user.offer_posts)
+    on_demand_offers = [offer for offer in offers if offer.on_demand]
+    listing_offers = [offer for offer in offers if not offer.on_demand]
+    return render_template("offeringto.html", offers=offers, offer_count=offer_count, 
+                           on_demand_offers=on_demand_offers, listing_offers=listing_offers)
+ 
 
 # Job Status Page   
 @app.route("/jobStatus/<int:job_id>", methods=["GET", "POST"])
@@ -344,22 +407,22 @@ def jobStatus(job_id):
         flash("Job not found.", "error")
         return redirect(url_for("profile", usr=g.user.username))
     
-    # Only allow creator or taker to update/view.
+    # Only allow creator or taker.
     if g.user.id != job.user_id and g.user.id != job.taken_by:
         flash("You are not authorized to update the job status.", "error")
         return redirect(url_for("profile", usr=g.user.username))
     
     if request.method == "POST":
-        # If job is already complete, do not allow toggling confirmation.
+        # Do not allow changes if both users have already confirmed
         if job.creator_confirmed and job.taker_confirmed:
             flash("Job is already marked as complete. Confirmation cannot be undone.", "error")
             return redirect(url_for("profile", usr=g.user.username))
 
-        # Toggle the confirmation flag for the correct user.
-        if g.user.id == job.user_id:
-            job.creator_confirmed = not job.creator_confirmed
-        elif g.user.id == job.taken_by:
-            job.taker_confirmed = not job.taker_confirmed
+        # Allow only unconfirmed users to confirm
+        if g.user.id == job.user_id and not job.creator_confirmed:
+            job.creator_confirmed = True
+        elif g.user.id == job.taken_by and not job.taker_confirmed:
+            job.taker_confirmed = True
 
         # If both confirmations are now true, update the completion date.
         if job.creator_confirmed and job.taker_confirmed:
@@ -367,7 +430,7 @@ def jobStatus(job_id):
 
         db.session.commit()
         
-        # Check if job is now complete.
+       # If both confirmed, redirect immediately.
         if job.creator_confirmed and job.taker_confirmed:
             flash("Job marked as complete!", "success")
             return redirect(url_for("profile", usr=g.user.username))
@@ -376,8 +439,16 @@ def jobStatus(job_id):
             flash(f"Job confirmation updated: {total}/2", "info")
             return redirect(url_for("jobStatus", job_id=job_id))
     
-    # GET request: simply render the job status page.
-    return render_template("jobstatus.html", job=job)
+    # For GET requests, if complete, redirect immediately.
+    if job.creator_confirmed and job.taker_confirmed:
+        return redirect(url_for("profile", usr=g.user.username))
+    
+    # Otherwise, render the page.
+    response = make_response(render_template("jobstatus.html", job=job))
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 
 # Offering To Page
@@ -391,6 +462,11 @@ def jobStatus(job_id):
 def post_details(job_id):
     job = JobPost.query.get_or_404(job_id)
     return render_template("postdetails.html", job=job)
+
+@app.route("/offerDetails/<int:offer_id>")
+def offer_details(offer_id):
+    offer = OfferPost.query.get_or_404(offer_id)
+    return render_template("offerdetails.html", offer=offer)
 
 @app.route("/createjob_disabled")
 def createJobDisabled():
@@ -579,6 +655,53 @@ def deleteJob(job_id):
     
     flash("Job post deleted successfully.", "success")
     return redirect(url_for("profile", usr=g.user.username))
+
+# User Search Function
+@app.route("/search", methods=["GET"])
+def search():
+    # Retrieve the username from the query parameter 'q'
+    username = request.args.get("q", "").strip()
+    
+    if not username:
+        flash("Please enter a username to search.", "error")
+        # Change the destination as you see fit; here, it goes back to the current user's profile.
+        return redirect(url_for("profile", usr=g.user.username))
+    
+    # Redirect to the profile page for the searched username.
+    return redirect(url_for("profile", usr=username))
+
+
+# Profile Picture Upload Function
+@app.route("/profilePic", methods=["POST"])
+def profilePic():
+    if not g.user:
+        flash("You must be logged in to update your profile picture.", "error")
+        return redirect(url_for("login"))
+
+    if "profile_picture" not in request.files:
+        flash("No file selected.", "error")
+        return redirect(url_for("editProfile"))
+
+    file = request.files["profile_picture"]
+
+    if file.filename == "":
+        flash("No file selected.", "error")
+        return redirect(url_for("editProfile"))
+
+    if not allowed_file(file.filename):
+        flash("Invalid file type. Please upload a PNG, JPG, JPEG, or GIF.", "error")
+        return redirect(url_for("editProfile"))
+
+    filename = secure_filename(file.filename)
+    filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+    file.save(filepath)
+
+    # Update user profile picture in the database
+    g.user.profile_picture = filepath
+    db.session.commit()
+
+    flash("Profile picture updated successfully!", "success")
+    return redirect(url_for("editProfile"))
 
 # Logout Function
 @app.route("/logout")
