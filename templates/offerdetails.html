@@ -20,11 +20,71 @@
       {% endif %}
     </p>
     {% if offer.on_demand %}
-      <!-- Wrap the "Take" button in a form to POST to the take_offer route -->
-        <button class="job-take-button" type="submit">Take</button>
+      <!-- Instead of immediately taking the offer, show a "Take" button that triggers the payment modal -->
+      <button class="job-take-button" id="openTakeOfferModal">Take</button>
     {% else %}
       <button class="job-contact-button">Contact</button>
     {% endif %}
   </footer>
 </div>
+
+<!-- Payment Modal for Taking the Offer -->
+<div id="takeOfferModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span class="close" id="closeTakeOfferModal">&times;</span>
+    <h2>Payment</h2>
+    <p>Please scan the QR code below to pay RM{{ offer.commission }}.</p>
+    <div class="qr-mock">QR CODE</div>
+    <!-- When "Simulate Payment" is clicked the offer is marked as taken -->
+    <button type="button" id="simulatePaymentOffer">Simulate Payment</button>
+  </div>
+</div>
+
+<script>
+  // === Modal Controls for Taking an Offer ===
+  var takeOfferModal = document.getElementById("takeOfferModal");
+  var openTakeOfferModal = document.getElementById("openTakeOfferModal");
+  var closeTakeOfferModal = document.getElementById("closeTakeOfferModal");
+
+  openTakeOfferModal.onclick = function() {
+    takeOfferModal.style.display = "block";
+  };
+
+  closeTakeOfferModal.onclick = function() {
+    takeOfferModal.style.display = "none";
+  };
+
+  window.onclick = function(event) {
+    if (event.target == takeOfferModal) {
+      takeOfferModal.style.display = "none";
+    }
+  };
+
+  // When "Simulate Payment" is clicked, submit a POST request to take the offer.
+  document.getElementById("simulatePaymentOffer").addEventListener("click", function() {
+    // Option 1: Submit via AJAX (fetch API)
+    fetch("{{ url_for('take_offer', offer_id=offer.id) }}", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json"
+        // If you're using CSRF protection, make sure to send your token here.
+      },
+      // Include additional body data if needed.
+    }).then(response => {
+      if (response.ok) {
+        // If successful, redirect or refresh the details page.
+        window.location.href = "{{ url_for('offer_details', offer_id=offer.id) }}";
+      } else {
+        alert("There was an error processing your payment.");
+      }
+    }).catch(error => {
+      console.error("Error:", error);
+      alert("An error occurred.");
+    });
+    
+    // Option 2: You could alternatively create and submit a hidden form.
+  });
+  // === End Modal Controls ===
+</script>
 {% endblock %}

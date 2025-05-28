@@ -629,6 +629,33 @@ def take_job(job_id):
     flash("Job taken successfully. The listing has been removed.", "success")
     return redirect(url_for("lookingFor"))
 
+# Take Offer Function
+@app.route("/take_offer/<int:offer_id>", methods=["POST"])
+def take_offer(offer_id):
+    if not g.user:
+        flash("You must be logged in to take an offer.", "error")
+        return redirect(url_for("login"))
+    
+    offer = OfferPost.query.get_or_404(offer_id)
+    
+    # Prevent the posting user from taking the offer.
+    if offer.creator.id == g.user.id:
+        flash("You cannot take your own offer.", "error")
+        return redirect(url_for("offer_details", offer_id=offer_id))
+    
+    # Check if the offer is already taken:
+    if offer.accepted:
+        flash("This offer has already been taken.", "error")
+        return redirect(url_for("offeringTo"))
+    
+    # Mark the offer as accepted.
+    offer.accepted = True
+    offer.accepted_by = g.user.id
+    db.session.commit()
+    
+    flash("Offer accepted! The listing has been removed.", "success")
+    return redirect(url_for("offeringTo"))
+
 # Delete Job Function
 
 @app.route("/deletejob/<int:job_id>", methods=["POST"])
