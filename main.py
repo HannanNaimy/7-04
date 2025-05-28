@@ -268,6 +268,44 @@ def profile(usr):
             JobPost.taker_confirmed == True
         ).all()
 
+        # Offer Posts queries
+        # Offers created by user and not yet accepted
+        listed_offer_posts = OfferPost.query.filter_by(user_id=user.id, accepted=False).all()
+
+        # Offers created by user and accepted but not completed
+        accepted_offer_posts_created = OfferPost.query.filter(
+            OfferPost.user_id == user.id,
+            OfferPost.accepted == True,
+            OfferPost.creator_confirmed != True,
+            OfferPost.responder_confirmed != True
+        ).all()
+
+        # Offers accepted by user (not created by user) and not completed
+        accepted_offer_posts_taken = OfferPost.query.filter(
+            OfferPost.accepted == True,
+            OfferPost.accepted_by == user.id,
+            OfferPost.user_id != user.id,
+            OfferPost.creator_confirmed != True,
+            OfferPost.responder_confirmed != True
+        ).all()
+
+        # Offers created by user and completed
+        completed_offer_posts_created = OfferPost.query.filter(
+            OfferPost.user_id == user.id,
+            OfferPost.accepted == True,
+            OfferPost.creator_confirmed == True,
+            OfferPost.responder_confirmed == True
+        ).all()
+
+        # Offers accepted by user (not created by user) and completed
+        completed_offer_posts_taken = OfferPost.query.filter(
+            OfferPost.accepted == True,
+            OfferPost.accepted_by == user.id,
+            OfferPost.user_id != user.id,
+            OfferPost.creator_confirmed == True,
+            OfferPost.responder_confirmed == True
+        ).all()
+
         return render_template("ownerprofile.html",
                                usr=user.username,
                                email=user.email,
@@ -275,7 +313,12 @@ def profile(usr):
                                ongoing_created_jobs=ongoing_created_jobs,
                                ongoing_taken_jobs=ongoing_taken_jobs,
                                completed_created_jobs=completed_created_jobs,
-                               completed_taken_jobs=completed_taken_jobs)
+                               completed_taken_jobs=completed_taken_jobs,
+                               listed_offer_posts=listed_offer_posts,
+                               accepted_offer_posts_created=accepted_offer_posts_created,
+                               accepted_offer_posts_taken=accepted_offer_posts_taken,
+                               completed_offer_posts_created=completed_offer_posts_created,
+                               completed_offer_posts_taken=completed_offer_posts_taken)
     else:
         # Pass the user instance to the template so that 'user.profile_picture' is defined.
         return render_template("profile.html", user=user)
@@ -656,7 +699,6 @@ def take_offer(offer_id):
     return redirect(url_for("offeringTo"))
 
 # Delete Job Function
-
 @app.route("/deletejob/<int:job_id>", methods=["POST"])
 def deleteJob(job_id):
     # Ensure that a user is logged in
@@ -680,6 +722,32 @@ def deleteJob(job_id):
     db.session.commit()
     
     flash("Job post deleted successfully.", "success")
+    return redirect(url_for("profile", usr=g.user.username))
+
+# Delete Offer Function
+@app.route("/deleteoffer/<int:offer_id>", methods=["POST"])
+def deleteOffer(offer_id):
+    # Ensure that a user is logged in
+    if not g.user:
+        flash("You must be logged in to perform that action.", "error")
+        return redirect(url_for("login"))
+    
+    # Look up the offer post by its ID
+    offer = OfferPost.query.get(offer_id)
+    if offer is None:
+        flash("Offer post not found.", "error")
+        return redirect(url_for("profile", usr=g.user.username))
+    
+    # Verify that the current user owns this offer post
+    if offer.creator.id != g.user.id:
+        flash("You do not have permission to delete this offer post.", "error")
+        return redirect(url_for("profile", usr=g.user.username))
+    
+    # Delete the offer post and commit the changes to the database
+    db.session.delete(offer)
+    db.session.commit()
+    
+    flash("Offer post deleted successfully.", "success")
     return redirect(url_for("profile", usr=g.user.username))
 
 # User Search Function

@@ -27,14 +27,14 @@
     <!-- Confirmation button with prompt. Once confirmed it cannot be undone. -->
     <form action="{{ url_for('jobStatus', job_id=job.id) }}" method="POST">
       {% if job.creator_confirmed and job.taker_confirmed %}
-        <button class="job-take-button" type="submit" disabled>Confirmed (Job Complete)</button>
+        <button class="job-take-button" type="submit" disabled>Completed (Job Complete)</button>
       {% elif (g.user.id == job.user_id and job.creator_confirmed) or (g.user.id == job.taken_by and job.taker_confirmed) %}
-        <button class="job-take-button" type="submit" disabled>Confirmed</button>
+        <button class="job-take-button" type="submit" disabled>Completed</button>
       {% else %}
         <button class="job-take-button"
                 type="submit"
-                onclick="return confirm('Are you sure? Once confirmed it cannot be undone');">
-          Confirm
+                onclick="return confirm('Are you sure? Once completed it cannot be undone');">
+          Complete
         </button>
       {% endif %}
     </form>
@@ -44,17 +44,17 @@
       <p>
         {{ job.creator.username }} (creator)
         {% if job.creator_confirmed %}
-          has confirmed.
+          has completed.
         {% else %}
-          has not confirmed.
+          has not completed.
         {% endif %}
       </p>
       <p>
         {{ job.taker.username }} (taker)
         {% if job.taker_confirmed %}
-          has confirmed.
+          has completed.
         {% else %}
-          has not confirmed.
+          has not completed.
         {% endif %}
       </p>
     </div>

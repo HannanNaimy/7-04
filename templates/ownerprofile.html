@@ -129,120 +129,46 @@
     color: #777;
   }
   
-  /* Credentials Navigation */
+  /* Credentials Navigation - visually pleasing card style */
+  .credentials {
+    background: #fffbea;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(247, 140, 0, 0.08);
+    border: 1px solid #ffe08a;
+    padding: 18px 24px;
+    margin: 24px 0 32px 0;
+    display: flex;
+    justify-content: center;
+  }
+
   .credentials ul {
     list-style: none;
     padding: 0;
-    display: flex;
-    gap: 20px;
-    margin-top: 20px;
-  }
-  
-  .credentials ul li a {
-    text-decoration: none;
-    color: #007bff;
-    font-weight: bold;
-    transition: color 0.3s ease;
-  }
-  
-  .credentials ul li a:hover {
-    color: #0056b3;
-  }
-
-  /* Ensure the listed container is a horizontal scroll area */
-  .listed-container {
-    display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    gap: 15px;
-    padding-bottom: 10px;
-  }
-  
-  /* Remove the duplicate .job-post CSS here */
-  /* Job post card styling (already present, but you can enhance) */
-.listed-container .job-post {
-  flex: 0 0 250px;
-  height: 350px;
-  background: #fff;
-  border: 1.5px solid #ffe08a;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(247, 140, 0, 0.10);
-  transition: box-shadow 0.2s;
-}
-.listed-container .job-post:hover {
-  box-shadow: 0 6px 18px rgba(247, 140, 0, 0.18);
-  border-color: #ffd900;
-}
-
-  /* Profile Page Container */
-  .profile-container {
-    max-width: 1200px;
-    margin: auto;
-    padding: 20px;
-  }
-
-  /* Profile Header with Picture and Greeting */
-  .profile-info {
-    display: flex;
-    align-items: center;
-    padding: 20px;
-    background-color: #f7f7f7;
-    border-radius: 8px;
-    margin-bottom: 20px;
-  }
-  
-  /* Container for the profile picture */
-  .profile-pic-container {
-    margin-right: 20px;
-    flex-shrink: 0;
-  }
-  
-  /* Profile picture: cropped as a circle */
-  .profile-pic {
-    width: 150px;
-    height: 150px;
-    object-fit: cover;
-    border-radius: 50%;
-    border: 2px solid #ddd;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  
-  /* Text next to the profile picture */
-  .profile-text h1 {
-    font-size: 2rem;
     margin: 0;
-    color: #333;
-  }
-  
-  .profile-text h2 {
-    font-size: 1.25rem;
-    margin: 5px 0 0;
-    color: #777;
-  }
-  
-  /* Credentials Navigation */
-  .credentials ul {
-    list-style: none;
-    padding: 0;
     display: flex;
-    gap: 20px;
-    margin-top: 20px;
+    gap: 28px;
   }
   
   .credentials ul li a {
     text-decoration: none;
-    color: #007bff;
+    color: #fff;
+    background: linear-gradient(90deg, #f78c00 60%, #ffd900 100%);
+    padding: 10px 22px;
+    border-radius: 24px;
     font-weight: bold;
-    transition: color 0.3s ease;
+    font-size: 1.08rem;
+    box-shadow: 0 2px 8px rgba(247, 140, 0, 0.10);
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    border: none;
+    display: inline-block;
   }
   
   .credentials ul li a:hover {
-    color: #0056b3;
+    background: linear-gradient(90deg, #ffd900 60%, #f78c00 100%);
+    color: #fffbea;
+    box-shadow: 0 4px 16px rgba(247, 140, 0, 0.18);
   }
 
-  /* Remove the duplicate .listed-container CSS here */
   /* Ensure the listed container is a horizontal scroll area */
   .listed-container {
     display: flex;
@@ -323,6 +249,85 @@
   .take-button:hover {
     background: darkorange;
   }
+
+  /* Offer Posts Section Styling */
+.offer-posts {
+  background: #eafcff;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 180, 247, 0.08);
+  padding: 32px 24px 24px 24px;
+  margin: 32px 0;
+  border: 1px solid #a3e6ff;
+  position: relative;
+}
+.offer-posts .label {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #00b4f7;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+  padding-left: 8px;
+  border-left: 6px solid #00b4f7;
+  background: linear-gradient(90deg, #eafcff 80%, #d1f3ff 100%);
+  border-radius: 6px 0 0 6px;
+  display: inline-block;
+}
+.offer-container {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 18px;
+  padding-bottom: 10px;
+  margin-bottom: 8px;
+  scrollbar-color: #a3e6ff #eafcff;
+  scrollbar-width: thin;
+}
+.offer-container::-webkit-scrollbar {
+  height: 8px;
+}
+.offer-container::-webkit-scrollbar-thumb {
+  background: #a3e6ff;
+  border-radius: 4px;
+}
+.offer-container::-webkit-scrollbar-track {
+  background: #eafcff;
+}
+.offer-container .offer-post {
+  flex: 0 0 250px;
+  height: 350px;
+  background: #fff;
+  border: 1.5px solid #a3e6ff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 180, 247, 0.10);
+  transition: box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+}
+.offer-container .offer-post:hover {
+  box-shadow: 0 6px 18px rgba(0, 180, 247, 0.18);
+  border-color: #00b4f7;
+}
+.offer-on-demand-tag {
+  /* Use same style as .on-demand-tag for jobs */
+  display: inline-block;
+  background: rgba(128, 0, 128, 0.2);
+  color: purple;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+.offer-listing-tag {
+  /* Use same style as .listing-tag for jobs */
+  display: inline-block;
+  background: #ffe08a;
+  color: #f78c00;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
 {% endblock %}
 
 {% block content %}
@@ -533,6 +538,174 @@
       {% endif %}
     </div>
   </div>
+
+  <!-- Offer Posts Section -->
+  <div class="offer-posts">
+    <h2 class="label">Offers Listed</h2>
+    <div class="offer-container">
+      {% if listed_offer_posts|length == 0 %}
+        <p>No offer posts listed.</p>
+      {% else %}
+        {% for offer in listed_offer_posts %}
+        <div class="offer-post">
+          <h2>{{ offer.title }}</h2>
+          {% if offer.on_demand %}
+            <div class="offer-on-demand-tag">Instant</div>
+          {% else %}
+            <div class="offer-listing-tag">Negotiate</div>
+          {% endif %}
+          <p>{{ offer.description }}</p>
+          <div class="job-footer">
+            <div class="job-meta-info">
+              {% if offer.on_demand %}
+              <span class="job-meta">Commission: RM{{ offer.commission }}</span><br>
+              {% else %}
+              <span class="job-meta">Salary Range: RM{{ offer.salary_range }}</span><br>
+              {% endif %}
+              <span class="job-meta">Offered by: {{ offer.creator.username }}</span>
+            </div>
+            <div class="job-options">
+              <form action="{{ url_for('deleteOffer', offer_id=offer.id) }}" method="POST" style="display:inline;">
+                <button type="submit" class="delete-button" onclick="return confirm('Are you sure you want to delete this offer?');">Delete</button>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="offer-posts">
+    <h2 class="label">Offers Taken</h2>
+    <h3>Created by You</h3>
+    <div class="offer-container">
+      {% if accepted_offer_posts_created|length == 0 %}
+        <p>No offers created by you have been accepted.</p>
+      {% else %}
+        {% for offer in accepted_offer_posts_created %}
+        <div class="offer-post">
+          <h2>{{ offer.title }}</h2>
+          {% if offer.on_demand %}
+            <div class="offer-on-demand-tag">Instant</div>
+          {% else %}
+            <div class="offer-listing-tag">Negotiate</div>
+          {% endif %}
+          <p>{{ offer.description }}</p>
+          <div class="job-footer">
+            <div class="job-meta-info">
+              {% if offer.on_demand %}
+              <span class="job-meta">Commission: RM{{ offer.commission }}</span><br>
+              {% else %}
+              <span class="job-meta">Salary Range: RM{{ offer.salary_range }}</span><br>
+              {% endif %}
+              <span class="job-meta">Offered by: {{ offer.creator.username }}</span><br>
+              <span class="job-meta">Accepted by: {{ offer.responder.username }}</span>
+            </div>
+            <div class="job-options">
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+    <h3>Accepted by You</h3>
+    <div class="offer-container">
+      {% if accepted_offer_posts_taken|length == 0 %}
+        <p>No offers accepted by you.</p>
+      {% else %}
+        {% for offer in accepted_offer_posts_taken %}
+        <div class="offer-post">
+          <h2>{{ offer.title }}</h2>
+          {% if offer.on_demand %}
+            <div class="offer-on-demand-tag">Instant</div>
+          {% else %}
+            <div class="offer-listing-tag">Negotiate</div>
+          {% endif %}
+          <p>{{ offer.description }}</p>
+          <div class="job-footer">
+            <div class="job-meta-info">
+              {% if offer.on_demand %}
+              <span class="job-meta">Commission: RM{{ offer.commission }}</span><br>
+              {% else %}
+              <span class="job-meta">Salary Range: RM{{ offer.salary_range }}</span><br>
+              {% endif %}
+              <span class="job-meta">Offered by: {{ offer.creator.username }}</span><br>
+              <span class="job-meta">Accepted by: {{ offer.responder.username }}</span>
+            </div>
+            <div class="job-options">
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="offer-posts">
+    <h2 class="label">Offers Completed</h2>
+    <h3>Created by You</h3>
+    <div class="offer-container">
+      {% if completed_offer_posts_created|length == 0 %}
+        <p>No completed offers created by you.</p>
+      {% else %}
+        {% for offer in completed_offer_posts_created %}
+        <div class="offer-post">
+          <h2>{{ offer.title }}</h2>
+          {% if offer.on_demand %}
+            <div class="offer-on-demand-tag">Instant</div>
+          {% else %}
+            <div class="offer-listing-tag">Negotiate</div>
+          {% endif %}
+          <p>{{ offer.description }}</p>
+          <div class="job-footer">
+            <div class="job-meta-info">
+              {% if offer.on_demand %}
+              <span class="job-meta">Commission: RM{{ offer.commission }}</span><br>
+              {% else %}
+              <span class="job-meta">Salary Range: RM{{ offer.salary_range }}</span><br>
+              {% endif %}
+              <span class="job-meta">Offered by: {{ offer.creator.username }}</span><br>
+              <span class="job-meta">Accepted by: {{ offer.responder.username }}</span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+    <h3>Accepted by You</h3>
+    <div class="offer-container">
+      {% if completed_offer_posts_taken|length == 0 %}
+        <p>No completed offers accepted by you.</p>
+      {% else %}
+        {% for offer in completed_offer_posts_taken %}
+        <div class="offer-post">
+          <h2>{{ offer.title }}</h2>
+          {% if offer.on_demand %}
+            <div class="offer-on-demand-tag">Instant</div>
+          {% else %}
+            <div class="offer-listing-tag">Negotiate</div>
+          {% endif %}
+          <p>{{ offer.description }}</p>
+          <div class="job-footer">
+            <div class="job-meta-info">
+              {% if offer.on_demand %}
+              <span class="job-meta">Commission: RM{{ offer.commission }}</span><br>
+              {% else %}
+              <span class="job-meta">Salary Range: RM{{ offer.salary_range }}</span><br>
+              {% endif %}
+              <span class="job-meta">Offered by: {{ offer.creator.username }}</span><br>
+              <span class="job-meta">Accepted by: {{ offer.responder.username }}</span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ...existing job posts sections... -->
+  <!-- ...existing code... -->
 </div>
 {% endblock %}
 
