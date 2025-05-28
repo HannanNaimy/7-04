@@ -20,13 +20,13 @@
       {% endif %}
     </p>
     {% if offer.on_demand %}
-      {# If the current user is the offer creator, disable the button #}
+      {# For all users, show a "Take" button. If the user is the creator, this button submits immediately and triggers the flash message from the route. #}
       {% if g.user and offer.creator.id == g.user.id %}
-        <button class="job-take-button" onclick="alert('You cannot take your own offer.');">
-          Take
-        </button>
+        <form id="creatorTakeOfferForm" action="{{ url_for('take_offer', offer_id=offer.id) }}" method="POST" style="display:inline;">
+          <button type="submit" class="job-take-button">Take</button>
+        </form>
       {% else %}
-        <!-- For allowed users, show the modal trigger -->
+        <!-- For allowed users, show the modal trigger for payment simulation -->
         <button class="job-take-button" id="openTakeOfferModal">Take</button>
       {% endif %}
     {% else %}
@@ -35,17 +35,14 @@
   </footer>
 </div>
 
-<!-- Payment Modal for Taking the Offer (only relevant for on‑demand offers) -->
+<!-- Payment Modal for Taking the Offer (only relevant for on‑demand offers and non–creators) -->
 <div id="takeOfferModal" class="modal" style="display:none;">
   <div class="modal-content">
     <span class="close" id="closeTakeOfferModal">&times;</span>
     <h2>Payment</h2>
     <p>Please scan the QR code below to pay RM{{ offer.commission }}.</p>
     <div class="qr-mock">QR CODE</div>
-    <!-- 
-      Wrap the "Simulate Payment" button in a form so that the POST submission 
-      triggers a full page reload and flash messages will be displayed.
-    -->
+    <!-- Wrap the "Simulate Payment" button in a form so that a full POST is submitted -->
     <form id="takeOfferForm" action="{{ url_for('take_offer', offer_id=offer.id) }}" method="POST">
       <button type="submit" id="simulatePaymentOffer">Simulate Payment</button>
     </form>
@@ -58,7 +55,7 @@
   var openTakeOfferModal = document.getElementById("openTakeOfferModal");
   var closeTakeOfferModal = document.getElementById("closeTakeOfferModal");
 
-  if(openTakeOfferModal){ // Only attach if button exists.
+  if(openTakeOfferModal){ // Only attach if button exists (i.e. user is not the creator)
     openTakeOfferModal.onclick = function() {
       takeOfferModal.style.display = "block";
     };
