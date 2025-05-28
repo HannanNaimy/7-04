@@ -629,7 +629,6 @@ def take_job(job_id):
     flash("Job taken successfully. The listing has been removed.", "success")
     return redirect(url_for("lookingFor"))
 
-# Take Offer Function
 @app.route("/take_offer/<int:offer_id>", methods=["POST"])
 def take_offer(offer_id):
     if not g.user:

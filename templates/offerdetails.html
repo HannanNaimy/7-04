@@ -20,23 +20,35 @@
       {% endif %}
     </p>
     {% if offer.on_demand %}
-      <!-- Instead of immediately taking the offer, show a "Take" button that triggers the payment modal -->
-      <button class="job-take-button" id="openTakeOfferModal">Take</button>
+      {# If the current user is the offer creator, disable the button #}
+      {% if g.user and offer.creator.id == g.user.id %}
+        <button class="job-take-button" onclick="alert('You cannot take your own offer.');">
+          Take
+        </button>
+      {% else %}
+        <!-- For allowed users, show the modal trigger -->
+        <button class="job-take-button" id="openTakeOfferModal">Take</button>
+      {% endif %}
     {% else %}
       <button class="job-contact-button">Contact</button>
     {% endif %}
   </footer>
 </div>
 
-<!-- Payment Modal for Taking the Offer -->
+<!-- Payment Modal for Taking the Offer (only relevant for on‑demand offers) -->
 <div id="takeOfferModal" class="modal" style="display:none;">
   <div class="modal-content">
     <span class="close" id="closeTakeOfferModal">&times;</span>
     <h2>Payment</h2>
     <p>Please scan the QR code below to pay RM{{ offer.commission }}.</p>
     <div class="qr-mock">QR CODE</div>
-    <!-- When "Simulate Payment" is clicked the offer is marked as taken -->
-    <button type="button" id="simulatePaymentOffer">Simulate Payment</button>
+    <!-- 
+      Wrap the "Simulate Payment" button in a form so that the POST submission 
+      triggers a full page reload and flash messages will be displayed.
+    -->
+    <form id="takeOfferForm" action="{{ url_for('take_offer', offer_id=offer.id) }}" method="POST">
+      <button type="submit" id="simulatePaymentOffer">Simulate Payment</button>
+    </form>
   </div>
 </div>
 
@@ -46,45 +58,23 @@
   var openTakeOfferModal = document.getElementById("openTakeOfferModal");
   var closeTakeOfferModal = document.getElementById("closeTakeOfferModal");
 
-  openTakeOfferModal.onclick = function() {
-    takeOfferModal.style.display = "block";
-  };
+  if(openTakeOfferModal){ // Only attach if button exists.
+    openTakeOfferModal.onclick = function() {
+      takeOfferModal.style.display = "block";
+    };
+  }
 
-  closeTakeOfferModal.onclick = function() {
-    takeOfferModal.style.display = "none";
-  };
+  if(closeTakeOfferModal){
+    closeTakeOfferModal.onclick = function() {
+      takeOfferModal.style.display = "none";
+    };
+  }
 
   window.onclick = function(event) {
     if (event.target == takeOfferModal) {
       takeOfferModal.style.display = "none";
     }
   };
-
-  // When "Simulate Payment" is clicked, submit a POST request to take the offer.
-  document.getElementById("simulatePaymentOffer").addEventListener("click", function() {
-    // Option 1: Submit via AJAX (fetch API)
-    fetch("{{ url_for('take_offer', offer_id=offer.id) }}", {
-      method: "POST",
-      credentials: "same-origin",
-      headers: {
-        "Content-Type": "application/json"
-        // If you're using CSRF protection, make sure to send your token here.
-      },
-      // Include additional body data if needed.
-    }).then(response => {
-      if (response.ok) {
-        // If successful, redirect or refresh the details page.
-        window.location.href = "{{ url_for('offer_details', offer_id=offer.id) }}";
-      } else {
-        alert("There was an error processing your payment.");
-      }
-    }).catch(error => {
-      console.error("Error:", error);
-      alert("An error occurred.");
-    });
-    
-    // Option 2: You could alternatively create and submit a hidden form.
-  });
   // === End Modal Controls ===
 </script>
 {% endblock %}
