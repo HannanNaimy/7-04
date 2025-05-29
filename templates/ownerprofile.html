@@ -395,8 +395,8 @@
       {% endif %}
     </div>
     <div class="profile-text">
-      <h1>Hello {{ usr }}!</h1> 
-      <h2>{{ email }}</h2>
+      <h1>Hello {{ usr.username }}!</h1> 
+      <h2>{{ usr.email }}</h2>
     </div>
   </div>
 
@@ -404,7 +404,7 @@
   <div class="credentials">
     <ul>
       <li><a href="/logout">Log Out</a></li>
-      <li><a href="/contacts">Contacts</a></li>
+      <li><a href="javascript:void(0)" onclick="document.getElementById('contactModal').style.display='block';">Contacts</a></li>
       <li><a href="/editpaymentmethods">Payment Methods</a></li>  
       <li><a href="/editProfile">Edit Profile</a></li>   
     </ul>
@@ -762,6 +762,16 @@
     </div>
   </div>
 </div>
+
+{% include "contacts.html" %}
+
+<script>
+  // Open the contact modal when the button is clicked
+  document.getElementById("openContactModal").onclick = function() {
+    document.getElementById("contactModal").style.display = "block";
+  };
+</script>
+
 {% endblock %}
 
 

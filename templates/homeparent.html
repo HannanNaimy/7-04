@@ -717,17 +717,19 @@
     </li>        
   </ul>
 
-  <!-- Right side: Search Field -->
-  <form class="nav-search" action="/search" method="GET" style="display: flex; align-items: center;">
+  <!-- Right side: Search Field (only show on /profile) -->
+  {% if request.path.startswith('/profile') %}
+  <form class="nav-search" action="/search" method="GET" style="display: flex; align-items: flex-end; gap: 0; height: 40px;">
     <input type="search"
            name="q"
-           placeholder="Search..."
-           style="padding: 5px 10px; border: 1px solid #ccc; border-radius: 4px;">
+           placeholder="Search Users..."
+           style="padding: 8px 18px; border: 2px solid #ffd900; border-radius: 22px 0 0 22px; font-size: 1.08rem; outline: none; background: #fffbea; color: #222; border-right: none; height: 40px; box-sizing: border-box; font-weight: 500; display: block; margin-right: 0;">
     <button type="submit"
-            style="margin-left: 5px; padding: 5px 10px; border: none; background-color: #007bff; color: #fff; border-radius: 4px;">
+            style="padding: 0 28px; border: 2px solid #ffd900; border-radius: 0 22px 22px 0; background: #ffd900; color: #222; font-weight: 700; font-size: 1.08rem; cursor: pointer; transition: background 0.2s; border-left: none; height: 40px; box-sizing: border-box; letter-spacing: 0.5px; display: block; margin-left: 0;">
       Search
     </button>
   </form>
+  {% endif %}
 </nav>
 
   {% with messages = get_flashed_messages(with_categories=true) %}

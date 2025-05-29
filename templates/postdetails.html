@@ -20,13 +20,20 @@
       {% endif %}
     </p>
     {% if job.on_demand %}
-      <!-- Wrap the "Take" button in a form to POST to the take_job route -->
       <form action="{{ url_for('take_job', job_id=job.id) }}" method="POST">
         <button class="job-take-button" type="submit">Take</button>
       </form>
     {% else %}
-      <button class="job-contact-button">Contact</button>
+      <!-- Contact button that triggers the modal -->
+      <button class="job-contact-button" onclick="document.getElementById('contactModal').style.display='block';">
+        Contact
+      </button>
     {% endif %}
   </footer>
 </div>
+
+<!-- Pass the job creator to the contacts modal -->
+{% set usr = job.creator %}
+{% include "contacts.html" %}
+
 {% endblock %}

@@ -74,8 +74,8 @@
   <div class="profile-info">
     <!-- Profile picture container -->
     <div class="profile-pic-container">
-      {% if user.profile_picture %}
-        {% set pic = user.profile_picture %}
+      {% if usr.profile_picture %}
+        {% set pic = usr.profile_picture %}
         {% if pic.startswith('static/') %}
           {% set pic = pic[7:] %}
         {% endif %}
@@ -86,17 +86,27 @@
     </div>
     <!-- Profile text with username and email -->
     <div class="profile-text">
-      <h1>{{ user.username }}</h1>
-      <h2>{{ user.email }}</h2>
+      <h1>{{ usr.username }}</h1>
+      <h2>{{ usr.email }}</h2>
     </div>
   </div>
 
   <!-- Credentials/Navigation -->
   <div class="credentials">
     <ul>
-      <li><a href="/contacts">Contacts</a></li>
+      <li><a href="javascript:void(0)" onclick="document.getElementById('contactModal').style.display='block';">Contacts</a></li>
       <!-- Additional public links can be added here -->
     </ul>
   </div>
 </div>
+
+{% include "contacts.html" %}
+
+<script>
+  // Open the contact modal when the button is clicked
+  document.getElementById("openContactModal").onclick = function() {
+    document.getElementById("contactModal").style.display = "block";
+  };
+</script>
+
 {% endblock %}

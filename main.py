@@ -307,21 +307,21 @@ def profile(usr):
         ).all()
 
         return render_template("ownerprofile.html",
-                               usr=user.username,
-                               email=user.email,
-                               listed_jobs=listed_jobs,
-                               ongoing_created_jobs=ongoing_created_jobs,
-                               ongoing_taken_jobs=ongoing_taken_jobs,
-                               completed_created_jobs=completed_created_jobs,
-                               completed_taken_jobs=completed_taken_jobs,
-                               listed_offer_posts=listed_offer_posts,
-                               accepted_offer_posts_created=accepted_offer_posts_created,
-                               accepted_offer_posts_taken=accepted_offer_posts_taken,
-                               completed_offer_posts_created=completed_offer_posts_created,
-                               completed_offer_posts_taken=completed_offer_posts_taken)
+                       usr=user,  # pass the full user object
+                       listed_jobs=listed_jobs,
+                       ongoing_created_jobs=ongoing_created_jobs,
+                       ongoing_taken_jobs=ongoing_taken_jobs,
+                       completed_created_jobs=completed_created_jobs,
+                       completed_taken_jobs=completed_taken_jobs,
+                       listed_offer_posts=listed_offer_posts,
+                       accepted_offer_posts_created=accepted_offer_posts_created,
+                       accepted_offer_posts_taken=accepted_offer_posts_taken,
+                       completed_offer_posts_created=completed_offer_posts_created,
+                       completed_offer_posts_taken=completed_offer_posts_taken)
+
     else:
         # Pass the user instance to the template so that 'user.profile_picture' is defined.
-        return render_template("profile.html", user=user)
+        return render_template("profile.html", usr=user)
 # Looking For Page  
 
 @app.route("/lookingFor", methods=["GET", "POST"])

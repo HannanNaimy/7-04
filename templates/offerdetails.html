@@ -20,7 +20,7 @@
       {% endif %}
     </p>
     {% if offer.on_demand %}
-      {# For all users, show a "Take" button. If the user is the creator, this button submits immediately and triggers the flash message from the route. #}
+      {# For on‑demand offers – show the Take button; if creator then submit form immediately #}
       {% if g.user and offer.creator.id == g.user.id %}
         <form id="creatorTakeOfferForm" action="{{ url_for('take_offer', offer_id=offer.id) }}" method="POST" style="display:inline;">
           <button type="submit" class="job-take-button">Take</button>
@@ -30,19 +30,29 @@
         <button class="job-take-button" id="openTakeOfferModal">Take</button>
       {% endif %}
     {% else %}
-      <button class="job-contact-button">Contact</button>
+      {# For non on‑demand offers, show the Contact button that opens the contacts modal #}
+      <button class="job-contact-button"
+              onclick="document.getElementById('contactModal').style.display='block';">
+        Contact
+      </button>
     {% endif %}
   </footer>
 </div>
 
-<!-- Payment Modal for Taking the Offer (only relevant for on‑demand offers and non–creators) -->
+{# For the contacts modal, set 'usr' to be the offer creator so that their info is displayed #}
+{% set usr = offer.creator %}
+{% include "contacts.html" %}
+
+{# Only include the payment modal if this is an on‑demand offer #}
+{% if offer.on_demand %}
+<!-- Payment Modal for Taking the Offer (only relevant for on‑demand offers and non-creators) -->
 <div id="takeOfferModal" class="modal" style="display:none;">
   <div class="modal-content">
     <span class="close" id="closeTakeOfferModal">&times;</span>
     <h2>Payment</h2>
     <p>Please scan the QR code below to pay RM{{ offer.commission }}.</p>
     <div class="qr-mock">QR CODE</div>
-    <!-- Wrap the "Simulate Payment" button in a form so that a full POST is submitted -->
+    <!-- Payment simulation form -->
     <form id="takeOfferForm" action="{{ url_for('take_offer', offer_id=offer.id) }}" method="POST">
       <button type="submit" id="simulatePaymentOffer">Simulate Payment</button>
     </form>
@@ -50,12 +60,12 @@
 </div>
 
 <script>
-  // === Modal Controls for Taking an Offer ===
+  // === Modal Controls for Payment Simulation ===
   var takeOfferModal = document.getElementById("takeOfferModal");
   var openTakeOfferModal = document.getElementById("openTakeOfferModal");
   var closeTakeOfferModal = document.getElementById("closeTakeOfferModal");
 
-  if(openTakeOfferModal){ // Only attach if button exists (i.e. user is not the creator)
+  if(openTakeOfferModal){ // Only attach if button exists (i.e. if user is allowed)
     openTakeOfferModal.onclick = function() {
       takeOfferModal.style.display = "block";
     };
@@ -74,4 +84,6 @@
   };
   // === End Modal Controls ===
 </script>
+{% endif %}
+
 {% endblock %}
