@@ -1,4 +1,4 @@
-import re, random
+import re, random, pprint
 from sqlalchemy import or_
 from flask import Flask, redirect, url_for, render_template, flash, g, session, request
 from flask_mail import Mail, Message
@@ -456,7 +456,6 @@ def edit_payment_methods():
     saved_payments = Payment.query.filter_by(user_id=g.user.id).order_by(Payment.date_added.desc()).all()
     return render_template("payment.html", saved_payments=saved_payments)
 
-# History Page
 @app.route("/history")
 def historyPage():
     if not g.user:
@@ -465,7 +464,7 @@ def historyPage():
     
     events = []
     
-    # Added events for jobs created by the user.
+    # Example: Gather job event data (your existing implementation)
     created_jobs = JobPost.query.filter_by(user_id=g.user.id).all()
     for job in created_jobs:
         events.append({
@@ -473,7 +472,6 @@ def historyPage():
             "text": f"You created the job '{job.title}' on {job.date_created.strftime('%Y-%m-%d %H:%M:%S')}."
         })
     
-    # Added events for jobs taken by the user.
     taken_jobs = JobPost.query.filter_by(taken_by=g.user.id).all()
     for job in taken_jobs:
         if job.date_taken:
@@ -482,7 +480,6 @@ def historyPage():
                 "text": f"You took the job '{job.title}' on {job.date_taken.strftime('%Y-%m-%d %H:%M:%S')}."
             })
     
-    # Added events for jobs completed (both confirmations set) in which the user is involved.
     completed_jobs = JobPost.query.filter(
         JobPost.creator_confirmed == True,
         JobPost.taker_confirmed == True,
@@ -495,10 +492,34 @@ def historyPage():
                 "text": f"Job '{job.title}' was completed on {job.date_completed.strftime('%Y-%m-%d %H:%M:%S')}."
             })
     
-    # Sort events by date (most recent first).
-    events.sort(key=lambda e: e["date"], reverse=True)
+    payments = Payment.query.filter_by(user_id=g.user.id).all()
+    for payment in payments:
+        if payment.transfer_info:
+            events.append({
+                "date": payment.date_created,
+                "text": f"Payment method '{payment.method_name}' processed.",
+                "payment_transfer": payment.transfer_info
+            })
     
-    return render_template("history.html", events=events)
+    start_date_str = request.args.get('start_date')
+    end_date_str = request.args.get('end_date')
+
+    if start_date_str:
+        start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+        events = [e for e in events if e['date'] >= start_date]
+    if end_date_str:
+    # Add one day (or adjust to include the full end date) if needed.
+        end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+        events = [e for e in events if e['date'] <= end_date]
+
+    # Get sort order from query parameter ('asc' or 'desc', default is 'desc')
+    sort_order = request.args.get("sort", "desc")
+    if sort_order == "asc":
+        events.sort(key=lambda e: e["date"])
+    else:
+        events.sort(key=lambda e: e["date"], reverse=True)
+    
+    return render_template("history.html", events=events, sort_order=sort_order)
 
 #Set Main Payment
 
