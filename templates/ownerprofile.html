@@ -201,8 +201,8 @@
   
   /* Footer container at the bottom of each job post */
   .job-footer {
-    display: block;
-    margin-top: 1%;
+    display: block !important;
+    margin-top: auto !important;
   }
   
   .job-meta-info {
@@ -331,6 +331,54 @@
 .offer-posts .offer-post h2 {
   color: #222 !important;
 }
+
+/* --- Harmonize Job and Offer Card Styles --- */
+.listed-posts {
+  background: #fffbea;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(247, 140, 0, 0.10);
+  padding: 32px 24px 24px 24px;
+  margin: 32px 0;
+  border: 1.5px solid #ffe08a;
+  position: relative;
+}
+
+.listed-container .job-post {
+  flex: 0 0 250px;
+  height: 350px;
+  background: #fff;
+  border: 1.5px solid #ffe08a;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(247, 140, 0, 0.10);
+  transition: box-shadow 0.2s, border-color 0.2s;
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+}
+
+.listed-container .job-post:hover {
+  box-shadow: 0 6px 18px rgba(247, 140, 0, 0.18);
+  border-color: #f78c00;
+  /* Vibrant hover effect, similar to offer-posts */
+  background: linear-gradient(90deg, #fffbea 80%, #ffe08a 100%);
+}
+
+/* Make job/offer title color consistent */
+.job-post h2,
+.offer-post h2 {
+  color: #222 !important;
+  font-size: 1.2rem !important;
+  margin-bottom: 10px !important;
+  margin-top: 0 !important;
+  font-weight: bold !important;
+}
+
+/* Make job-footer always stick to bottom */
+.job-footer {
+  display: block !important;
+  margin-top: auto !important;
+}
+
 {% endblock %}
 
 {% block content %}
@@ -442,7 +490,7 @@
     </div>
     
     <!-- Subsection: Taken by You -->
-    <h3>Taken by You</h3>
+    <h3>Taken by You (You Need to Do What This Person is Looking For)</h3>
     <div class="listed-container">
       {% if ongoing_taken_jobs|length == 0 %}
         <p>No ongoing posts taken by you.</p>
@@ -581,7 +629,7 @@
 
   <div class="offer-posts">
     <h2 class="label">Offers Taken</h2>
-    <h3>Created by You</h3>
+    <h3>Created by You (You Need to Do What You are Offering To)</h3>
     <div class="offer-container">
       {% if accepted_offer_posts_created|length == 0 %}
         <p>No offers created by you have been accepted.</p>
@@ -603,7 +651,7 @@
               <span class="job-meta">Salary Range: RM{{ offer.salary_range }}</span><br>
               {% endif %}
               <span class="job-meta">Offered by: {{ offer.creator.username }}</span><br>
-              <span class="job-meta">Accepted by: {{ offer.responder.username }}</span>
+              <span class="job-meta">Taken by: {{ offer.responder.username }}</span>
             </div>
             <div class="job-options">
             </div>
@@ -634,7 +682,7 @@
               <span class="job-meta">Salary Range: RM{{ offer.salary_range }}</span><br>
               {% endif %}
               <span class="job-meta">Offered by: {{ offer.creator.username }}</span><br>
-              <span class="job-meta">Accepted by: {{ offer.responder.username }}</span>
+              <span class="job-meta">Taken by: {{ offer.responder.username }}</span>
             </div>
             <div class="job-options">
             </div>
@@ -669,7 +717,7 @@
               <span class="job-meta">Salary Range: RM{{ offer.salary_range }}</span><br>
               {% endif %}
               <span class="job-meta">Offered by: {{ offer.creator.username }}</span><br>
-              <span class="job-meta">Accepted by: {{ offer.responder.username }}</span>
+              <span class="job-meta">Taken by: {{ offer.responder.username }}</span>
             </div>
           </div>
         </div>
@@ -698,7 +746,7 @@
               <span class="job-meta">Salary Range: RM{{ offer.salary_range }}</span><br>
               {% endif %}
               <span class="job-meta">Offered by: {{ offer.creator.username }}</span><br>
-              <span class="job-meta">Accepted by: {{ offer.responder.username }}</span>
+              <span class="job-meta">Taken by: {{ offer.responder.username }}</span>
             </div>
           </div>
         </div>
