@@ -272,24 +272,22 @@ def profile(usr):
         # Offers created by user and not yet accepted
         listed_offer_posts = OfferPost.query.filter_by(user_id=user.id, accepted=False).all()
 
-        # Offers created by user and accepted but not completed
+        # Offers created by user and accepted but not completed (either confirmation is not True)
         accepted_offer_posts_created = OfferPost.query.filter(
             OfferPost.user_id == user.id,
             OfferPost.accepted == True,
-            OfferPost.creator_confirmed != True,
-            OfferPost.responder_confirmed != True
+            or_(OfferPost.creator_confirmed != True, OfferPost.responder_confirmed != True)
         ).all()
 
-        # Offers accepted by user (not created by user) and not completed
+        # Offers accepted by user (not created by user) and not completed (either confirmation is not True)
         accepted_offer_posts_taken = OfferPost.query.filter(
             OfferPost.accepted == True,
             OfferPost.accepted_by == user.id,
             OfferPost.user_id != user.id,
-            OfferPost.creator_confirmed != True,
-            OfferPost.responder_confirmed != True
+            or_(OfferPost.creator_confirmed != True, OfferPost.responder_confirmed != True)
         ).all()
 
-        # Offers created by user and completed
+        # Offers created by user and completed (both confirmations True)
         completed_offer_posts_created = OfferPost.query.filter(
             OfferPost.user_id == user.id,
             OfferPost.accepted == True,
@@ -297,7 +295,7 @@ def profile(usr):
             OfferPost.responder_confirmed == True
         ).all()
 
-        # Offers accepted by user (not created by user) and completed
+        # Offers accepted by user (not created by user) and completed (both confirmations True)
         completed_offer_posts_taken = OfferPost.query.filter(
             OfferPost.accepted == True,
             OfferPost.accepted_by == user.id,
