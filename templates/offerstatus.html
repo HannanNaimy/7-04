@@ -2,8 +2,8 @@
 
 {% block meta %}
   {{ super() }}
-  {# Only add meta refresh if the job is still incomplete #}
-  {% if not (job.creator_confirmed and job.taker_confirmed) %}
+  {# Only add meta refresh if the offer is still incomplete #}
+  {% if not (offer.creator_confirmed and offer.responder_confirmed) %}
     <meta http-equiv="refresh" content="2">
   {% endif %}
 {% endblock %}
@@ -11,24 +11,24 @@
 {% block content %}
 <div class="job-details-container">
   <header class="job-header">
-    <span class="label-looking-for">Looking For &gt;</span>
-    <h1 class="job-title">{{ job.title }}</h1>
+    <span class="label-looking-for">Offering To &gt;</span>
+    <h1 class="job-title">{{ offer.title }}</h1>
   </header>
 
   <section class="job-content">
-    <p class="job-description">{{ job.description }}</p>
+    <p class="job-description">{{ offer.description }}</p>
   </section>
   
   <footer class="job-footer">
     <p class="job-commission">
-      Commission: RM{{ job.commission }}
+      Commission: RM{{ offer.commission }}
     </p>
 
     <!-- Confirmation button with prompt. Once confirmed it cannot be undone. -->
-    <form action="{{ url_for('jobStatus', job_id=job.id) }}" method="POST">
-      {% if job.creator_confirmed and job.taker_confirmed %}
-        <button class="job-take-button" type="submit" disabled>Completed (Job Complete)</button>
-      {% elif (g.user.id == job.user_id and job.creator_confirmed) or (g.user.id == job.taken_by and job.taker_confirmed) %}
+    <form action="{{ url_for('offerStatus', offer_id=offer.id) }}" method="POST">
+      {% if offer.creator_confirmed and offer.responder_confirmed %}
+        <button class="job-take-button" type="submit" disabled>Completed (Offer Complete)</button>
+      {% elif (g.user.id == offer.user_id and offer.creator_confirmed) or (g.user.id == offer.accepted_by and offer.responder_confirmed) %}
         <button class="job-take-button" type="submit" disabled>Completed</button>
       {% else %}
         <button class="job-take-button"
@@ -39,19 +39,19 @@
       {% endif %}
     </form>
     
-    <!-- Display confirmation statuses for creator and taker -->
+    <!-- Display confirmation statuses for creator and responder -->
     <div class="confirmation-status">
       <p>
-        {{ job.creator.username }} (creator)
-        {% if job.creator_confirmed %}
+        {{ offer.creator.username }} (creator)
+        {% if offer.creator_confirmed %}
           has completed.
         {% else %}
           has not completed.
         {% endif %}
       </p>
       <p>
-        {{ job.taker.username }} (taker)
-        {% if job.taker_confirmed %}
+        {{ offer.responder.username }} (taker)
+        {% if offer.responder_confirmed %}
           has completed.
         {% else %}
           has not completed.
