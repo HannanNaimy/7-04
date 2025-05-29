@@ -34,7 +34,7 @@
         <h2>{{ job.title }}</h2>
         <div class="on-demand-tag">Instant</div>
         <p>{{ job.description }}</p>
-        <span class="job-meta">Commission: RM{{ job.commission }}</span><br>
+        <span class="job-meta">Commission: RM{{ job.commission }}</span>
         <span class="job-meta">
           Posted by:
           <a href="{{ url_for('profile', usr=job.creator.username) }}">{{ job.creator.username }}</a>
@@ -59,7 +59,7 @@
         <h2>{{ job.title }}</h2>
         <div class="listing-tag">Negotiate</div>
         <p>{{ job.description }}</p>
-        <span class="job-meta">Salary Range: RM{{ job.salary_range }}</span><br>
+        <span class="job-meta">Salary Range: RM{{ job.salary_range }}</span>
         <span class="job-meta">
           Posted by:
           <a href="{{ url_for('profile', usr=job.creator.username) }}">{{ job.creator.username }}</a>
