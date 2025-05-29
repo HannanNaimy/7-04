@@ -427,12 +427,10 @@
           <p>{{ job.description }}</p>
           <div class="job-footer">
             <div class="job-meta-info">
-              {% if job.on_demand %}
-              <span class="job-meta">Commission: RM{{ job.commission }}</span><br>
-              {% else %}
-              <span class="job-meta">Salary Range: RM{{ job.salary_range }}</span><br>
-              {% endif %}
-              <span class="job-meta">Posted by: {{ job.creator.username }}</span>
+              <span class="job-meta">
+                Posted by:
+                <a href="{{ url_for('profile', usr=job.creator.username) }}">{{ job.creator.username }}</a>
+              </span>
             </div>
             <div class="job-options">
               <!-- Delete button as a form so we can use POST -->
@@ -454,7 +452,7 @@
     <h3>Created by You</h3>
     <div class="listed-container">
       {% if ongoing_created_jobs|length == 0 %}
-        <p>No ongoing posts created by you.</p>
+        <p>No taken posts created by you.</p>
       {% else %}
         {% for job in ongoing_created_jobs %}
         <div class="job-post">
@@ -467,16 +465,16 @@
           <p>{{ job.description }}</p>
           <div class="job-footer">
             <div class="job-meta-info">
-              {% if job.on_demand %}
-              <span class="job-meta">Commission: RM{{ job.commission }}</span><br>
-              {% else %}
-              <span class="job-meta">Salary Range: RM{{ job.salary_range }}</span><br>
-              {% endif %}
-              <span class="job-meta">Posted by: {{ job.creator.username }}</span><br>
-              <span class="job-meta">Taken by: {{ job.taker.username }}</span>
+              <span class="job-meta">
+                Posted by:
+                <a href="{{ url_for('profile', usr=job.creator.username) }}">{{ job.creator.username }}</a>
+              </span><br>
+              <span class="job-meta">
+                Taken by:
+                <a href="{{ url_for('profile', usr=job.taker.username) }}">{{ job.taker.username }}</a>
+              </span>
             </div>
             <div class="job-options">
-              <!-- Optionally add buttons or details -->
               <form action="{{ url_for('jobStatus', job_id=job.id) }}" method="GET" style="display:inline;">
                 <button type="submit" class="take-button">Check Status</button>
               </form>
@@ -491,7 +489,7 @@
     <h3>Taken by You (You Need to Do What This Person is Looking For)</h3>
     <div class="listed-container">
       {% if ongoing_taken_jobs|length == 0 %}
-        <p>No ongoing posts taken by you.</p>
+        <p>No taken posts taken by you.</p>
       {% else %}
         {% for job in ongoing_taken_jobs %}
         <div class="job-post">
@@ -504,18 +502,19 @@
           <p>{{ job.description }}</p>
           <div class="job-footer">
             <div class="job-meta-info">
-              {% if job.on_demand %}
-              <span class="job-meta">Commission: RM{{ job.commission }}</span><br>
-              {% else %}
-              <span class="job-meta">Salary Range: RM{{ job.salary_range }}</span><br>
-              {% endif %}
-              <span class="job-meta">Posted by: {{ job.creator.username }}</span><br>
-              <span class="job-meta">Taken by: {{ job.taker.username }}</span>
+              <span class="job-meta">
+                Posted by:
+                <a href="{{ url_for('profile', usr=job.creator.username) }}">{{ job.creator.username }}</a>
+              </span><br>
+              <span class="job-meta">
+                Taken by:
+                <a href="{{ url_for('profile', usr=job.taker.username) }}">{{ job.taker.username }}</a>
+              </span>
             </div>
             <div class="job-options">
               <form action="{{ url_for('jobStatus', job_id=job.id) }}" method="GET" style="display:inline;">
                 <button type="submit" class="take-button">Check Status</button>
-              </form> 
+              </form>
             </div>
           </div>
         </div>
@@ -543,13 +542,14 @@
           <p>{{ job.description }}</p>
           <div class="job-footer">
             <div class="job-meta-info">
-              {% if job.on_demand %}
-              <span class="job-meta">Commission: RM{{ job.commission }}</span><br>
-              {% else %}
-              <span class="job-meta">Salary Range: RM{{ job.salary_range }}</span><br>
-              {% endif %}
-              <span class="job-meta">Posted by: {{ job.creator.username }}</span><br>
-              <span class="job-meta">Taken by: {{ job.taker.username }}</span>
+              <span class="job-meta">
+                Posted by:
+                <a href="{{ url_for('profile', usr=job.creator.username) }}">{{ job.creator.username }}</a>
+              </span><br>
+              <span class="job-meta">
+                Taken by:
+                <a href="{{ url_for('profile', usr=job.taker.username) }}">{{ job.taker.username }}</a>
+              </span>
             </div>
           </div>
         </div>
@@ -573,13 +573,14 @@
           <p>{{ job.description }}</p>
           <div class="job-footer">
            <div class="job-meta-info">
-            {% if job.on_demand %}
-            <span class="job-meta">Commission: RM{{ job.commission }}</span><br>
-            {% else %}
-            <span class="job-meta">Salary Range: RM{{ job.salary_range }}</span><br>
-            {% endif %}
-            <span class="job-meta">Posted by: {{ job.creator.username }}</span><br>
-            <span class="job-meta">Taken by: {{ job.taker.username }}</span>
+            <span class="job-meta">
+                Posted by:
+                <a href="{{ url_for('profile', usr=job.creator.username) }}">{{ job.creator.username }}</a>
+              </span><br>
+              <span class="job-meta">
+                Taken by:
+                <a href="{{ url_for('profile', usr=job.taker.username) }}">{{ job.taker.username }}</a>
+              </span>
           </div>
         </div>
       </div>
@@ -606,12 +607,10 @@
           <p>{{ offer.description }}</p>
           <div class="job-footer">
             <div class="job-meta-info">
-              {% if offer.on_demand %}
-              <span class="job-meta">Commission: RM{{ offer.commission }}</span><br>
-              {% else %}
-              <span class="job-meta">Salary Range: RM{{ offer.salary_range }}</span><br>
-              {% endif %}
-              <span class="job-meta">Offered by: {{ offer.creator.username }}</span>
+              <span class="job-meta">
+                Offered by:
+                <a href="{{ url_for('profile', usr=offer.creator.username) }}">{{ offer.creator.username }}</a>
+              </span>
             </div>
             <div class="job-options">
               <form action="{{ url_for('deleteOffer', offer_id=offer.id) }}" method="POST" style="display:inline;">
@@ -643,15 +642,17 @@
           <p>{{ offer.description }}</p>
           <div class="job-footer">
             <div class="job-meta-info">
-              {% if offer.on_demand %}
-              <span class="job-meta">Commission: RM{{ offer.commission }}</span><br>
-              {% else %}
-              <span class="job-meta">Salary Range: RM{{ offer.salary_range }}</span><br>
-              {% endif %}
-              <span class="job-meta">Offered by: {{ offer.creator.username }}</span><br>
-              <span class="job-meta">Taken by: {{ offer.responder.username }}</span>
+              <span class="job-meta">
+                Offered by:
+                <a href="{{ url_for('profile', usr=offer.creator.username) }}">{{ offer.creator.username }}</a>
+              </span><br>
+              <span class="job-meta">
+                Taken by:
+                <a href="{{ url_for('profile', usr=offer.responder.username) }}">{{ offer.responder.username }}</a>
+              </span>
             </div>
             <div class="job-options">
+              <!-- Keep check status button if you want to add it here in the future -->
             </div>
           </div>
         </div>
@@ -674,15 +675,17 @@
           <p>{{ offer.description }}</p>
           <div class="job-footer">
             <div class="job-meta-info">
-              {% if offer.on_demand %}
-              <span class="job-meta">Commission: RM{{ offer.commission }}</span><br>
-              {% else %}
-              <span class="job-meta">Salary Range: RM{{ offer.salary_range }}</span><br>
-              {% endif %}
-              <span class="job-meta">Offered by: {{ offer.creator.username }}</span><br>
-              <span class="job-meta">Taken by: {{ offer.responder.username }}</span>
+              <span class="job-meta">
+                Offered by:
+                <a href="{{ url_for('profile', usr=offer.creator.username) }}">{{ offer.creator.username }}</a>
+              </span><br>
+              <span class="job-meta">
+                Taken by:
+                <a href="{{ url_for('profile', usr=offer.responder.username) }}">{{ offer.responder.username }}</a>
+              </span>
             </div>
             <div class="job-options">
+              <!-- Keep check status button if you want to add it here in the future -->
             </div>
           </div>
         </div>
@@ -709,13 +712,14 @@
           <p>{{ offer.description }}</p>
           <div class="job-footer">
             <div class="job-meta-info">
-              {% if offer.on_demand %}
-              <span class="job-meta">Commission: RM{{ offer.commission }}</span><br>
-              {% else %}
-              <span class="job-meta">Salary Range: RM{{ offer.salary_range }}</span><br>
-              {% endif %}
-              <span class="job-meta">Offered by: {{ offer.creator.username }}</span><br>
-              <span class="job-meta">Taken by: {{ offer.responder.username }}</span>
+              <span class="job-meta">
+                Offered by:
+                <a href="{{ url_for('profile', usr=offer.creator.username) }}">{{ offer.creator.username }}</a>
+              </span><br>
+              <span class="job-meta">
+                Taken by:
+                <a href="{{ url_for('profile', usr=offer.responder.username) }}">{{ offer.responder.username }}</a>
+              </span>
             </div>
           </div>
         </div>
@@ -738,13 +742,14 @@
           <p>{{ offer.description }}</p>
           <div class="job-footer">
             <div class="job-meta-info">
-              {% if offer.on_demand %}
-              <span class="job-meta">Commission: RM{{ offer.commission }}</span><br>
-              {% else %}
-              <span class="job-meta">Salary Range: RM{{ offer.salary_range }}</span><br>
-              {% endif %}
-              <span class="job-meta">Offered by: {{ offer.creator.username }}</span><br>
-              <span class="job-meta">Taken by: {{ offer.responder.username }}</span>
+              <span class="job-meta">
+                Offered by:
+                <a href="{{ url_for('profile', usr=offer.creator.username) }}">{{ offer.creator.username }}</a>
+              </span><br>
+              <span class="job-meta">
+                Taken by:
+                <a href="{{ url_for('profile', usr=offer.responder.username) }}">{{ offer.responder.username }}</a>
+              </span>
             </div>
           </div>
         </div>
@@ -753,8 +758,7 @@
     </div>
   </div>
 
-  <!-- ...existing job posts sections... -->
-  <!-- ...existing code... -->
+  <!-- ...repeat similar changes for completed jobs/offers if needed... -->
 </div>
 {% endblock %}
 
