@@ -461,25 +461,27 @@ def historyPage():
     if not g.user:
         flash("You must be logged in to view this page.", "error")
         return redirect(url_for("login"))
-    
+
     events = []
-    
-    # Example: Gather job event data (your existing implementation)
+
+    # Gather job event data (existing implementation)
     created_jobs = JobPost.query.filter_by(user_id=g.user.id).all()
     for job in created_jobs:
         events.append({
             "date": job.date_created,
-            "text": f"You created the job '{job.title}' on {job.date_created.strftime('%Y-%m-%d %H:%M:%S')}."
+            "text": f"You created the job '{job.title}'.",  # Removed the duplicate date
+            "payment_transfer": "-"  # No payment transfer for created jobs
         })
-    
+
     taken_jobs = JobPost.query.filter_by(taken_by=g.user.id).all()
     for job in taken_jobs:
         if job.date_taken:
             events.append({
                 "date": job.date_taken,
-                "text": f"You took the job '{job.title}' on {job.date_taken.strftime('%Y-%m-%d %H:%M:%S')}."
+                "text": f"You took the job '{job.title}'.",  # Removed duplicate date information
+                "payment_transfer": "-"  # No payment transfer for taken jobs
             })
-    
+
     completed_jobs = JobPost.query.filter(
         JobPost.creator_confirmed == True,
         JobPost.taker_confirmed == True,
@@ -489,9 +491,10 @@ def historyPage():
         if job.date_completed:
             events.append({
                 "date": job.date_completed,
-                "text": f"Job '{job.title}' was completed on {job.date_completed.strftime('%Y-%m-%d %H:%M:%S')}."
+                "text": f"Job '{job.title}' was completed.",  # Removed duplicate date information
+                "payment_transfer": f"Transferred from Escrow to {job.taker.username}: Rm{job.commission}" if job.commission else "-"
             })
-    
+
     payments = Payment.query.filter_by(user_id=g.user.id).all()
     for payment in payments:
         if payment.transfer_info:
@@ -500,7 +503,8 @@ def historyPage():
                 "text": f"Payment method '{payment.method_name}' processed.",
                 "payment_transfer": payment.transfer_info
             })
-    
+
+    # Apply date filter
     start_date_str = request.args.get('start_date')
     end_date_str = request.args.get('end_date')
 
@@ -508,17 +512,16 @@ def historyPage():
         start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
         events = [e for e in events if e['date'] >= start_date]
     if end_date_str:
-    # Add one day (or adjust to include the full end date) if needed.
         end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
         events = [e for e in events if e['date'] <= end_date]
 
-    # Get sort order from query parameter ('asc' or 'desc', default is 'desc')
+    # Sort events by date
     sort_order = request.args.get("sort", "desc")
     if sort_order == "asc":
         events.sort(key=lambda e: e["date"])
     else:
         events.sort(key=lambda e: e["date"], reverse=True)
-    
+
     return render_template("history.html", events=events, sort_order=sort_order)
 
 #Set Main Payment
