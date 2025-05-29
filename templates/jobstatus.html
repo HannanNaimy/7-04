@@ -12,6 +12,21 @@
 <div class="job-details-container">
   <header class="job-header">
     <span class="label-looking-for">Looking For &gt;</span>
+    
+    <!-- Added doer/benefitor graphic row -->
+    <div style="display: flex; align-items: center; margin: 16px 0;">
+      <div style="display: flex; flex-direction: column; align-items: center; width: 120px;">
+        <img src="/static/assets/doer.png" alt="Doer" style="width:48px;height:48px;">
+        <span style="margin-top: 8px;">{{ job.taker.username }}</span>
+      </div>
+      <div style="height: 60px; border-left: 2px dashed #bbb; margin: 0 24px;"></div>
+      <div style="display: flex; flex-direction: column; align-items: center; width: 120px;">
+        <img src="/static/assets/benefitor.png" alt="Benefitor" style="width:48px;height:48px;">
+        <span style="margin-top: 8px;">{{ job.creator.username }}</span>
+      </div>
+    </div>
+    <!-- End graphic row -->
+    
     <h1 class="job-title">{{ job.title }}</h1>
   </header>
 
