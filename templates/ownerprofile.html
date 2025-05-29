@@ -359,8 +359,6 @@
 .listed-container .job-post:hover {
   box-shadow: 0 6px 18px rgba(247, 140, 0, 0.18);
   border-color: #f78c00;
-  /* Vibrant hover effect, similar to offer-posts */
-  background: linear-gradient(90deg, #fffbea 80%, #ffe08a 100%);
 }
 
 /* Make job/offer title color consistent */
@@ -628,7 +626,7 @@
   </div>
 
   <div class="offer-posts">
-    <h2 class="label">Offers Taken</h2>
+    <h2 class="label">Instant-Offers Taken</h2>
     <h3>Created by You (You Need to Do What You are Offering To)</h3>
     <div class="offer-container">
       {% if accepted_offer_posts_created|length == 0 %}
@@ -694,7 +692,7 @@
   </div>
 
   <div class="offer-posts">
-    <h2 class="label">Offers Completed</h2>
+    <h2 class="label">Instant-Offers Completed</h2>
     <h3>Created by You</h3>
     <div class="offer-container">
       {% if completed_offer_posts_created|length == 0 %}
