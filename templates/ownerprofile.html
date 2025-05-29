@@ -376,7 +376,7 @@
   display: block !important;
   margin-top: auto !important;
 }
-
+  
 {% endblock %}
 
 {% block content %}
@@ -652,7 +652,9 @@
               </span>
             </div>
             <div class="job-options">
-              <!-- Keep check status button if you want to add it here in the future -->
+              <form action="{{ url_for('offerStatus', offer_id=offer.id) }}" method="GET" style="display:inline;">
+                <button type="submit" class="take-button">Check Status</button>
+              </form>
             </div>
           </div>
         </div>
@@ -685,7 +687,9 @@
               </span>
             </div>
             <div class="job-options">
-              <!-- Keep check status button if you want to add it here in the future -->
+              <form action="{{ url_for('offerStatus', offer_id=offer.id) }}" method="GET" style="display:inline;">
+                <button type="submit" class="take-button">Check Status</button>
+              </form>
             </div>
           </div>
         </div>
@@ -757,8 +761,6 @@
       {% endif %}
     </div>
   </div>
-
-  <!-- ...repeat similar changes for completed jobs/offers if needed... -->
 </div>
 {% endblock %}
 

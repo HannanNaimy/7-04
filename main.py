@@ -493,12 +493,60 @@ def jobStatus(job_id):
     response.headers["Expires"] = "0"
     return response
 
+# Offer Status Page
+@app.route("/offerStatus/<int:offer_id>", methods=["GET", "POST"])
+def offerStatus(offer_id):
+    if not g.user:
+        flash("You must be logged in to view this page.", "error")
+        return redirect(url_for("login"))
 
-# Offering To Page
+    offer = OfferPost.query.get(offer_id)
+    if not offer:
+        flash("Offer not found.", "error")
+        return redirect(url_for("profile", usr=g.user.username))
 
-# Guide
+    # Only allow creator or responder.
+    if g.user.id != offer.user_id and g.user.id != offer.accepted_by:
+        flash("You are not authorized to update the offer status.", "error")
+        return redirect(url_for("profile", usr=g.user.username))
 
-# Create Job Button Disabled Message
+    if request.method == "POST":
+        # Do not allow changes if both users have already confirmed
+        if offer.creator_confirmed and offer.responder_confirmed:
+            flash("Offer is already marked as complete. Confirmation cannot be undone.", "error")
+            return redirect(url_for("profile", usr=g.user.username))
+
+        # Allow only unconfirmed users to confirm
+        if g.user.id == offer.user_id and not offer.creator_confirmed:
+            offer.creator_confirmed = True
+        elif g.user.id == offer.accepted_by and not offer.responder_confirmed:
+            offer.responder_confirmed = True
+
+        # If both confirmations are now true, update the completion date.
+        if offer.creator_confirmed and offer.responder_confirmed:
+            offer.date_completed = datetime.utcnow()
+
+        db.session.commit()
+
+        # If both confirmed, redirect immediately.
+        if offer.creator_confirmed and offer.responder_confirmed:
+            flash("Offer marked as complete!", "success")
+            return redirect(url_for("profile", usr=g.user.username))
+        else:
+            total = int(offer.creator_confirmed or 0) + int(offer.responder_confirmed or 0)
+            flash(f"Offer confirmation updated: {total}/2", "info")
+            return redirect(url_for("offerStatus", offer_id=offer_id))
+
+    # For GET requests, if complete, redirect immediately.
+    if offer.creator_confirmed and offer.responder_confirmed:
+        return redirect(url_for("profile", usr=g.user.username))
+
+    # Otherwise, render the page.
+    response = make_response(render_template("offerstatus.html", offer=offer))
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 # Job Details Page
 @app.route("/postDetails/<int:job_id>")

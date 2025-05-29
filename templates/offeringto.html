@@ -59,6 +59,12 @@
           Posted by:
           <a href="{{ url_for('profile', usr=offer.creator.username) }}">{{ offer.creator.username }}</a>
         </span>
+        {% if offer.responder %}
+        <span class="job-meta">
+          Taken by:
+          <a href="{{ url_for('profile', usr=offer.responder.username) }}">{{ offer.responder.username }}</a>
+        </span>
+        {% endif %}
         <a href="{{ url_for('offer_details', offer_id=offer.id) }}">
           <button class="take-button">See Details</button>
         </a>

@@ -39,6 +39,12 @@
           Posted by:
           <a href="{{ url_for('profile', usr=job.creator.username) }}">{{ job.creator.username }}</a>
         </span>
+        {% if job.taker %}
+        <span class="job-meta">
+          Taken by:
+          <a href="{{ url_for('profile', usr=job.taker.username) }}">{{ job.taker.username }}</a>
+        </span>
+        {% endif %}
         <a href="{{ url_for('post_details', job_id=job.id) }}">
           <button class="take-button">See Details</button>
         </a>
