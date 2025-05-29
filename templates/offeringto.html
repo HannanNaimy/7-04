@@ -1,5 +1,12 @@
 {% extends "homeparent.html" %}
 
+{% block styles %}
+.job-post.highlight-border {
+  border: 2.5px solid #e53935 !important;
+  box-shadow: 0 0 0 2px #e5393533;
+}
+{% endblock %}
+
 {% block content %}
 <div class="jobs-container">
   <div class="jobs-header" style="display: flex; align-items: center; justify-content: space-between;">
@@ -24,7 +31,7 @@
   <!-- Section: Instant Offers -->
   <div class="jobs-listings">
       {% for offer in on_demand_offers %}
-      <div class="job-post">
+      <div class="job-post{% if g.user and offer.creator.username == g.user.username %} highlight-border{% endif %}">
         <h2>{{ offer.title }}</h2>
         <div class="on-demand-tag">Instant</div>
         <p>{{ offer.description }}</p>
@@ -43,7 +50,7 @@
   <!-- Section: Negotiate Offers -->
   <div class="jobs-listings">
       {% for offer in listing_offers %}
-      <div class="job-post">
+      <div class="job-post{% if g.user and offer.creator.username == g.user.username %} highlight-border{% endif %}">
         <h2>{{ offer.title }}</h2>
         <div class="listing-tag">Negotiate</div>
         <p>{{ offer.description }}</p>
