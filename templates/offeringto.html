@@ -29,7 +29,10 @@
         <div class="on-demand-tag">Instant</div>
         <p>{{ offer.description }}</p>
         <span class="job-meta">Commission: RM{{ offer.commission }}</span><br>
-        <span class="job-meta">Posted by: {{ offer.creator.username }}</span>
+        <span class="job-meta">
+          Posted by:
+          <a href="{{ url_for('profile', usr=offer.creator.username) }}">{{ offer.creator.username }}</a>
+        </span>
         <a href="{{ url_for('offer_details', offer_id=offer.id) }}">
           <button class="take-button">See Details</button>
         </a>
@@ -45,7 +48,10 @@
         <div class="listing-tag">Negotiate</div>
         <p>{{ offer.description }}</p>
         <span class="job-meta">Salary Range: RM{{ offer.salary_range }}</span><br>
-        <span class="job-meta">Posted by: {{ offer.creator.username }}</span>
+        <span class="job-meta">
+          Posted by:
+          <a href="{{ url_for('profile', usr=offer.creator.username) }}">{{ offer.creator.username }}</a>
+        </span>
         <a href="{{ url_for('offer_details', offer_id=offer.id) }}">
           <button class="take-button">See Details</button>
         </a>
