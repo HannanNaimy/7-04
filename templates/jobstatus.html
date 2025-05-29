@@ -13,16 +13,36 @@
   <header class="job-header">
     <span class="label-looking-for">Looking For &gt;</span>
     
-    <!-- Added doer/benefitor graphic row -->
-    <div style="display: flex; align-items: center; margin: 16px 0;">
-      <div style="display: flex; flex-direction: column; align-items: center; width: 120px;">
-        <img src="/static/assets/doer.png" alt="Doer" style="width:48px;height:48px;">
-        <span style="margin-top: 8px;">{{ job.taker.username }}</span>
+    <!-- Centered and enlarged doer/benefitor graphic row with right-facing arrow -->
+    <div style="display: flex; align-items: center; justify-content: center; margin: 32px 0;">
+      <div style="display: flex; flex-direction: column; align-items: center; width: 240px;">
+        <img src="/static/assets/doer.png" alt="Doer" style="width:140px;height:140px;">
+        <span style="margin-top: 16px; font-size: 1.25em;">
+          {{ job.taker.username }}
+          {% if job.taker_confirmed %}
+            <span style="color: #28a745; font-size: 1.2em; vertical-align: middle;">&#10003;</span>
+          {% else %}
+            <span style="color: #dc3545; font-size: 1.2em; vertical-align: middle;">&#10007;</span>
+          {% endif %}
+        </span>
       </div>
-      <div style="height: 60px; border-left: 2px dashed #bbb; margin: 0 24px;"></div>
-      <div style="display: flex; flex-direction: column; align-items: center; width: 120px;">
-        <img src="/static/assets/benefitor.png" alt="Benefitor" style="width:48px;height:48px;">
-        <span style="margin-top: 8px;">{{ job.creator.username }}</span>
+      <div style="display: flex; align-items: center; margin: 0 36px;">
+        <!-- SVG right arrow, longer -->
+        <svg width="180" height="32" viewBox="0 0 180 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="0" y1="16" x2="160" y2="16" stroke="#e68608" stroke-width="4" />
+          <polygon points="160,8 180,16 160,24" fill="#e68608"/>
+        </svg>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: center; width: 240px;">
+        <img src="/static/assets/benefitor.png" alt="Benefitor" style="width:140px;height:140px;">
+        <span style="margin-top: 16px; font-size: 1.25em;">
+          {{ job.creator.username }}
+          {% if job.creator_confirmed %}
+            <span style="color: #28a745; font-size: 1.2em; vertical-align: middle;">&#10003;</span>
+          {% else %}
+            <span style="color: #dc3545; font-size: 1.2em; vertical-align: middle;">&#10007;</span>
+          {% endif %}
+        </span>
       </div>
     </div>
     <!-- End graphic row -->
