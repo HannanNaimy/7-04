@@ -334,10 +334,16 @@ def lookingFor():
         on_demand = True if request.form.get('on_demand') else False  
         user_id = g.user.id  
 
-        # --- Enforce post limits ---
+        # --- Enforce post limits (exclude completed posts) ---
         user_jobs = g.user.job_posts
-        on_demand_count = sum(1 for job in user_jobs if job.on_demand)
-        not_on_demand_count = sum(1 for job in user_jobs if not job.on_demand)
+        on_demand_count = sum(
+            1 for job in user_jobs
+            if job.on_demand and not (job.creator_confirmed and job.taker_confirmed)
+        )
+        not_on_demand_count = sum(
+            1 for job in user_jobs
+            if not job.on_demand and not (job.creator_confirmed and job.taker_confirmed)
+        )
         if on_demand and on_demand_count >= 3:
             flash("You have reached the maximum limit of 3 Instant (on-demand) posts.", "error")
             return redirect(url_for("lookingFor"))
@@ -398,10 +404,16 @@ def lookingFor():
         return redirect(url_for('lookingFor'))
     
     jobs = JobPost.query.filter_by(taken=False).all()
-    # Count user's own posts for modal button logic
+    # Count user's own posts for modal button logic (exclude completed)
     user_jobs = g.user.job_posts
-    on_demand_count = sum(1 for job in user_jobs if job.on_demand)
-    not_on_demand_count = sum(1 for job in user_jobs if not job.on_demand)
+    on_demand_count = sum(
+        1 for job in user_jobs
+        if job.on_demand and not (job.creator_confirmed and job.taker_confirmed)
+    )
+    not_on_demand_count = sum(
+        1 for job in user_jobs
+        if not job.on_demand and not (job.creator_confirmed and job.taker_confirmed)
+    )
     return render_template("lookingfor.html", jobs=jobs, job_count=len(user_jobs),
                            on_demand_jobs=[job for job in jobs if job.on_demand],
                            listing_jobs=[job for job in jobs if not job.on_demand],
@@ -420,10 +432,16 @@ def offeringTo():
         on_demand = True if request.form.get('on_demand') else False
         user_id = g.user.id  
 
-        # --- Enforce post limits ---
+        # --- Enforce post limits (exclude completed offers) ---
         user_offers = g.user.offer_posts
-        on_demand_count = sum(1 for offer in user_offers if offer.on_demand)
-        not_on_demand_count = sum(1 for offer in user_offers if not offer.on_demand)
+        on_demand_count = sum(
+            1 for offer in user_offers
+            if offer.on_demand and not (offer.creator_confirmed and offer.responder_confirmed)
+        )
+        not_on_demand_count = sum(
+            1 for offer in user_offers
+            if not offer.on_demand and not (offer.creator_confirmed and offer.responder_confirmed)
+        )
         if on_demand and on_demand_count >= 3:
             flash("You have reached the maximum limit of 3 Instant (on-demand) offers.", "error")
             return redirect(url_for("offeringTo"))
@@ -485,8 +503,14 @@ def offeringTo():
     
     offers = OfferPost.query.filter_by(accepted=False).all()
     user_offers = g.user.offer_posts
-    on_demand_count = sum(1 for offer in user_offers if offer.on_demand)
-    not_on_demand_count = sum(1 for offer in user_offers if not offer.on_demand)
+    on_demand_count = sum(
+        1 for offer in user_offers
+        if offer.on_demand and not (offer.creator_confirmed and offer.responder_confirmed)
+    )
+    not_on_demand_count = sum(
+        1 for offer in user_offers
+        if not offer.on_demand and not (offer.creator_confirmed and offer.responder_confirmed)
+    )
     return render_template("offeringto.html", offers=offers, offer_count=len(user_offers),
                            on_demand_offers=[offer for offer in offers if offer.on_demand],
                            listing_offers=[offer for offer in offers if not offer.on_demand],
