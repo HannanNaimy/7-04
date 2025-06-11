@@ -86,7 +86,7 @@
     </ul>
 
     <!-- Create Offer Form -->
-    <form id="offerDetailsForm" action="/offeringTo" method="POST">
+    <form id="offerDetailsForm" action="/offeringTo" method="POST" enctype="multipart/form-data">
       <!-- Step 1: Offer Details -->
       <div id="step1">
         <h2>Add Offer Details</h2>
@@ -107,7 +107,10 @@
           <label for="offerDescription">Offer Description:</label>
           <textarea id="offerDescription" name="description" rows="4" placeholder="Enter offer description"></textarea>
         </div>
-
+        <div class="form-group">
+          <label for="picture">Picture (max 2MB, PNG/JPG/JPEG/GIF):</label>
+          <input type="file" name="picture" id="picture" accept=".png,.jpg,.jpeg,.gif" />
+        </div>
         <div class="form-group" id="commissionGroup" style="display: none;">
           <label for="commission">Commission:</label>
           <input type="number" name="commission" id="commission" placeholder="Enter commission cost" />

@@ -1,4 +1,3 @@
-
 import os, re, random, pprint
 from sqlalchemy import or_
 from flask import Flask, redirect, url_for, render_template, flash, make_response, g, session, request
@@ -12,10 +11,15 @@ from config import Config
 app = Flask(__name__) 
 app.config.from_object(Config)
 app.config["UPLOAD_FOLDER"] = Config.UPLOAD_FOLDER
+app.config["POST_PICTURE_FOLDER"] = os.path.join("static", "postpicture")
+app.config["MAX_POST_PIC_SIZE"] = 2 * 1024 * 1024  # 2MB
 
 # Ensure upload folder exists
 if not os.path.exists(app.config["UPLOAD_FOLDER"]):
     os.makedirs(app.config["UPLOAD_FOLDER"])
+
+if not os.path.exists(app.config["POST_PICTURE_FOLDER"]):
+    os.makedirs(app.config["POST_PICTURE_FOLDER"])
 
 db.init_app(app)
 mail = Mail(app)
@@ -321,6 +325,7 @@ def profile(usr):
     else:
         # Pass the user instance to the template so that 'user.profile_picture' is defined.
         return render_template("profile.html", usr=user)
+
 # Looking For Page  
 
 @app.route("/lookingFor", methods=["GET", "POST"])
@@ -335,24 +340,39 @@ def lookingFor():
         on_demand = True if request.form.get('on_demand') else False  
         user_id = g.user.id  
 
+        # --- Handle picture upload ---
+        picture_path = None
+        if 'picture' in request.files:
+            file = request.files['picture']
+            if file and file.filename != "":
+                if not allowed_file(file.filename):
+                    flash("Invalid image type. Only PNG, JPG, JPEG, GIF allowed.", "error")
+                    return redirect(url_for("lookingFor"))
+                file.seek(0, os.SEEK_END)
+                file_length = file.tell()
+                file.seek(0)
+                if file_length > app.config["MAX_POST_PIC_SIZE"]:
+                    flash("Image exceeds 2MB size limit.", "error")
+                    return redirect(url_for("lookingFor"))
+                filename = secure_filename(file.filename)
+                picture_path = os.path.join(app.config["POST_PICTURE_FOLDER"], filename)
+                file.save(picture_path)
+                picture_path = picture_path.replace("\\", "/")  # For Windows path
+
         if on_demand:
-            # Parse commission for on-demand jobs
             commission_input = request.form.get('commission')
             try:
                 commission = float(commission_input)
             except ValueError:
                 flash("Invalid commission cost. Please enter a numeric value.", "error")
                 return redirect(url_for("lookingFor"))
-            # For on-demand postings, there’s no salary range
             salary_range_value = None
         else:
-            # For non on-demand jobs, get the salary range inputs
             min_salary = request.form.get('min_salary')
             max_salary = request.form.get('max_salary')
             if not min_salary or not max_salary:
                 flash("Please enter both a minimum and maximum salary.", "error")
                 return redirect(url_for("lookingFor"))
-            # Commission is not applicable here. Instead, form a salary range string.
             commission = None
             salary_range_value = f"{min_salary}-{max_salary}"
 
@@ -362,7 +382,8 @@ def lookingFor():
             commission=commission,
             on_demand=on_demand,
             salary_range=salary_range_value,
-            user_id=user_id
+            user_id=user_id,
+            picture=picture_path  # assumes JobPost has a 'picture' field
         )
         
         db.session.add(new_post)
@@ -388,22 +409,37 @@ def offeringTo():
     if request.method == 'POST':
         title = request.form.get('title')
         description = request.form.get('description')
-        # Determine on-demand status from the checkbox.
         on_demand = True if request.form.get('on_demand') else False
         user_id = g.user.id  
 
+        # --- Handle picture upload ---
+        picture_path = None
+        if 'picture' in request.files:
+            file = request.files['picture']
+            if file and file.filename != "":
+                if not allowed_file(file.filename):
+                    flash("Invalid image type. Only PNG, JPG, JPEG, GIF allowed.", "error")
+                    return redirect(url_for("offeringTo"))
+                file.seek(0, os.SEEK_END)
+                file_length = file.tell()
+                file.seek(0)
+                if file_length > app.config["MAX_POST_PIC_SIZE"]:
+                    flash("Image exceeds 2MB size limit.", "error")
+                    return redirect(url_for("offeringTo"))
+                filename = secure_filename(file.filename)
+                picture_path = os.path.join(app.config["POST_PICTURE_FOLDER"], filename)
+                file.save(picture_path)
+                picture_path = picture_path.replace("\\", "/")  # For Windows path
+
         if on_demand:
-            # For on-demand offers, commission is required.
             commission_input = request.form.get('commission')
             try:
                 commission = float(commission_input)
             except ValueError:
                 flash("Invalid commission cost. Please enter a numeric value.", "error")
                 return redirect(url_for("offeringTo"))
-            # on-demand postings don't have a salary range.
             salary_range_value = None
         else:
-            # For standard offers, commission is not applicable.
             min_salary = request.form.get('min_salary')
             max_salary = request.form.get('max_salary')
             if not min_salary or not max_salary:
@@ -412,14 +448,14 @@ def offeringTo():
             commission = None
             salary_range_value = f"{min_salary}-{max_salary}"
 
-        # Create a new OfferPost instead of JobPost.
         new_offer = OfferPost(
             title=title,
             description=description,
             commission=commission,
             on_demand=on_demand,
             salary_range=salary_range_value,
-            user_id=user_id
+            user_id=user_id,
+            picture=picture_path  # assumes OfferPost has a 'picture' field
         )
         
         db.session.add(new_offer)
@@ -428,7 +464,6 @@ def offeringTo():
         flash("Offer Created Successfully!", "success")
         return redirect(url_for('offeringTo'))
     
-    # For GET requests, list only those offers that are not yet accepted.
     offers = OfferPost.query.filter_by(accepted=False).all()
     offer_count = len(g.user.offer_posts)
     on_demand_offers = [offer for offer in offers if offer.on_demand]
