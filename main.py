@@ -10,9 +10,6 @@ from models import db, User, JobPost, Payment, OfferPost
 from config import Config
 app = Flask(__name__) 
 app.config.from_object(Config)
-app.config["UPLOAD_FOLDER"] = Config.UPLOAD_FOLDER
-app.config["POST_PICTURE_FOLDER"] = os.path.join("static", "postpicture")
-app.config["MAX_POST_PIC_SIZE"] = 2 * 1024 * 1024  # 2MB
 
 # Ensure upload folder exists
 if not os.path.exists(app.config["UPLOAD_FOLDER"]):
@@ -25,11 +22,9 @@ db.init_app(app)
 mail = Mail(app)
 migrate = Migrate(app, db)
 
-# ALLOWED_EXTENSIONS should be defined here for modularity
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
 def allowed_file(filename):
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in app.config["ALLOWED_EXTENSIONS"]
 
 @app.before_request
 def load_logged_in_user():
