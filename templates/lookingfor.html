@@ -19,6 +19,16 @@
   margin-bottom: 4px;
   display: block;
 }
+/* Post image styling */
+.post-image {
+  display: block;
+  margin: 0 auto 10px auto;
+  max-width: 100%;
+  max-height: 90px;
+  object-fit: contain;
+  object-position: center;
+  background: #fff;
+}
 {% endblock %}
 
 {% block content %}
@@ -48,6 +58,9 @@
   <div class="jobs-listings">
     {% for job in on_demand_jobs %}
       <div class="job-post{% if g.user and job.creator.username == g.user.username %} highlight-border{% endif %}">
+        {% if job.picture %}
+          <img src="{{ url_for('static', filename=job.picture.split('static/', 1)[1]) }}" alt="Job Picture" class="post-image" />
+        {% endif %}
         <h2>{{ job.title }}</h2>
         <div class="on-demand-tag">Instant</div>
         <p>{{ job.description }}</p>
@@ -73,6 +86,9 @@
   <div class="jobs-listings">
     {% for job in listing_jobs %}
       <div class="job-post{% if g.user and job.creator.username == g.user.username %} highlight-border{% endif %}">
+        {% if job.picture %}
+          <img src="{{ url_for('static', filename=job.picture.split('static/', 1)[1]) }}" alt="Job Picture" class="post-image" />
+        {% endif %}
         <h2>{{ job.title }}</h2>
         <div class="listing-tag">Negotiate</div>
         <p>{{ job.description }}</p>
