@@ -47,6 +47,9 @@ class JobPost(db.Model):
     creator_confirmed = db.Column(db.Boolean, default=False)
     taker_confirmed = db.Column(db.Boolean, default=False)
     
+    # New picture field for JobPost
+    picture = db.Column(db.String(200), nullable=True)  # Path to post picture, can be null
+    
     @property
     def is_complete(self):
         """Job is complete only when both the creator and the taker have confirmed."""
@@ -72,6 +75,9 @@ class OfferPost(db.Model):
     # Added confirmation flags:
     creator_confirmed = db.Column(db.Boolean, default=False)
     responder_confirmed = db.Column(db.Boolean, default=False)
+    
+    # New picture field for OfferPost
+    picture = db.Column(db.String(200), nullable=True)  # Path to post picture, can be null
     
     @property
     def is_complete(self):

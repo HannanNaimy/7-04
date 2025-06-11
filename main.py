@@ -327,7 +327,6 @@ def profile(usr):
         return render_template("profile.html", usr=user)
 
 # Looking For Page  
-
 @app.route("/lookingFor", methods=["GET", "POST"])
 def lookingFor():
     if not g.user:
