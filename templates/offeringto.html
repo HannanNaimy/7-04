@@ -148,7 +148,9 @@
         <div class="form-group">
           <label for="offerTitle">Offer Title:</label>
           <input type="text" name="title" id="offerTitle" 
-                 value="Offering To " placeholder="Enter offer title" />
+                 value="Offering To " placeholder="Enter offer title"
+                 maxlength="50" />
+          <span style="font-size: 0.95em; color: #888;">(max 50 characters)</span>
         </div>
         <div class="form-group">
           <label for="offerDescription">Offer Description:</label>
@@ -245,6 +247,10 @@
     var titleValue = offerTitleInput.value;
     if (titleValue.trim() === "" || titleValue === prefix) {
       alert("Please fill in the offer title (after the prefix).");
+      return;
+    }
+    if (titleValue.length > 50) {
+      alert("Offer title must not exceed 50 characters.");
       return;
     }
     var description = document.getElementById("offerDescription").value;

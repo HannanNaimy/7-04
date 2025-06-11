@@ -147,7 +147,9 @@
         <!-- Single Input Field with built‑in prefix -->
         <div class="form-group">
           <label for="jobTitleInput">Job Title:</label>
-          <input type="text" id="jobTitleInput" name="title" value="Looking For " placeholder="Enter job title" />
+          <input type="text" id="jobTitleInput" name="title" value="Looking For " placeholder="Enter job title"
+                 maxlength="50" />
+          <span style="font-size: 0.95em; color: #888;">(max 50 characters)</span>
         </div>
         <div class="form-group">
           <label for="jobDescription">Job Description:</label>
@@ -253,10 +255,13 @@
 
   // Before form submission, validate and (if needed) update the title value.
   document.getElementById("toStep2").addEventListener("click", function() {
-    // The title is already maintained in the field (with prefix enforced).
     var titleValue = titleInput.value;
     if (titleValue.trim() === "" || titleValue === prefix) {
       alert("Please fill in the job title.");
+      return;
+    }
+    if (titleValue.length > 50) {
+      alert("Job title must not exceed 50 characters.");
       return;
     }
 
