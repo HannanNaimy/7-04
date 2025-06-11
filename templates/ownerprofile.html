@@ -589,7 +589,7 @@
     </div>
   </div>
 
-  <!-- Offer Posts Section -->
+  <!-- Offer Posts Section: Offers Listed -->
   <div class="offer-posts">
     <h2 class="label">Offers Listed</h2>
     <div class="offer-container">
@@ -624,8 +624,10 @@
     </div>
   </div>
 
+  <!-- Offer Posts Section: Instant-Offers Taken -->
   <div class="offer-posts">
     <h2 class="label">Instant-Offers Taken</h2>
+    <!-- Subsection: Created by You -->
     <h3>Created by You (You Need to Do What You are Offering To)</h3>
     <div class="offer-container">
       {% if accepted_offer_posts_created|length == 0 %}
@@ -661,6 +663,7 @@
         {% endfor %}
       {% endif %}
     </div>
+    <!-- Subsection: Taken by You -->
     <h3>Taken by You</h3>
     <div class="offer-container">
       {% if accepted_offer_posts_taken|length == 0 %}
@@ -698,8 +701,10 @@
     </div>
   </div>
 
+  <!-- Offer Posts Section: Instant-Offers Completed -->
   <div class="offer-posts">
     <h2 class="label">Instant-Offers Completed</h2>
+    <!-- Subsection: Created by You -->
     <h3>Created by You</h3>
     <div class="offer-container">
       {% if completed_offer_posts_created|length == 0 %}
@@ -730,6 +735,7 @@
         {% endfor %}
       {% endif %}
     </div>
+    <!-- Subsection: Taken by You -->
     <h3>Taken by You</h3>
     <div class="offer-container">
       {% if completed_offer_posts_taken|length == 0 %}
