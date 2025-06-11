@@ -5,7 +5,6 @@
   border: 2.5px solid #e53935 !important;
   box-shadow: 0 0 0 2px #e5393533;
 }
-
 .form-group input[type="file"] {
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -28,6 +27,12 @@
   object-fit: contain;
   object-position: center;
   background: #fff;
+}
+.post-divider {
+  border: none;
+  border-top: 1.5px solid #eee;
+  margin: 8px 0 10px 0;
+  width: 100%;
 }
 {% endblock %}
 
@@ -61,6 +66,7 @@
       <div class="job-post{% if g.user and offer.creator.username == g.user.username %} highlight-border{% endif %}">
         {% if offer.picture %}
           <img src="{{ url_for('static', filename=offer.picture.split('static/', 1)[1]) }}" alt="Offer Picture" class="post-image" />
+          <hr class="post-divider"/>
         {% endif %}
         <h2>{{ offer.title }}</h2>
         <div class="on-demand-tag">Instant</div>
@@ -83,6 +89,7 @@
       <div class="job-post{% if g.user and offer.creator.username == g.user.username %} highlight-border{% endif %}">
         {% if offer.picture %}
           <img src="{{ url_for('static', filename=offer.picture.split('static/', 1)[1]) }}" alt="Offer Picture" class="post-image" />
+          <hr class="post-divider"/>
         {% endif %}
         <h2>{{ offer.title }}</h2>
         <div class="listing-tag">Negotiate</div>
