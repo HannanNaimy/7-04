@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  {% block meta %}
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  {% endblock %}
   <title>eBtask</title>   
   <style>
     * {
@@ -12,18 +14,36 @@
     }
     body {
       font-family: Arial, sans-serif;
+      background: #f9f9f9;
     }
-    
-    /* Navbar Container */
+
+    /* Visually pleasing Navbar */
     .navbar {
       position: fixed;
       top: 0;
       width: 100%;
-      background: #ffd900;
-      padding: 1% 0;
+      background: linear-gradient(90deg, #ffd900 60%, #fffbea 100%);
+      padding: 0.7rem 0;
       z-index: 1000;
       overflow-x: auto;
       white-space: nowrap;
+      box-shadow: 0 2px 12px rgba(247, 140, 0, 0.08);
+      border-bottom: 1.5px solid #ffe08a;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      scrollbar-width: thin;
+      scrollbar-color: #ffd900 #fffbea;
+    }
+    .navbar::-webkit-scrollbar {
+      height: 6px;
+    }
+    .navbar::-webkit-scrollbar-thumb {
+      background: #ffd900;
+      border-radius: 4px;
+    }
+    .navbar::-webkit-scrollbar-track {
+      background: #fffbea;
     }
     .navbar ul {
       display: flex;
@@ -33,17 +53,136 @@
       margin: 0;
       list-style: none;
       overflow-x: auto;
+      white-space: nowrap;
+      gap: 0.5rem;
+      scrollbar-width: thin;
+      scrollbar-color: #ffd900 #fffbea;
+    }
+    .navbar ul::-webkit-scrollbar {
+      height: 6px;
+    }
+    .navbar ul::-webkit-scrollbar-thumb {
+      background: #ffd900;
+      border-radius: 4px;
+    }
+    .navbar ul::-webkit-scrollbar-track {
+      background: #fffbea;
     }
     .navbar ul li {
-      margin-right: 1.5%;
+      margin-right: 0.5rem;
       flex-shrink: 0;
     }
     .navbar ul li a {
       text-decoration: none;
-      color: black;
+      color: #222;
       font-size: 1rem;
-      padding: 10px 15px;
+      padding: 10px 18px;
+      border-radius: 22px;
+      transition: background 0.2s, color 0.2s;
+      font-weight: 500;
+      background: transparent;
+      display: inline-block;
     }
+    .navbar ul li a:hover,
+    .navbar ul li a.active {
+      background: #f78c00;
+      color: #000000e3;
+      box-shadow: 0 2px 8px rgba(247, 140, 0, 0.10);
+    }
+    .logo a {
+      font-size: 1.5rem !important;
+      font-weight: bold !important;
+      margin-left: 0.5rem;
+      color: #000000 !important;
+      background: none !important;
+      letter-spacing: 1px;
+      padding: 10px 18px;
+      border-radius: 22px;
+      transition: background 0.2s;
+    }
+    .logo a:hover {
+      background: #fffbea !important;
+      color: #f78c00 !important;
+    }
+
+    /* Responsive horizontal scroll for mobile */
+    @media (max-width: 900px) {
+      .navbar {
+        overflow-x: auto;
+        padding: 0.5rem 0;
+      }
+      .navbar ul {
+        gap: 0.2rem;
+        padding-left: 0.2rem;
+        padding-right: 0.2rem;
+      }
+      .navbar ul li a {
+        font-size: 0.98rem;
+        padding: 8px 12px;
+      }
+      .logo a {
+        font-size: 1.1rem !important;
+        padding: 8px 12px;
+      }
+    }
+    @media (max-width: 600px) {
+      .navbar {
+        padding: 0.3rem 0;
+      }
+      .navbar ul {
+        gap: 0.1rem;
+      }
+      .navbar ul li a {
+        font-size: 0.95rem;
+        padding: 7px 10px;
+      }
+      .logo a {
+        font-size: 1rem !important;
+        padding: 7px 10px;
+      }
+    }
+
+    /* Container for the search form */
+    .nav-search {
+      display: flex;
+      align-items: center;
+    }
+
+    /* Style the search input */
+    .nav-search input[type="search"] {
+      padding: 8px 12px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    /* Focus state for the search input */
+    .nav-search input[type="search"]:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+    }
+
+    /* Style the search button */
+    .nav-search button {
+      margin-left: 8px;
+      padding: 8px 16px;
+      font-size: 14px;
+      background-color: #007bff;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    /* Hover state for the search button */
+    .nav-search button:hover {
+      background-color: #0056b3;
+    }
+
+
     .logo a {
       font-size: 1.5rem !important;
       font-weight: bold !important;
@@ -218,9 +357,6 @@
 
     /* "Take" button positioned at the bottom right */
     .take-button {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
       background: #f78c00;
       color: #fff;
       border: none;
@@ -548,38 +684,54 @@
 </head>
 <body>
   <nav class="navbar">
-    <ul>
-      <li class="logo"><a href="/profile/{{ g.user.username }}">eBtask</a></li>
-      {% if g.user %}
-        <li>
-          <a href="/profile/{{ g.user.username }}"
-             class="{% if request.path == '/profile/' ~ g.user.username %}active{% endif %}">
-            Profile
-          </a>
-        </li>
-      {% endif %}
+  <!-- Left side: Navigation Links -->
+  <ul class="nav-links">
+    <li class="logo"><a href="/profile/{{ g.user.username }}">eBtask</a></li>
+    {% if g.user %}
       <li>
-        <a href="/lookingFor" class="{% if request.path.startswith('/lookingFor') %}active{% endif %}">
-          Looking For
+        <a href="/profile/{{ g.user.username }}"
+           class="{% if request.path == '/profile/' ~ g.user.username %}active{% endif %}">
+          Profile
         </a>
       </li>
-      <li>
-        <a href="/offeringTo" class="{% if request.path.startswith('/offeringTo') %}active{% endif %}">
-          Offering To
-        </a>
-      </li>
-      <li>
-        <a href="/history" class="{% if request.path.startswith('/history') %}active{% endif %}">
-          History
-        </a>
-      </li>
-      <li>
-        <a href="/guide" class="{% if request.path.startswith('/guide') %}active{% endif %}">
-          Guide
-        </a>
-      </li>        
-    </ul>
-  </nav>
+    {% endif %}
+    <li>
+      <a href="/lookingFor" class="{% if request.path.startswith('/lookingFor') %}active{% endif %}">
+        Looking For
+      </a>
+    </li>
+    <li>
+      <a href="/offeringTo" class="{% if request.path.startswith('/offeringTo') %}active{% endif %}">
+        Offering To
+      </a>
+    </li>
+    <li>
+      <a href="/history" class="{% if request.path.startswith('/history') %}active{% endif %}">
+        History
+      </a>
+    </li>
+    <li>
+      <a href="/guide" class="{% if request.path.startswith('/guide') %}active{% endif %}">
+        Guide
+      </a>
+    </li>        
+  </ul>
+
+  <!-- Right side: Search Field (only show on /profile) -->
+  {% if request.path.startswith('/profile') %}
+  <form class="nav-search" action="/search" method="GET" style="display: flex; align-items: flex-end; gap: 0; height: 40px;">
+    <input type="search"
+           name="q"
+           placeholder="Search Users..."
+           style="padding: 8px 18px; border: 2px solid #ffd900; border-radius: 22px 0 0 22px; font-size: 1.08rem; outline: none; background: #fffbea; color: #222; border-right: none; height: 40px; box-sizing: border-box; font-weight: 500; display: block; margin-right: 0;">
+    <button type="submit"
+            style="padding: 0 28px; border: 2px solid #ffd900; border-radius: 0 22px 22px 0; background: #ffd900; color: #222; font-weight: 700; font-size: 1.08rem; cursor: pointer; transition: background 0.2s; border-left: none; height: 40px; box-sizing: border-box; letter-spacing: 0.5px; display: block; margin-left: 0;">
+      Search
+    </button>
+  </form>
+  {% endif %}
+</nav>
+
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
       <div class="flash-container">

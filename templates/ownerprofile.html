@@ -1,14 +1,175 @@
 {% extends "homeparent.html" %}
 
 {% block styles %}
+/* Section container for each job group */
+.listed-posts {
+  background: #fffbea;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(247, 140, 0, 0.08);
+  padding: 32px 24px 24px 24px;
+  margin: 32px 0;
+  border: 1px solid #ffe08a;
+  position: relative;
+}
+
+/* Section label styling */
+.listed-posts .label {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #f78c00;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+  padding-left: 8px;
+  border-left: 6px solid #f78c00;
+  background: linear-gradient(90deg, #fffbea 80%, #fff3cd 100%);
+  border-radius: 6px 0 0 6px;
+  display: inline-block;
+}
+
+/* Subsection headers */
+.listed-posts h3 {
+  font-size: 1.15rem;
+  color: #333;
+  margin: 18px 0 8px 0;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Horizontal scroll area for job cards */
+.listed-container {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 18px;
+  padding-bottom: 10px;
+  margin-bottom: 8px;
+  scrollbar-color: #ffd900 #fffbea;
+  scrollbar-width: thin;
+}
+
+/* Custom scrollbar for Chrome */
+.listed-container::-webkit-scrollbar {
+  height: 8px;
+}
+.listed-container::-webkit-scrollbar-thumb {
+  background: #ffd900;
+  border-radius: 4px;
+}
+.listed-container::-webkit-scrollbar-track {
+  background: #fffbea;
+}
+
+/* Job post card styling (already present, but you can enhance) */
+.listed-container .job-post {
+  flex: 0 0 250px;
+  height: 350px;
+  background: #fff;
+  border: 1.5px solid #ffe08a;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(247, 140, 0, 0.10);
+  transition: box-shadow 0.2s;
+}
+.listed-container .job-post:hover {
+  box-shadow: 0 6px 18px rgba(247, 140, 0, 0.18);
+  border-color: #ffd900;
+}
+
   h3 {
     text-align: left;
-    margin: -1 0 0 0 ;
+    margin: -1 0 0 0;
     font-size: 1.2rem;
     color: #333;
   }
 
-  /* Ensure the listed container is a horizontal scroll area (already defined earlier) */
+  /* Profile Page Container */
+  .profile-container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+  }
+
+  /* Profile Header with Picture and Greeting */
+  .profile-info {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    background-color: #f7f7f7;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  
+  /* Container for the profile picture */
+  .profile-pic-container {
+    margin-right: 20px;
+    flex-shrink: 0;
+  }
+  
+  /* Profile picture: cropped as a circle */
+  .profile-pic {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid #ddd;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  /* Text next to the profile picture */
+  .profile-text h1 {
+    font-size: 2rem;
+    margin: 0;
+    color: #333;
+  }
+  
+  .profile-text h2 {
+    font-size: 1.25rem;
+    margin: 5px 0 0;
+    color: #777;
+  }
+  
+  /* Credentials Navigation - visually pleasing card style */
+  .credentials {
+    background: #fffbea;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(247, 140, 0, 0.08);
+    border: 1px solid #ffe08a;
+    padding: 18px 24px;
+    margin: 24px 0 32px 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  .credentials ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 28px;
+  }
+  
+  .credentials ul li a {
+    text-decoration: none;
+    color: #fff;
+    background: linear-gradient(90deg, #f78c00 60%, #ffd900 100%);
+    padding: 10px 22px;
+    border-radius: 24px;
+    font-weight: bold;
+    font-size: 1.08rem;
+    box-shadow: 0 2px 8px rgba(247, 140, 0, 0.10);
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    border: none;
+    display: inline-block;
+  }
+  
+  .credentials ul li a:hover {
+    background: linear-gradient(90deg, #ffd900 60%, #f78c00 100%);
+    color: #fffbea;
+    box-shadow: 0 4px 16px rgba(247, 140, 0, 0.18);
+  }
+
+  /* Ensure the listed container is a horizontal scroll area */
   .listed-container {
     display: flex;
     flex-wrap: nowrap;
@@ -40,12 +201,12 @@
   
   /* Footer container at the bottom of each job post */
   .job-footer {
-    display: block;
-    margin-top: 1%;
+    display: block !important;
+    margin-top: auto !important;
   }
   
   .job-meta-info {
-    margin-bottom: 1%%
+    margin-bottom: 1%;
   }
   
   /* Override on-demand tag so it only wraps its text */
@@ -69,6 +230,7 @@
     cursor: pointer;
     transition: background 0.3s ease;
   }
+  
   .delete-button:hover {
     background: darkred;
   }
@@ -83,29 +245,171 @@
     cursor: pointer;
     transition: background 0.3s ease;
   }
+  
   .take-button:hover {
     background: darkorange;
   }
+
+  /* Offer Posts Section Styling */
+.offer-posts {
+  background: #eafcff;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 180, 247, 0.08);
+  padding: 32px 24px 24px 24px;
+  margin: 32px 0;
+  border: 1px solid #a3e6ff;
+  position: relative;
+}
+.offer-posts .label {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #00b4f7;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+  padding-left: 8px;
+  border-left: 6px solid #00b4f7;
+  background: linear-gradient(90deg, #eafcff 80%, #d1f3ff 100%);
+  border-radius: 6px 0 0 6px;
+  display: inline-block;
+}
+.offer-container {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 18px;
+  padding-bottom: 10px;
+  margin-bottom: 8px;
+  scrollbar-color: #a3e6ff #eafcff;
+  scrollbar-width: thin;
+}
+.offer-container::-webkit-scrollbar {
+  height: 8px;
+}
+.offer-container::-webkit-scrollbar-thumb {
+  background: #a3e6ff;
+  border-radius: 4px;
+}
+.offer-container::-webkit-scrollbar-track {
+  background: #eafcff;
+}
+.offer-container .offer-post {
+  flex: 0 0 250px;
+  height: 350px;
+  background: #fff;
+  border: 1.5px solid #a3e6ff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 180, 247, 0.10);
+  transition: box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+}
+.offer-container .offer-post:hover {
+  box-shadow: 0 6px 18px rgba(0, 180, 247, 0.18);
+  border-color: #00b4f7;
+}
+.offer-on-demand-tag {
+  /* Use same style as .on-demand-tag for jobs */
+  display: inline-block;
+  background: rgba(128, 0, 128, 0.2);
+  color: purple;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+.offer-listing-tag {
+  /* Use same style as .listing-tag for jobs */
+  display: inline-block;
+  background: #ffe08a;
+  color: #f78c00;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+.offer-posts .offer-post h2 {
+  color: #222 !important;
+}
+
+/* --- Harmonize Job and Offer Card Styles --- */
+.listed-posts {
+  background: #fffbea;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(247, 140, 0, 0.10);
+  padding: 32px 24px 24px 24px;
+  margin: 32px 0;
+  border: 1.5px solid #ffe08a;
+  position: relative;
+}
+
+.listed-container .job-post {
+  flex: 0 0 250px;
+  height: 350px;
+  background: #fff;
+  border: 1.5px solid #ffe08a;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(247, 140, 0, 0.10);
+  transition: box-shadow 0.2s, border-color 0.2s;
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+}
+
+.listed-container .job-post:hover {
+  box-shadow: 0 6px 18px rgba(247, 140, 0, 0.18);
+  border-color: #f78c00;
+}
+
+/* Make job/offer title color consistent */
+.job-post h2,
+.offer-post h2 {
+  color: #222 !important;
+  font-size: 1.2rem !important;
+  margin-bottom: 10px !important;
+  margin-top: 0 !important;
+  font-weight: bold !important;
+}
+
+/* Make job-footer always stick to bottom */
+.job-footer {
+  display: block !important;
+  margin-top: auto !important;
+}
   
 {% endblock %}
 
 {% block content %}
 <div class="profile-container">
+  <!-- Profile Header with Picture and Greeting -->
   <div class="profile-info">
-    <h1>Hello {{ usr }}!</h1> 
-    <h2>{{ email }}</h2>
+    <div class="profile-pic-container">
+      {% if g_user and g_user.profile_picture %}
+        {% set relative_path = g_user.profile_picture %}
+        {% if relative_path.startswith('static/') %}
+          {% set relative_path = relative_path[7:] %}
+        {% endif %}
+        <img src="{{ url_for('static', filename=relative_path) }}" alt="Profile Picture" class="profile-pic">
+      {% else %}
+        <img src="{{ url_for('static', filename='profile_pictures/default.png') }}" alt="Profile Picture" class="profile-pic">
+      {% endif %}
+    </div>
+    <div class="profile-text">
+      <h1>Hello {{ usr.username }}!</h1> 
+      <h2>{{ usr.email }}</h2>
+    </div>
   </div>
 
+  <!-- Credentials Navigation -->
   <div class="credentials">
     <ul>
       <li><a href="/logout">Log Out</a></li>
-      <li><a href="/contacts">Contacts</a></li>
+      <li><a href="javascript:void(0)" onclick="document.getElementById('contactModal').style.display='block';">Contacts</a></li>
       <li><a href="/editpaymentmethods">Payment Methods</a></li>  
       <li><a href="/editProfile">Edit Profile</a></li>   
     </ul>
   </div>
 
-  <!-- Section: Listed posts -->
   <div class="listed-posts">
     <h2 class="label">Jobs Listed</h2>
     <div class="listed-container">
@@ -123,12 +427,10 @@
           <p>{{ job.description }}</p>
           <div class="job-footer">
             <div class="job-meta-info">
-              {% if job.on_demand %}
-              <span class="job-meta">Commission: RM{{ job.commission }}</span><br>
-              {% else %}
-              <span class="job-meta">Salary Range: RM{{ job.salary_range }}</span><br>
-              {% endif %}
-              <span class="job-meta">Posted by: {{ job.creator.username }}</span>
+              <span class="job-meta">
+                Posted by:
+                <a href="{{ url_for('profile', usr=job.creator.username) }}">{{ job.creator.username }}</a>
+              </span>
             </div>
             <div class="job-options">
               <!-- Delete button as a form so we can use POST -->
@@ -150,7 +452,7 @@
     <h3>Created by You</h3>
     <div class="listed-container">
       {% if ongoing_created_jobs|length == 0 %}
-        <p>No ongoing posts created by you.</p>
+        <p>No taken posts created by you.</p>
       {% else %}
         {% for job in ongoing_created_jobs %}
         <div class="job-post">
@@ -163,16 +465,16 @@
           <p>{{ job.description }}</p>
           <div class="job-footer">
             <div class="job-meta-info">
-              {% if job.on_demand %}
-              <span class="job-meta">Commission: RM{{ job.commission }}</span><br>
-              {% else %}
-              <span class="job-meta">Salary Range: RM{{ job.salary_range }}</span><br>
-              {% endif %}
-              <span class="job-meta">Posted by: {{ job.creator.username }}</span><br>
-              <span class="job-meta">Taken by: {{ job.taker.username }}</span>
+              <span class="job-meta">
+                Posted by:
+                <a href="{{ url_for('profile', usr=job.creator.username) }}">{{ job.creator.username }}</a>
+              </span><br>
+              <span class="job-meta">
+                Taken by:
+                <a href="{{ url_for('profile', usr=job.taker.username) }}">{{ job.taker.username }}</a>
+              </span>
             </div>
             <div class="job-options">
-              <!-- Optionally add buttons or details -->
               <form action="{{ url_for('jobStatus', job_id=job.id) }}" method="GET" style="display:inline;">
                 <button type="submit" class="take-button">Check Status</button>
               </form>
@@ -182,13 +484,12 @@
         {% endfor %}
       {% endif %}
     </div>
-  </div>
     
     <!-- Subsection: Taken by You -->
-    <h3>Taken by You</h3>
+    <h3>Taken by You (You Need to Do What This Person is Looking For)</h3>
     <div class="listed-container">
       {% if ongoing_taken_jobs|length == 0 %}
-        <p>No ongoing posts taken by you.</p>
+        <p>No taken posts taken by you.</p>
       {% else %}
         {% for job in ongoing_taken_jobs %}
         <div class="job-post">
@@ -201,21 +502,22 @@
           <p>{{ job.description }}</p>
           <div class="job-footer">
             <div class="job-meta-info">
-              {% if job.on_demand %}
-              <span class="job-meta">Commission: RM{{ job.commission }}</span><br>
-              {% else %}
-              <span class="job-meta">Salary Range: RM{{ job.salary_range }}</span><br>
-              {% endif %}
-              <span class="job-meta">Posted by: {{ job.creator.username }}</span><br>
-              <span class="job-meta">Taken by: {{ job.taker.username }}</span>
+              <span class="job-meta">
+                Posted by:
+                <a href="{{ url_for('profile', usr=job.creator.username) }}">{{ job.creator.username }}</a>
+              </span><br>
+              <span class="job-meta">
+                Taken by:
+                <a href="{{ url_for('profile', usr=job.taker.username) }}">{{ job.taker.username }}</a>
+              </span>
             </div>
             <div class="job-options">
               <form action="{{ url_for('jobStatus', job_id=job.id) }}" method="GET" style="display:inline;">
                 <button type="submit" class="take-button">Check Status</button>
-              </form> 
+              </form>
+            </div>
           </div>
         </div>
-      </div>
         {% endfor %}
       {% endif %}
     </div>
@@ -240,21 +542,20 @@
           <p>{{ job.description }}</p>
           <div class="job-footer">
             <div class="job-meta-info">
-              {% if job.on_demand %}
-              <span class="job-meta">Commission: RM{{ job.commission }}</span><br>
-              {% else %}
-              <span class="job-meta">Salary Range: RM{{ job.salary_range }}</span><br>
-              {% endif %}
-              <span class="job-meta">Posted by: {{ job.creator.username }}</span><br>
-              <span class="job-meta">Taken by: {{ job.taker.username }}</span>
+              <span class="job-meta">
+                Posted by:
+                <a href="{{ url_for('profile', usr=job.creator.username) }}">{{ job.creator.username }}</a>
+              </span><br>
+              <span class="job-meta">
+                Taken by:
+                <a href="{{ url_for('profile', usr=job.taker.username) }}">{{ job.taker.username }}</a>
+              </span>
             </div>
           </div>
         </div>
         {% endfor %}
       {% endif %}
     </div>
-  </div>
-    
     <!-- Subsection: Taken by You -->
     <h3>Taken by You</h3>
     <div class="listed-container">
@@ -271,21 +572,213 @@
           {% endif %}
           <p>{{ job.description }}</p>
           <div class="job-footer">
-            <div class="job-meta-info">
-              {% if job.on_demand %}
-              <span class="job-meta">Commission: RM{{ job.commission }}</span><br>
-              {% else %}
-              <span class="job-meta">Salary Range: RM{{ job.salary_range }}</span><br>
-              {% endif %}
-              <span class="job-meta">Posted by: {{ job.creator.username }}</span>
-            </div>
+           <div class="job-meta-info">
+            <span class="job-meta">
+                Posted by:
+                <a href="{{ url_for('profile', usr=job.creator.username) }}">{{ job.creator.username }}</a>
+              </span><br>
+              <span class="job-meta">
+                Taken by:
+                <a href="{{ url_for('profile', usr=job.taker.username) }}">{{ job.taker.username }}</a>
+              </span>
+          </div>
         </div>
       </div>
         {% endfor %}
       {% endif %}
     </div>
   </div>
+
+  <!-- Offer Posts Section: Offers Listed -->
+  <div class="offer-posts">
+    <h2 class="label">Offers Listed</h2>
+    <div class="offer-container">
+      {% if listed_offer_posts|length == 0 %}
+        <p>No offer posts listed.</p>
+      {% else %}
+        {% for offer in listed_offer_posts %}
+        <div class="offer-post">
+          <h2>{{ offer.title }}</h2>
+          {% if offer.on_demand %}
+            <div class="offer-on-demand-tag">Instant</div>
+          {% else %}
+            <div class="offer-listing-tag">Negotiate</div>
+          {% endif %}
+          <p>{{ offer.description }}</p>
+          <div class="job-footer">
+            <div class="job-meta-info">
+              <span class="job-meta">
+                Offered by:
+                <a href="{{ url_for('profile', usr=offer.creator.username) }}">{{ offer.creator.username }}</a>
+              </span>
+            </div>
+            <div class="job-options">
+              <form action="{{ url_for('deleteOffer', offer_id=offer.id) }}" method="POST" style="display:inline;">
+                <button type="submit" class="delete-button" onclick="return confirm('Are you sure you want to delete this offer?');">Delete</button>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Offer Posts Section: Instant-Offers Taken -->
+  <div class="offer-posts">
+    <h2 class="label">Instant-Offers Taken</h2>
+    <!-- Subsection: Created by You -->
+    <h3>Created by You (You Need to Do What You are Offering To)</h3>
+    <div class="offer-container">
+      {% if accepted_offer_posts_created|length == 0 %}
+        <p>No offers created by you have been taken.</p>
+      {% else %}
+        {% for offer in accepted_offer_posts_created %}
+        <div class="offer-post">
+          <h2>{{ offer.title }}</h2>
+          {% if offer.on_demand %}
+            <div class="offer-on-demand-tag">Instant</div>
+          {% else %}
+            <div class="offer-listing-tag">Negotiate</div>
+          {% endif %}
+          <p>{{ offer.description }}</p>
+          <div class="job-footer">
+            <div class="job-meta-info">
+              <span class="job-meta">
+                Offered by:
+                <a href="{{ url_for('profile', usr=offer.creator.username) }}">{{ offer.creator.username }}</a>
+              </span><br>
+              <span class="job-meta">
+                Taken by:
+                <a href="{{ url_for('profile', usr=offer.responder.username) }}">{{ offer.responder.username }}</a>
+              </span>
+            </div>
+            <div class="job-options">
+              <form action="{{ url_for('offerStatus', offer_id=offer.id) }}" method="GET" style="display:inline;">
+                <button type="submit" class="take-button">Check Status</button>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+    <!-- Subsection: Taken by You -->
+    <h3>Taken by You</h3>
+    <div class="offer-container">
+      {% if accepted_offer_posts_taken|length == 0 %}
+        <p>No offers Taken by You.</p>
+      {% else %}
+        {% for offer in accepted_offer_posts_taken %}
+        <div class="offer-post">
+          <h2>{{ offer.title }}</h2>
+          {% if offer.on_demand %}
+            <div class="offer-on-demand-tag">Instant</div>
+          {% else %}
+            <div class="offer-listing-tag">Negotiate</div>
+          {% endif %}
+          <p>{{ offer.description }}</p>
+          <div class="job-footer">
+            <div class="job-meta-info">
+              <span class="job-meta">
+                Offered by:
+                <a href="{{ url_for('profile', usr=offer.creator.username) }}">{{ offer.creator.username }}</a>
+              </span><br>
+              <span class="job-meta">
+                Taken by:
+                <a href="{{ url_for('profile', usr=offer.responder.username) }}">{{ offer.responder.username }}</a>
+              </span>
+            </div>
+            <div class="job-options">
+              <form action="{{ url_for('offerStatus', offer_id=offer.id) }}" method="GET" style="display:inline;">
+                <button type="submit" class="take-button">Check Status</button>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Offer Posts Section: Instant-Offers Completed -->
+  <div class="offer-posts">
+    <h2 class="label">Instant-Offers Completed</h2>
+    <!-- Subsection: Created by You -->
+    <h3>Created by You</h3>
+    <div class="offer-container">
+      {% if completed_offer_posts_created|length == 0 %}
+        <p>No completed offers created by you.</p>
+      {% else %}
+        {% for offer in completed_offer_posts_created %}
+        <div class="offer-post">
+          <h2>{{ offer.title }}</h2>
+          {% if offer.on_demand %}
+            <div class="offer-on-demand-tag">Instant</div>
+          {% else %}
+            <div class="offer-listing-tag">Negotiate</div>
+          {% endif %}
+          <p>{{ offer.description }}</p>
+          <div class="job-footer">
+            <div class="job-meta-info">
+              <span class="job-meta">
+                Offered by:
+                <a href="{{ url_for('profile', usr=offer.creator.username) }}">{{ offer.creator.username }}</a>
+              </span><br>
+              <span class="job-meta">
+                Taken by:
+                <a href="{{ url_for('profile', usr=offer.responder.username) }}">{{ offer.responder.username }}</a>
+              </span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+    <!-- Subsection: Taken by You -->
+    <h3>Taken by You</h3>
+    <div class="offer-container">
+      {% if completed_offer_posts_taken|length == 0 %}
+        <p>No completed offers Taken by You.</p>
+      {% else %}
+        {% for offer in completed_offer_posts_taken %}
+        <div class="offer-post">
+          <h2>{{ offer.title }}</h2>
+          {% if offer.on_demand %}
+            <div class="offer-on-demand-tag">Instant</div>
+          {% else %}
+            <div class="offer-listing-tag">Negotiate</div>
+          {% endif %}
+          <p>{{ offer.description }}</p>
+          <div class="job-footer">
+            <div class="job-meta-info">
+              <span class="job-meta">
+                Offered by:
+                <a href="{{ url_for('profile', usr=offer.creator.username) }}">{{ offer.creator.username }}</a>
+              </span><br>
+              <span class="job-meta">
+                Taken by:
+                <a href="{{ url_for('profile', usr=offer.responder.username) }}">{{ offer.responder.username }}</a>
+              </span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
 </div>
+
+{% include "contacts.html" %}
+
+<script>
+  // Open the contact modal when the button is clicked
+  document.getElementById("openContactModal").onclick = function() {
+    document.getElementById("contactModal").style.display = "block";
+  };
+</script>
+
 {% endblock %}
+
 
 

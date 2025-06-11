@@ -1,0 +1,74 @@
+<!-- contact_modal.html -->
+<div id="contactModal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <span class="close" id="contactModalClose">&times;</span>
+    <h2>Contact Information</h2>
+    <ul class="contact-info">
+      <li><strong>Username:</strong> {{ usr.username }}</li>
+      <li><strong>Email:</strong> {{ usr.email }}</li>
+      {% if usr.phone_number %}
+        <li><strong>Phone:</strong> {{ usr.phone_number }}</li>
+      {% endif %}
+      {% if usr.instagram_username %}
+        <li><strong>Instagram:</strong> @{{ usr.instagram_username }}</li>
+      {% endif %}
+      {% if usr.discord_username %}
+        <li><strong>Discord:</strong> {{ usr.discord_username }}</li>
+      {% endif %}
+    </ul>
+  </div>
+</div>
+
+<script>
+  // Close modal when the close button is clicked
+  document.getElementById("contactModalClose").onclick = function() {
+    document.getElementById("contactModal").style.display = "none";
+  };
+
+  // Close modal if the user clicks outside the modal content
+  window.onclick = function(event) {
+    var modal = document.getElementById("contactModal");
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  };
+</script>
+
+<style>
+  /* Example CSS styling for the modal */
+  .modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+  }
+  
+  .modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+  }
+  
+  .close {
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .contact-info {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .contact-info li {
+    margin-bottom: 10px;
+  }
+</style>
