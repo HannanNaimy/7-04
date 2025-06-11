@@ -46,7 +46,15 @@
       </div>
     </div>
     <!-- End graphic row -->
-    
+
+    <hr style="margin: 24px 0;">
+
+    {% if job.picture %}
+      <div style="display: flex; justify-content: flex-start; margin-bottom: 24px;">
+        <img src="{{ url_for('static', filename=job.picture.split('static/', 1)[1]) }}" alt="Job Picture" style="max-width: 400px; max-height: 300px; border-radius: 8px; border: 1px solid #ccc;">
+      </div>
+    {% endif %}
+
     <h1 class="job-title">{{ job.title }}</h1>
   </header>
 
