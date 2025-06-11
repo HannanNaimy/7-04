@@ -1,4 +1,4 @@
-import os, re, random, pprint
+import os, re, random
 from sqlalchemy import or_
 from flask import Flask, redirect, url_for, render_template, flash, make_response, g, session, request
 from flask_mail import Mail, Message
@@ -339,6 +339,17 @@ def lookingFor():
         on_demand = True if request.form.get('on_demand') else False  
         user_id = g.user.id  
 
+        # --- Enforce post limits ---
+        user_jobs = g.user.job_posts
+        on_demand_count = sum(1 for job in user_jobs if job.on_demand)
+        not_on_demand_count = sum(1 for job in user_jobs if not job.on_demand)
+        if on_demand and on_demand_count >= 3:
+            flash("You have reached the maximum limit of 3 Instant (on-demand) posts.", "error")
+            return redirect(url_for("lookingFor"))
+        if not on_demand and not_on_demand_count >= 7:
+            flash("You have reached the maximum limit of 7 Negotiate (not on-demand) posts.", "error")
+            return redirect(url_for("lookingFor"))
+
         # --- Handle picture upload ---
         picture_path = None
         if 'picture' in request.files:
@@ -392,13 +403,16 @@ def lookingFor():
         return redirect(url_for('lookingFor'))
     
     jobs = JobPost.query.filter_by(taken=False).all()
-    job_count = len(g.user.job_posts)
-    on_demand_jobs = [job for job in jobs if job.on_demand]
-    listing_jobs = [job for job in jobs if not job.on_demand]
-    return render_template("lookingfor.html", jobs=jobs, job_count=job_count, 
-                           on_demand_jobs=on_demand_jobs, listing_jobs=listing_jobs)
+    # Count user's own posts for modal button logic
+    user_jobs = g.user.job_posts
+    on_demand_count = sum(1 for job in user_jobs if job.on_demand)
+    not_on_demand_count = sum(1 for job in user_jobs if not job.on_demand)
+    return render_template("lookingfor.html", jobs=jobs, job_count=len(user_jobs),
+                           on_demand_jobs=[job for job in jobs if job.on_demand],
+                           listing_jobs=[job for job in jobs if not job.on_demand],
+                           on_demand_count=on_demand_count,
+                           not_on_demand_count=not_on_demand_count)
 
-# Offering To Page
 @app.route("/offeringTo", methods=["GET", "POST"])
 def offeringTo():
     if not g.user:
@@ -410,6 +424,17 @@ def offeringTo():
         description = request.form.get('description')
         on_demand = True if request.form.get('on_demand') else False
         user_id = g.user.id  
+
+        # --- Enforce post limits ---
+        user_offers = g.user.offer_posts
+        on_demand_count = sum(1 for offer in user_offers if offer.on_demand)
+        not_on_demand_count = sum(1 for offer in user_offers if not offer.on_demand)
+        if on_demand and on_demand_count >= 3:
+            flash("You have reached the maximum limit of 3 Instant (on-demand) offers.", "error")
+            return redirect(url_for("offeringTo"))
+        if not on_demand and not_on_demand_count >= 7:
+            flash("You have reached the maximum limit of 7 Negotiate (not on-demand) offers.", "error")
+            return redirect(url_for("offeringTo"))
 
         # --- Handle picture upload ---
         picture_path = None
@@ -464,11 +489,14 @@ def offeringTo():
         return redirect(url_for('offeringTo'))
     
     offers = OfferPost.query.filter_by(accepted=False).all()
-    offer_count = len(g.user.offer_posts)
-    on_demand_offers = [offer for offer in offers if offer.on_demand]
-    listing_offers = [offer for offer in offers if not offer.on_demand]
-    return render_template("offeringto.html", offers=offers, offer_count=offer_count, 
-                           on_demand_offers=on_demand_offers, listing_offers=listing_offers)
+    user_offers = g.user.offer_posts
+    on_demand_count = sum(1 for offer in user_offers if offer.on_demand)
+    not_on_demand_count = sum(1 for offer in user_offers if not offer.on_demand)
+    return render_template("offeringto.html", offers=offers, offer_count=len(user_offers),
+                           on_demand_offers=[offer for offer in offers if offer.on_demand],
+                           listing_offers=[offer for offer in offers if not offer.on_demand],
+                           on_demand_count=on_demand_count,
+                           not_on_demand_count=not_on_demand_count)
  
 
 # Job Status Page   

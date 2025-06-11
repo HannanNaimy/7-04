@@ -45,10 +45,14 @@
   <div class="jobs-header" style="display: flex; align-items: center; justify-content: space-between;">
     <h1>Looking For...</h1>
     <div>
-      {% if job_count < 7 %}
-        <a href="javascript:void(0)" id="openCreateJobModal" class="create-post-button">Create Post</a>
+      {% if on_demand_count >= 3 and not_on_demand_count >= 7 %}
+        <a href="javascript:void(0)" class="create-post-button" style="pointer-events:none;opacity:0.6;" title="You have reached the maximum for both types of posts.">Create Post</a>
+      {% elif on_demand_count >= 3 %}
+        <a href="javascript:void(0)" id="openCreateJobModal" class="create-post-button" onclick="alert('You have reached the maximum limit of 3 Instant (on-demand) posts.');return false;">Create Post</a>
+      {% elif not_on_demand_count >= 7 %}
+        <a href="javascript:void(0)" id="openCreateJobModal" class="create-post-button" onclick="alert('You have reached the maximum limit of 7 Negotiate (not on-demand) posts.');return false;">Create Post</a>
       {% else %}
-        <a href="/createjob_disabled" class="create-post-button" title="You have reached the maximum limit of 3 job listings">Create Post</a>
+        <a href="javascript:void(0)" id="openCreateJobModal" class="create-post-button">Create Post</a>
       {% endif %}
     </div>
   </div>
