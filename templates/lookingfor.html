@@ -1,54 +1,75 @@
 {% extends "homeparent.html" %}
 
+{% block styles %}
+.job-post.highlight-border {
+  border: 2.5px solid #e53935 !important;
+  box-shadow: 0 0 0 2px #e5393533;
+}
+{% endblock %}
+
 {% block content %}
 <div class="jobs-container">
-  <div class="jobs-header">
-    <h1>"Looking For"</h1>
-    {% if job_count < 7 %}
-      <a href="javascript:void(0)" id="openCreateJobModal" class="create-post-button">
-        Create Post
-      </a>
-    {% else %}
-      <a href="/createjob_disabled" class="create-post-button" title="You have reached the maximum limit of 3 job listings">Create Post</a>
-    {% endif %}
+  <div class="jobs-header" style="display: flex; align-items: center; justify-content: space-between;">
+    <h1>Looking For...</h1>
+    <div>
+      {% if job_count < 7 %}
+        <a href="javascript:void(0)" id="openCreateJobModal" class="create-post-button">Create Post</a>
+      {% else %}
+        <a href="/createjob_disabled" class="create-post-button" title="You have reached the maximum limit of 3 job listings">Create Post</a>
+      {% endif %}
+    </div>
   </div>
-  
+  <div style="margin-bottom: 18px;">
+    <span style="display: block; font-size: 1.08rem; color: #535251; font-style: italic; text-align: left; margin-left: 2px;">
+      (Create Post if You Need Something Done, Take a Post from Others to Earn Money)
+    </span>
+  </div>
   {% set on_demand_jobs = jobs | selectattr('on_demand', 'equalto', True) | list %}
   {% set listing_jobs = jobs | rejectattr('on_demand', 'equalto', True) | list %}
 
   <!-- Section: Instant Jobs -->
   <div class="jobs-listings">
-      {% for job in on_demand_jobs %}
-      <div class="job-post">
+    {% for job in on_demand_jobs %}
+      <div class="job-post{% if g.user and job.creator.username == g.user.username %} highlight-border{% endif %}">
         <h2>{{ job.title }}</h2>
         <div class="on-demand-tag">Instant</div>
         <p>{{ job.description }}</p>
-        <span class="job-meta">Commission: RM{{ job.commission }}</span><br>
-        <span class="job-meta">Posted by: {{ job.creator.username }}</span>
+        <span class="job-meta">Commission: RM{{ job.commission }}</span>
+        <span class="job-meta">
+          Posted by:
+          <a href="{{ url_for('profile', usr=job.creator.username) }}">{{ job.creator.username }}</a>
+        </span>
+        {% if job.taker %}
+        <span class="job-meta">
+          Taken by:
+          <a href="{{ url_for('profile', usr=job.taker.username) }}">{{ job.taker.username }}</a>
+        </span>
+        {% endif %}
         <a href="{{ url_for('post_details', job_id=job.id) }}">
           <button class="take-button">See Details</button>
         </a>
       </div>
-      {% endfor %}
+    {% endfor %}
   </div>
 
   <!-- Section: Negotiate Jobs -->
   <div class="jobs-listings">
-      {% for job in listing_jobs %}
-      <div class="job-post">
+    {% for job in listing_jobs %}
+      <div class="job-post{% if g.user and job.creator.username == g.user.username %} highlight-border{% endif %}">
         <h2>{{ job.title }}</h2>
         <div class="listing-tag">Negotiate</div>
         <p>{{ job.description }}</p>
-        <span class="job-meta">Salary Range: RM{{ job.salary_range }}</span><br>
-        <span class="job-meta">Posted by: {{ job.creator.username }}</span>
+        <span class="job-meta">Salary Range: RM{{ job.salary_range }}</span>
+        <span class="job-meta">
+          Posted by:
+          <a href="{{ url_for('profile', usr=job.creator.username) }}">{{ job.creator.username }}</a>
+        </span>
         <a href="{{ url_for('post_details', job_id=job.id) }}">
           <button class="take-button">See Details</button>
         </a>
       </div>
-      {% endfor %}
+    {% endfor %}
   </div>
-</div>
-
 </div>
 
 <!-- Modal for “Create Job” -->
@@ -73,9 +94,10 @@
             <span class="slider"></span>
           </label>
         </div>
+        <!-- Single Input Field with built‑in prefix -->
         <div class="form-group">
-          <label for="jobTitle">Job Title:</label>
-          <input type="text" name="title" id="jobTitle" placeholder="Enter job title" />
+          <label for="jobTitleInput">Job Title:</label>
+          <input type="text" id="jobTitleInput" name="title" value="Looking For " placeholder="Enter job title" />
         </div>
         <div class="form-group">
           <label for="jobDescription">Job Description:</label>
@@ -101,7 +123,6 @@
         <h2>Payment</h2>
         <p>Please scan the QR code below to pay the commission amount.</p>
         <div class="qr-mock">QR CODE</div>
-        <!-- When clicked, payment is simulated and the form is submitted -->
         <button type="button" id="simulatePayment">Simulate Payment</button>
       </div>
     </form>
@@ -109,87 +130,126 @@
 </div>
 
 <script>
-  // Modal open/close controls (existing code)
+  // === Enforce Fixed Prefix "Looking For " in the Job Title Input ===
+  var prefix = "Looking For ";
+  var titleInput = document.getElementById("jobTitleInput");
+
+  // If the input is empty on load, set it to the prefix.
+  if (!titleInput.value.startsWith(prefix)) {
+    titleInput.value = prefix;
+  }
+
+  titleInput.addEventListener("focus", function() {
+    // Ensure the prefix is present upon focus.
+    if (!this.value.startsWith(prefix)) {
+      this.value = prefix;
+    }
+    // Place the cursor at the end.
+    setTimeout(() => {
+      this.selectionStart = this.selectionEnd = this.value.length;
+    }, 0);
+  });
+
+  titleInput.addEventListener("keydown", function(e) {
+    var start = this.selectionStart;
+    // Prevent deletion or left arrow navigation if at the prefix boundary.
+    if (start <= prefix.length && (e.key === "Backspace" || e.key === "ArrowLeft")) {
+      e.preventDefault();
+    }
+  });
+
+  titleInput.addEventListener("paste", function(e) {
+    e.preventDefault();
+    var pasteData = (e.clipboardData || window.clipboardData).getData("text");
+    // Insert the pasted content after the prefix.
+    var currentValue = this.value;
+    var newText = currentValue.slice(0, prefix.length) + pasteData + currentValue.slice(this.selectionEnd);
+    this.value = newText;
+    this.selectionStart = this.selectionEnd = this.value.length;
+  });
+
+  // === End Fixed Prefix Enforcement ===
+
+  // Modal open/close controls.
   var modal = document.getElementById("createJobModal");
   var openModalBtn = document.getElementById("openCreateJobModal");
   var closeBtn = document.getElementsByClassName("close")[0];
 
   openModalBtn.onclick = function() {
     modal.style.display = "block";
-  }
+  };
   closeBtn.onclick = function() {
     modal.style.display = "none";
-  }
+  };
   window.onclick = function(event) {
     if (event.target == modal) {
       modal.style.display = "none";
     }
-  }
-  document.getElementById('onDemandToggle').addEventListener('change', function() {
-  if (this.checked) {
-    // Instant is ON: Show commission field, hide salary range, and show progress Step 2.
-    console.log("Instant is ON");
-    document.getElementById('commissionGroup').style.display = 'block';
-    document.getElementById('salaryRangeGroup').style.display = 'none';
-    document.getElementById('progress2').style.display = 'list-item'; // Show Step 2 progress
-  } else {
-    // Instant is OFF: Hide commission field, show salary range, and hide progress Step 2.
-    console.log("Instant is OFF");
-    document.getElementById('commissionGroup').style.display = 'none';
-    document.getElementById('salaryRangeGroup').style.display = 'block';
-    document.getElementById('progress2').style.display = 'none'; // Hide Step 2 progress
-  }
-});
+  };
 
+  // Toggle instant switch to show/hide commission vs. salary fields.
+  document.getElementById("onDemandToggle").addEventListener("change", function() {
+    if (this.checked) {
+      console.log("Instant is ON");
+      document.getElementById("commissionGroup").style.display = "block";
+      document.getElementById("salaryRangeGroup").style.display = "none";
+      document.getElementById("progress2").style.display = "list-item";
+    } else {
+      console.log("Instant is OFF");
+      document.getElementById("commissionGroup").style.display = "none";
+      document.getElementById("salaryRangeGroup").style.display = "block";
+      document.getElementById("progress2").style.display = "none";
+    }
+  });
 
-  // Transition from Step 1 to next action based on on-demand checkbox
-  document.getElementById('toStep2').addEventListener('click', function() {
-    var title = document.getElementById('jobTitle').value;
-    var description = document.getElementById('jobDescription').value;
-    // When on-demand is activated, commission is required;
-    // otherwise, the salary range must be filled.
-    var isOnDemand = document.getElementById('onDemandToggle').checked;
-    
-    if (title.trim() === "" || description.trim() === "") {
-      alert("Please fill in all fields.");
+  // Before form submission, validate and (if needed) update the title value.
+  document.getElementById("toStep2").addEventListener("click", function() {
+    // The title is already maintained in the field (with prefix enforced).
+    var titleValue = titleInput.value;
+    if (titleValue.trim() === "" || titleValue === prefix) {
+      alert("Please fill in the job title.");
       return;
     }
-    
+
+    var description = document.getElementById("jobDescription").value;
+    if (description.trim() === "") {
+      alert("Please fill in the job description.");
+      return;
+    }
+
+    var isOnDemand = document.getElementById("onDemandToggle").checked;
     if (isOnDemand) {
-      var commission = document.getElementById('commission').value;
+      var commission = document.getElementById("commission").value;
       if (commission.trim() === "") {
         alert("Please fill in the commission cost.");
         return;
       }
     } else {
-      var minSalary = document.getElementById('minSalary').value;
-      var maxSalary = document.getElementById('maxSalary').value;
+      var minSalary = document.getElementById("minSalary").value;
+      var maxSalary = document.getElementById("maxSalary").value;
       if (minSalary.trim() === "" || maxSalary.trim() === "") {
         alert("Please fill in both the minimum and maximum salary.");
         return;
       }
     }
     
-    // Hide Step 1 and update progress
-    document.getElementById('step1').style.display = 'none';
-    document.getElementById('progress1').classList.remove('active');
+    // Hide Step 1 and update progress.
+    document.getElementById("step1").style.display = "none";
+    document.getElementById("progress1").classList.remove("active");
 
     if (isOnDemand) {
-      // If on-demand is enabled, show the Payment step
-      document.getElementById('step2').style.display = 'block';
-      document.getElementById('progress2').classList.add('active');
+      document.getElementById("step2").style.display = "block";
+      document.getElementById("progress2").classList.add("active");
     } else {
-      // If on-demand is off, submit the form immediately (skip Payment)
-      document.getElementById('jobDetailsForm').submit();
+      document.getElementById("jobDetailsForm").submit();
     }
   });
 
-  // Simulated payment (existing code)
-  document.getElementById('simulatePayment').addEventListener('click', function() {
-    document.getElementById('step2').style.display = 'none';
-    document.getElementById('progress2').classList.remove('active');
-    document.getElementById('jobDetailsForm').submit();
+  // Payment simulation code.
+  document.getElementById("simulatePayment").addEventListener("click", function() {
+    document.getElementById("step2").style.display = "none";
+    document.getElementById("progress2").classList.remove("active");
+    document.getElementById("jobDetailsForm").submit();
   });
 </script>
-
 {% endblock %}

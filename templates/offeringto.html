@@ -1,16 +1,28 @@
 {% extends "homeparent.html" %}
 
+{% block styles %}
+.job-post.highlight-border {
+  border: 2.5px solid #e53935 !important;
+  box-shadow: 0 0 0 2px #e5393533;
+}
+{% endblock %}
+
 {% block content %}
 <div class="jobs-container">
-  <div class="jobs-header">
-    <h1>"Offering To"</h1>
-    {% if offer_count < 7 %}
-      <a href="javascript:void(0)" id="openCreateOfferModal" class="create-post-button">
-        Create Offer
-      </a>
-    {% else %}
-      <a href="/createoffer_disabled" class="create-post-button" title="You have reached the maximum limit of 3 offers">Create Offer</a>
-    {% endif %}
+  <div class="jobs-header" style="display: flex; align-items: center; justify-content: space-between;">
+    <h1>Offering To...</h1>
+    <div>
+      {% if offer_count < 7 %}
+        <a href="javascript:void(0)" id="openCreateOfferModal" class="create-post-button">Create Post</a>
+      {% else %}
+        <a href="/createoffer_disabled" class="create-post-button" title="You have reached the maximum limit of 3 offer listings">Create Post</a>
+      {% endif %}
+    </div>
+  </div>
+  <div style="margin-bottom: 18px;">
+    <span style="display: block; font-size: 1.08rem; color: #535251; font-style: italic; text-align: left; margin-left: 2px;">
+      (Create Post if You Want to Do Something and Earn Money, Take a Post from Others to Pay and Get What The Person is Offering)
+    </span>
   </div>
   
   {% set on_demand_offers = offers | selectattr('on_demand', 'equalto', True) | list %}
@@ -19,12 +31,15 @@
   <!-- Section: Instant Offers -->
   <div class="jobs-listings">
       {% for offer in on_demand_offers %}
-      <div class="job-post">
+      <div class="job-post{% if g.user and offer.creator.username == g.user.username %} highlight-border{% endif %}">
         <h2>{{ offer.title }}</h2>
         <div class="on-demand-tag">Instant</div>
         <p>{{ offer.description }}</p>
         <span class="job-meta">Commission: RM{{ offer.commission }}</span><br>
-        <span class="job-meta">Posted by: {{ offer.creator.username }}</span>
+        <span class="job-meta">
+          Posted by:
+          <a href="{{ url_for('profile', usr=offer.creator.username) }}">{{ offer.creator.username }}</a>
+        </span>
         <a href="{{ url_for('offer_details', offer_id=offer.id) }}">
           <button class="take-button">See Details</button>
         </a>
@@ -35,12 +50,21 @@
   <!-- Section: Negotiate Offers -->
   <div class="jobs-listings">
       {% for offer in listing_offers %}
-      <div class="job-post">
+      <div class="job-post{% if g.user and offer.creator.username == g.user.username %} highlight-border{% endif %}">
         <h2>{{ offer.title }}</h2>
         <div class="listing-tag">Negotiate</div>
         <p>{{ offer.description }}</p>
         <span class="job-meta">Salary Range: RM{{ offer.salary_range }}</span><br>
-        <span class="job-meta">Posted by: {{ offer.creator.username }}</span>
+        <span class="job-meta">
+          Posted by:
+          <a href="{{ url_for('profile', usr=offer.creator.username) }}">{{ offer.creator.username }}</a>
+        </span>
+        {% if offer.responder %}
+        <span class="job-meta">
+          Taken by:
+          <a href="{{ url_for('profile', usr=offer.responder.username) }}">{{ offer.responder.username }}</a>
+        </span>
+        {% endif %}
         <a href="{{ url_for('offer_details', offer_id=offer.id) }}">
           <button class="take-button">See Details</button>
         </a>
@@ -70,9 +94,11 @@
             <span class="slider"></span>
           </label>
         </div>
+        <!-- Offer Title Field with enforced prefix -->
         <div class="form-group">
           <label for="offerTitle">Offer Title:</label>
-          <input type="text" name="title" id="offerTitle" placeholder="Enter offer title" />
+          <input type="text" name="title" id="offerTitle" 
+                 value="Offering To " placeholder="Enter offer title" />
         </div>
         <div class="form-group">
           <label for="offerDescription">Offer Description:</label>
@@ -97,6 +123,44 @@
 </div>
 
 <script>
+  // --- Enforce Fixed Prefix "Offering To " in the Offer Title Input ---
+  var prefix = "Offering To ";
+  var offerTitleInput = document.getElementById("offerTitle");
+
+  // Ensure the input always starts with the prefix.
+  if (!offerTitleInput.value.startsWith(prefix)) {
+    offerTitleInput.value = prefix;
+  }
+
+  offerTitleInput.addEventListener("focus", function() {
+    if (!this.value.startsWith(prefix)) {
+      this.value = prefix;
+    }
+    // Move cursor to end
+    setTimeout(() => {
+      this.selectionStart = this.selectionEnd = this.value.length;
+    }, 0);
+  });
+
+  offerTitleInput.addEventListener("keydown", function(e) {
+    var pos = this.selectionStart;
+    // Prevent deletion or left navigation into the prefix area.
+    if (pos <= prefix.length && (e.key === "Backspace" || e.key === "ArrowLeft")) {
+      e.preventDefault();
+    }
+  });
+
+  offerTitleInput.addEventListener("paste", function(e) {
+    e.preventDefault();
+    var pasteData = (e.clipboardData || window.clipboardData).getData("text");
+    var currentValue = this.value;
+    // Insert paste data after the prefix.
+    var newValue = currentValue.slice(0, prefix.length) + pasteData + currentValue.slice(this.selectionEnd);
+    this.value = newValue;
+    this.selectionStart = this.selectionEnd = this.value.length;
+  });
+  // --- End Prefix Enforcement ---
+
   // Modal open/close controls.
   var modal = document.getElementById("createOfferModal");
   var openModalBtn = document.getElementById("openCreateOfferModal");
@@ -115,40 +179,40 @@
   };
 
   // Toggle instant switch controls which fields are shown.
-  document.getElementById('onDemandToggle').addEventListener('change', function() {
+  document.getElementById("onDemandToggle").addEventListener("change", function() {
     if (this.checked) {
-      // When Instant is ON: Show commission field, hide salary range.
       console.log("Instant is ON");
-      document.getElementById('commissionGroup').style.display = 'block';
-      document.getElementById('salaryRangeGroup').style.display = 'none';
+      document.getElementById("commissionGroup").style.display = "block";
+      document.getElementById("salaryRangeGroup").style.display = "none";
     } else {
-      // When Instant is OFF: Hide commission field, show salary range.
       console.log("Instant is OFF");
-      document.getElementById('commissionGroup').style.display = 'none';
-      document.getElementById('salaryRangeGroup').style.display = 'block';
+      document.getElementById("commissionGroup").style.display = "none";
+      document.getElementById("salaryRangeGroup").style.display = "block";
     }
   });
 
   // When the Submit button is clicked, validate and submit the form immediately.
-  document.getElementById('toStep1').addEventListener('click', function() {
-    var title = document.getElementById('offerTitle').value;
-    var description = document.getElementById('offerDescription').value;
-    var isOnDemand = document.getElementById('onDemandToggle').checked;
-    
-    if (title.trim() === "" || description.trim() === "") {
-      alert("Please fill in all fields.");
+  document.getElementById("toStep1").addEventListener("click", function() {
+    var titleValue = offerTitleInput.value;
+    if (titleValue.trim() === "" || titleValue === prefix) {
+      alert("Please fill in the offer title (after the prefix).");
       return;
     }
-    
+    var description = document.getElementById("offerDescription").value;
+    if (description.trim() === "") {
+      alert("Please fill in the offer description.");
+      return;
+    }
+    var isOnDemand = document.getElementById("onDemandToggle").checked;
     if (isOnDemand) {
-      var commission = document.getElementById('commission').value;
+      var commission = document.getElementById("commission").value;
       if (commission.trim() === "") {
         alert("Please fill in the commission cost.");
         return;
       }
     } else {
-      var minSalary = document.getElementById('minSalary').value;
-      var maxSalary = document.getElementById('maxSalary').value;
+      var minSalary = document.getElementById("minSalary").value;
+      var maxSalary = document.getElementById("maxSalary").value;
       if (minSalary.trim() === "" || maxSalary.trim() === "") {
         alert("Please fill in both the minimum and maximum salary.");
         return;
@@ -156,8 +220,7 @@
     }
     
     // Submit the form immediately.
-    document.getElementById('offerDetailsForm').submit();
+    document.getElementById("offerDetailsForm").submit();
   });
 </script>
-
 {% endblock %}
