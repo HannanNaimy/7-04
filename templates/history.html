@@ -9,7 +9,7 @@ body {
 }
 
 .timeline-container {
-  max-width: 800px;
+  max-width: 1100px; /* Wider layout */
   margin: 0 auto;
   background: #fff;
   padding: 20px;
@@ -18,58 +18,177 @@ body {
   margin-top: 100px; /* Add space for fixed navbar */
 }
 
-.timeline {
-  position: relative;
-  margin: 20px 0;
-  padding-left: 40px;
-  border-left: 2px solid #ddd;
+.table-container {
+  width: 100%;
 }
 
-.timeline-event {
-  position: relative;
-  margin-bottom: 20px;
-  padding-bottom: 10px;
+/* Add horizontal line (border) under each table row */
+table tbody tr {
+  border-bottom: 2px solid #ddd;
 }
 
-.timeline-event:before {
-  content: '';
+th {
+  text-align: center;
+  font-size: 1.2rem;
+  padding: 10px;
+}
+
+/* Wrapper for timeline event details in the first column */
+.timeline-event-wrapper {
+  position: relative;
+  padding-left: 40px; /* Leave room for the blue dot */
+}
+
+/* Blue dot element */
+.timeline-dot {
   position: absolute;
-  left: -11px;
-  top: 5px;
-  width: 20px;
-  height: 20px;
+  left: 0;
+  top: 0; /* Adjust as needed to vertically align the dot */
+  width: 18px;
+  height: 18px;
   background: #007BFF;
-  border-radius: 50%;
   border: 3px solid #fff;
+  border-radius: 50%;
   box-shadow: 0 0 0 2px #007BFF;
 }
 
 .timeline-date {
   font-size: 0.85rem;
   color: #888;
-  margin-bottom: 4px;
+  margin-top: 20px;
+  margin-bottom: 1px;
 }
 
 .timeline-text {
   font-size: 1rem;
   color: #333;
+  margin-bottom: 20px;
+}
+
+/* Styling for Payment Transfer column */
+.timeline-payment {
+  font-size: 0.9rem;
+  color: #28a745; /* Green for transfer info */
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Neat sort controls */
+.sort-controls {
+  text-align: right;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  padding: 5px 0;
+}
+
+.sort-controls a {
+  color: #007BFF;
+  text-decoration: none;
+  margin: 0 5px;
+}
+
+.sort-controls a:hover {
+  text-decoration: underline;
+}
+
+.sort-controls strong {
+  margin: 0 5px;
+}
+
+/* Custom date filter controls: display start & end dates in one row */
+.date-filter-controls {
+  text-align: right;
+  margin-bottom: 10px;
+}
+
+.date-filter-controls form {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.date-filter-controls label {
+  font-size: 1rem;
+}
+
+.date-filter-controls input[type="date"] {
+  padding: 5px;
+  font-size: 0.9rem;
+}
+
+.date-filter-controls button {
+  padding: 5px 10px;
+  font-size: 0.9rem;
+  background-color: #007BFF;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.date-filter-controls button:hover {
+  background-color: #0056b3;
 }
 {% endblock %}
 
 {% block content %}
 <div class="timeline-container">
-  <h2>Your Job History Timeline</h2>
-  <div class="timeline">
-    {% if events and events|length > 0 %}
-      {% for event in events %}
-        <div class="timeline-event">
-          <div class="timeline-date">{{ event.date.strftime('%Y-%m-%d %H:%M:%S') }}</div>
-          <div class="timeline-text">{{ event.text }}</div>
-        </div>
-      {% endfor %}
+  <h2 style="text-align: center;">Your Job History Timeline</h2>
+  
+  <!-- Neat Sort by Date Controls -->
+  <div class="sort-controls">
+    Sort by date:
+    {% if sort_order == 'desc' %}
+      <strong>Newest First</strong> |
+      <a href="{{ url_for('historyPage', sort='asc', start_date=request.args.get('start_date'), end_date=request.args.get('end_date')) }}">Oldest First</a>
     {% else %}
-      <p>No history events to display.</p>
+      <a href="{{ url_for('historyPage', sort='desc', start_date=request.args.get('start_date'), end_date=request.args.get('end_date')) }}">Newest First</a> |
+      <strong>Oldest First</strong>
     {% endif %}
+  </div>
+  
+  <!-- Custom Date Filter Form (start and end date inputs beside each other) -->
+  <div class="date-filter-controls">
+    <form method="get" action="{{ url_for('historyPage') }}">
+      <label for="start_date">Start Date:</label>
+      <input type="date" name="start_date" id="start_date" value="{{ request.args.get('start_date') }}">
+      <label for="end_date">End Date:</label>
+      <input type="date" name="end_date" id="end_date" value="{{ request.args.get('end_date') }}">
+      <input type="hidden" name="sort" value="{{ sort_order }}">
+      <button type="submit">Filter</button>
+    </form>
+  </div>
+  
+  <div class="table-container">
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr>
+          <th style="width: 70%;">Timeline Event</th>
+          <th style="width: 30%;">Payment Transfer</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for event in events %}
+        <tr>
+          <td>
+            <div class="timeline-event-wrapper">
+              <!-- Blue dot manually added -->
+              <div class="timeline-dot"></div>
+              <div class="timeline-date">{{ event.date.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+              <div class="timeline-text">{{ event.text }}</div>
+            </div>
+          </td>
+          <td>
+            {% if event.payment_transfer %}
+              <div class="timeline-payment">{{ event.payment_transfer }}</div>
+            {% else %}
+              <div class="timeline-payment">-</div>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 </div>
 {% endblock %}

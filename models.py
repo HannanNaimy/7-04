@@ -85,6 +85,7 @@ class Payment(db.Model):
     id_value = db.Column(db.String(100), nullable=False)
     is_main = db.Column(db.Boolean, default=False)  # Marks if this record is the main payment method
     date_added = db.Column(db.DateTime, default=datetime.utcnow)
+    transfer_info = db.Column(db.String(200), nullable=True)  # New column for payment transfer
 
     # Associate payment method with a specific user
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', name="fk_payment_user"), nullable=False)
