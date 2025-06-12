@@ -1,3 +1,4 @@
+
 import os, re, random
 from sqlalchemy import or_
 from flask import Flask, redirect, url_for, render_template, flash, make_response, g, session, request
@@ -48,13 +49,17 @@ def register():
     if g.user:
         flash("You're already logged in!", "info")
         return redirect(url_for("profile", usr=g.user.username))
-    # This checks if the user got here through submitting the form using "POST" method if not, 
-    # it will run |return render_template("register.html")|
     
     if request.method == "POST":            
         email = request.form.get("email")  
         username = request.form.get("username")
         password = request.form.get("password")
+        confirm_password = request.form.get("confirm_password")
+        
+        # Check if passwords match
+        if password != confirm_password:
+            flash("Passwords do not match!", "error")
+            return render_template("register.html", email=email, username=username)
         
         # This checks if the email entered is mmu domain or not
         #if not re.match(r"^[a-zA-Z0-9._%+-]+@[\w.]*mmu.edu.my$", email):
@@ -66,11 +71,11 @@ def register():
         
         if existing_email:
             flash("Email already taken!", "error")
-            return redirect(url_for("register"))
+            return render_template("register.html", email=email, username=username)
 
         if existing_username:
             flash("Username already taken!", "error")
-            return redirect(url_for("register"))
+            return render_template("register.html", email=email, username=username)
         # This generates a random 6 digit otp
         otp = str(random.randint(100000, 999999))
         # This stores the following information in the session to be used at otp page later
@@ -121,26 +126,30 @@ def otp():
     
 @app.route("/login", methods=["GET", "POST"])
 def login():
-     if g.user:
+    if g.user:
         flash("You're already logged in!", "info")
         return redirect(url_for("profile", usr=g.user.username))
-
-     if request.method == "POST":
-        username = request.form.get("username")
+    
+    if request.method == "POST":
+        email = request.form.get("email")
         password = request.form.get("password")
         
-        user = User.query.filter_by(username=username).first()
-
-        if user and check_password_hash(user.password, password):
-            session["user_id"] = user.id
-            flash("Login successful!", "success")
-
-            return redirect(url_for("profile", usr=username))
-        else:
-            flash("Invalid username or password!", "error")
+        user = User.query.filter_by(email=email).first()
+        
+        if user is None:
+            flash("Invalid email or password!", "error")
             return redirect(url_for("login"))
-
-     return render_template("login.html")
+        
+        if not check_password_hash(user.password, password):
+            flash("Invalid email or password!", "error")
+            return redirect(url_for("login"))
+        
+        session.clear()
+        session["user_id"] = user.id
+        flash("Login successful!", "success")
+        return redirect(url_for("profile", usr=user.username))
+    
+    return render_template("login.html")
 
 @app.route("/forgotPassword", methods=["GET", "POST"])
 def forgotPassword():
@@ -959,33 +968,32 @@ def logout():
 @app.route("/editProfile", methods=["GET", "POST"])
 def editProfile():
     if not g.user:
-        flash("You must be logged in to view this page.", "error")
+        flash("Please log in first!", "error")
         return redirect(url_for("login"))
-
+    
     if request.method == "POST":
-        # Retrieve new contact details from the form
-        phone_number = request.form.get("phone_number")
+        phone_number = request.form.get("phone_number", "")
         instagram_username = request.form.get("instagram_username")
         discord_username = request.form.get("discord_username")
-
-        # Update the user table by setting new values on g.user
+        
+        # Validate phone number format
+        if phone_number:
+            if not phone_number.startswith('0') or len(phone_number) < 10 or len(phone_number) > 11:
+                flash("Please enter valid phone number", "error")
+                return redirect(url_for("editProfile"))
+        
         g.user.phone_number = phone_number
         g.user.instagram_username = instagram_username
         g.user.discord_username = discord_username
-
-        # Commit the updates to the database
+        
         db.session.commit()
-        flash("Contact information updated successfully!", "success")
-        return redirect(url_for("editProfile"))
+        flash("Profile updated successfully!", "success")
+        return redirect(url_for("profile", usr=g.user.username))
     
-    return render_template(
-        "editprofile.html",
-        usr=g.user.username,
-        email=g.user.email,
-        phone_number=g.user.phone_number,
-        instagram_username=g.user.instagram_username,
-        discord_username=g.user.discord_username
-    )
+    return render_template("editprofile.html", 
+                         phone_number=g.user.phone_number,
+                         instagram_username=g.user.instagram_username,
+                         discord_username=g.user.discord_username)
 
 @app.route("/changeUsername", methods=["GET", "POST"])
 def changeUsername():
