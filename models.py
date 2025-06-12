@@ -51,7 +51,7 @@ class JobPost(db.Model):
     def is_complete(self):
         """Job is complete only when both the creator and the taker have confirmed."""
         return self.creator_confirmed and self.taker_confirmed
-      
+
 class OfferPost(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
@@ -59,6 +59,7 @@ class OfferPost(db.Model):
     commission = db.Column(db.Float, nullable=True)
     on_demand = db.Column(db.Boolean, nullable=False, default=False)
     salary_range = db.Column(db.String(50), nullable=True)
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)  # New field for offers
     
     # Indicates if the offer has been accepted:
     accepted = db.Column(db.Boolean, default=False)
@@ -78,14 +79,13 @@ class OfferPost(db.Model):
         """Offer is complete only when both the creator and the responder have confirmed."""
         return self.creator_confirmed and self.responder_confirmed
 
-
 class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(50), nullable=False)  # e.g., "Phone Number", "IC Number", etc.
     id_value = db.Column(db.String(100), nullable=False)
     is_main = db.Column(db.Boolean, default=False)  # Marks if this record is the main payment method
     date_added = db.Column(db.DateTime, default=datetime.utcnow)
-    transfer_info = db.Column(db.String(200), nullable=True)  # New column for payment transfer
+    transfer_info = db.Column(db.String(200), nullable=True)  # Column for payment transfer info
 
     # Associate payment method with a specific user
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', name="fk_payment_user"), nullable=False)
