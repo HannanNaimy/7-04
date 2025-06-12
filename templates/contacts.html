@@ -7,13 +7,28 @@
       <li><strong>Username:</strong> {{ usr.username }}</li>
       <li><strong>Email:</strong> {{ usr.email }}</li>
       {% if usr.phone_number %}
-        <li><strong>Phone:</strong> {{ usr.phone_number }}</li>
+        <li>
+          <strong>Phone:</strong> 
+          <a href="tel:{{ usr.phone_number }}" class="phone-link">
+            {{ usr.phone_number }}
+          </a>
+        </li>
       {% endif %}
       {% if usr.instagram_username %}
-        <li><strong>Instagram:</strong> @{{ usr.instagram_username }}</li>
+        <li>
+          <strong>Instagram:</strong> 
+          <a href="https://instagram.com/{{ usr.instagram_username }}" target="_blank" class="social-link">
+            @{{ usr.instagram_username }}
+          </a>
+        </li>
       {% endif %}
       {% if usr.discord_username %}
-        <li><strong>Discord:</strong> {{ usr.discord_username }}</li>
+        <li>
+          <strong>Discord:</strong> 
+          <a href="https://discord.com/users/{{ usr.discord_username }}" target="_blank" class="social-link">
+            {{ usr.discord_username }}
+          </a>
+        </li>
       {% endif %}
     </ul>
   </div>
@@ -70,5 +85,34 @@
   
   .contact-info li {
     margin-bottom: 10px;
+  }
+
+  .phone-link, .social-link {
+    color: #007bff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .phone-link:hover, .social-link:hover {
+    color: #0056b3;
+    text-decoration: underline;
+  }
+
+  /* Instagram specific styling */
+  .social-link[href*="instagram.com"] {
+    color: #E1306C;
+  }
+
+  .social-link[href*="instagram.com"]:hover {
+    color: #C13584;
+  }
+
+  /* Discord specific styling */
+  .social-link[href*="discord.com"] {
+    color: #7289DA;
+  }
+
+  .social-link[href*="discord.com"]:hover {
+    color: #5865F2;
   }
 </style>
