@@ -376,7 +376,76 @@
   display: block !important;
   margin-top: auto !important;
 }
+
+.post-image {
+    display: block;
+    margin: 0 auto 10px auto;
+    max-width: 100%;
+    max-height: 90px;
+    object-fit: contain;
+    object-position: center;
+    background: #fff;
+    transition: transform 0.25s cubic-bezier(.4,2,.6,1);
+  }
+  .job-post:hover .post-image,
+  .offer-post:hover .post-image {
+    transform: scale(1.08);
+  }
+  .post-divider {
+    border: none;
+    border-top: 1.5px solid #eee;
+    margin: 8px 0 10px 0;
+    width: 100%;
+  }
   
+/* Harmonize Offer Post Card Styles with Job Post Card Styles */
+.offer-container .offer-post {
+  flex: 0 0 250px !important;
+  height: 350px !important;
+  background: #fff !important;
+  border: 1.5px solid #a3e6ff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 180, 247, 0.10) !important;
+  transition: box-shadow 0.2s, border-color 0.2s !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 15px !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+/* On hover, match job-post hover effect */
+.offer-container .offer-post:hover {
+  box-shadow: 0 6px 18px rgba(0, 180, 247, 0.18) !important;
+  border-color: #00b4f7 !important;
+}
+
+/* Offer post title style */
+.offer-post h2 {
+  color: #222 !important;
+  font-size: 1.2rem !important;
+  margin-bottom: 10px !important;
+  margin-top: 0 !important;
+  font-weight: bold !important;
+}
+
+/* Offer post description: single line, ellipsis, like job-post */
+.offer-post p {
+  flex-grow: 1 !important;
+  margin-bottom: 8px !important;
+  color: #555 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-size: 1rem !important;
+}
+
+/* Make job-footer always stick to bottom for offer-post too */
+.offer-post .job-footer {
+  display: block !important;
+  margin-top: auto !important;
+}
+
 {% endblock %}
 
 {% block content %}
@@ -411,13 +480,17 @@
   </div>
 
   <div class="listed-posts">
-    <h2 class="label">Jobs Listed</h2>
+    <h2 class="label">Looking For Listed</h2>
     <div class="listed-container">
       {% if listed_jobs|length == 0 %}
         <p>No listed posts.</p>
       {% else %}
         {% for job in listed_jobs %}
         <div class="job-post">
+          {% if job.picture %}
+            <img src="{{ url_for('static', filename=job.picture.split('static/', 1)[1]) }}" alt="Job Picture" class="post-image" />
+            <hr class="post-divider"/>
+          {% endif %}
           <h2>{{ job.title }}</h2>
           {% if job.on_demand %}
             <div class="on-demand-tag">Instant</div>
@@ -433,7 +506,6 @@
               </span>
             </div>
             <div class="job-options">
-              <!-- Delete button as a form so we can use POST -->
               <form action="{{ url_for('deleteJob', job_id=job.id) }}" method="POST" style="display:inline;">
                 <button type="submit" class="delete-button" onclick="return confirm('Are you sure you want to delete this post?');">Delete</button>
               </form>
@@ -456,6 +528,10 @@
       {% else %}
         {% for job in ongoing_created_jobs %}
         <div class="job-post">
+          {% if job.picture %}
+            <img src="{{ url_for('static', filename=job.picture.split('static/', 1)[1]) }}" alt="Job Picture" class="post-image" />
+            <hr class="post-divider"/>
+          {% endif %}
           <h2>{{ job.title }}</h2>
           {% if job.on_demand %}
             <div class="on-demand-tag">Instant</div>
@@ -484,7 +560,6 @@
         {% endfor %}
       {% endif %}
     </div>
-    
     <!-- Subsection: Taken by You -->
     <h3>Taken by You (You Need to Do What This Person is Looking For)</h3>
     <div class="listed-container">
@@ -493,6 +568,10 @@
       {% else %}
         {% for job in ongoing_taken_jobs %}
         <div class="job-post">
+          {% if job.picture %}
+            <img src="{{ url_for('static', filename=job.picture.split('static/', 1)[1]) }}" alt="Job Picture" class="post-image" />
+            <hr class="post-divider"/>
+          {% endif %}
           <h2>{{ job.title }}</h2>
           {% if job.on_demand %}
             <div class="on-demand-tag">Instant</div>
@@ -533,6 +612,10 @@
       {% else %}
         {% for job in completed_created_jobs %}
         <div class="job-post">
+          {% if job.picture %}
+            <img src="{{ url_for('static', filename=job.picture.split('static/', 1)[1]) }}" alt="Job Picture" class="post-image" />
+            <hr class="post-divider"/>
+          {% endif %}
           <h2>{{ job.title }}</h2>
           {% if job.on_demand %}
             <div class="on-demand-tag">Instant</div>
@@ -564,6 +647,10 @@
       {% else %}
         {% for job in completed_taken_jobs %}
         <div class="job-post">
+          {% if job.picture %}
+            <img src="{{ url_for('static', filename=job.picture.split('static/', 1)[1]) }}" alt="Job Picture" class="post-image" />
+            <hr class="post-divider"/>
+          {% endif %}
           <h2>{{ job.title }}</h2>
           {% if job.on_demand %}
             <div class="on-demand-tag">Instant</div>
@@ -598,6 +685,10 @@
       {% else %}
         {% for offer in listed_offer_posts %}
         <div class="offer-post">
+          {% if offer.picture %}
+            <img src="{{ url_for('static', filename=offer.picture.split('static/', 1)[1]) }}" alt="Offer Picture" class="post-image" />
+            <hr class="post-divider"/>
+          {% endif %}
           <h2>{{ offer.title }}</h2>
           {% if offer.on_demand %}
             <div class="offer-on-demand-tag">Instant</div>
@@ -635,6 +726,10 @@
       {% else %}
         {% for offer in accepted_offer_posts_created %}
         <div class="offer-post">
+          {% if offer.picture %}
+            <img src="{{ url_for('static', filename=offer.picture.split('static/', 1)[1]) }}" alt="Offer Picture" class="post-image" />
+            <hr class="post-divider"/>
+          {% endif %}
           <h2>{{ offer.title }}</h2>
           {% if offer.on_demand %}
             <div class="offer-on-demand-tag">Instant</div>
@@ -671,6 +766,10 @@
       {% else %}
         {% for offer in accepted_offer_posts_taken %}
         <div class="offer-post">
+          {% if offer.picture %}
+            <img src="{{ url_for('static', filename=offer.picture.split('static/', 1)[1]) }}" alt="Offer Picture" class="post-image" />
+            <hr class="post-divider"/>
+          {% endif %}
           <h2>{{ offer.title }}</h2>
           {% if offer.on_demand %}
             <div class="offer-on-demand-tag">Instant</div>
@@ -712,6 +811,10 @@
       {% else %}
         {% for offer in completed_offer_posts_created %}
         <div class="offer-post">
+          {% if offer.picture %}
+            <img src="{{ url_for('static', filename=offer.picture.split('static/', 1)[1]) }}" alt="Offer Picture" class="post-image" />
+            <hr class="post-divider"/>
+          {% endif %}
           <h2>{{ offer.title }}</h2>
           {% if offer.on_demand %}
             <div class="offer-on-demand-tag">Instant</div>
@@ -743,6 +846,10 @@
       {% else %}
         {% for offer in completed_offer_posts_taken %}
         <div class="offer-post">
+          {% if offer.picture %}
+            <img src="{{ url_for('static', filename=offer.picture.split('static/', 1)[1]) }}" alt="Offer Picture" class="post-image" />
+            <hr class="post-divider"/>
+          {% endif %}
           <h2>{{ offer.title }}</h2>
           {% if offer.on_demand %}
             <div class="offer-on-demand-tag">Instant</div>

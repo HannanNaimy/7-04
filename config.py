@@ -14,4 +14,12 @@ class Config:
 
     # Profile Picture Upload Configuration
     UPLOAD_FOLDER = "static/profile_pictures/"
+    POST_PICTURE_FOLDER = os.path.join("static", "postpicture")
     ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+    MAX_POST_PIC_SIZE = 2 * 1024 * 1024  # 2MB
+
+    # Flask-Migrate settings (if needed)
+    # MIGRATE_DIR = os.path.join(os.path.dirname(__file__), 'migrations')
+
+    # Other global settings can be added here as needed
+    # Example: PAGINATION_PER_PAGE = 20
