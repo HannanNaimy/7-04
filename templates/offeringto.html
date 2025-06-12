@@ -57,6 +57,16 @@
   z-index: 2;
   border-top: 1px solid #eee;
 }
+.job-post-footer .tag-inline {
+  margin-bottom: 6px;
+}
+.job-post-footer .on-demand-tag,
+.job-post-footer .listing-tag {
+  display: inline-block;
+  margin-bottom: 0;
+  margin-right: 6px;
+  vertical-align: middle;
+}
 .job-post-footer .job-meta {
   font-size: 0.93rem;
   color: #777;
@@ -121,9 +131,9 @@
           <hr class="post-divider"/>
         {% endif %}
         <h2>{{ offer.title }}</h2>
-        <div class="on-demand-tag">Instant</div>
         <p>{{ offer.description }}</p>
         <div class="job-post-footer">
+          <span class="on-demand-tag tag-inline">Instant</span>
           <span class="job-meta">Commission: RM{{ offer.commission }}</span>
           <span class="job-meta">
             Posted by:
@@ -146,9 +156,9 @@
           <hr class="post-divider"/>
         {% endif %}
         <h2>{{ offer.title }}</h2>
-        <div class="listing-tag">Negotiate</div>
         <p>{{ offer.description }}</p>
         <div class="job-post-footer">
+          <span class="listing-tag tag-inline">Negotiate</span>
           <span class="job-meta">Salary Range: RM{{ offer.salary_range }}</span>
           <span class="job-meta">
             Posted by:

@@ -67,6 +67,16 @@
   width: 100%;
   align-self: flex-end;
 }
+.job-post-footer .tag-inline {
+  margin-bottom: 6px;
+}
+.job-post-footer .on-demand-tag,
+.job-post-footer .listing-tag {
+  display: inline-block;
+  margin-bottom: 0;
+  margin-right: 6px;
+  vertical-align: middle;
+}
 .job-post p {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -121,9 +131,9 @@
           <hr class="post-divider"/>
         {% endif %}
         <h2>{{ job.title }}</h2>
-        <div class="on-demand-tag">Instant</div>
         <p>{{ job.description }}</p>
         <div class="job-post-footer">
+          <span class="on-demand-tag tag-inline">Instant</span>
           <span class="job-meta">Commission: RM{{ job.commission }}</span>
           <span class="job-meta">
             Posted by:
@@ -152,9 +162,9 @@
           <hr class="post-divider"/>
         {% endif %}
         <h2>{{ job.title }}</h2>
-        <div class="listing-tag">Negotiate</div>
         <p>{{ job.description }}</p>
         <div class="job-post-footer">
+          <span class="listing-tag tag-inline">Negotiate</span>
           <span class="job-meta">Salary Range: RM{{ job.salary_range }}</span>
           <span class="job-meta">
             Posted by:
