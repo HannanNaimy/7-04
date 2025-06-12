@@ -38,6 +38,50 @@
   margin: 8px 0 10px 0;
   width: 100%;
 }
+.job-post {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  position: relative !important;
+  padding-bottom: 70px !important;
+}
+.job-post-footer {
+  position: absolute !important;
+  left: 0; right: 0; bottom: 0;
+  width: 100%;
+  background: linear-gradient(to top, #f9f9f9 90%, rgba(249,249,249,0.7) 100%);
+  padding: 10px 15px 12px 15px;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px;
+  z-index: 2;
+  border-top: 1px solid #eee;
+}
+.job-post-footer .job-meta {
+  font-size: 0.93rem;
+  color: #777;
+  margin-bottom: 0;
+}
+.job-post-footer .take-button {
+  margin-top: 7px;
+  width: 100%;
+  align-self: flex-end;
+}
+.job-post p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 8px;
+  flex-grow: 0 !important;
+}
+@media (max-width: 600px) {
+  .job-post {
+    padding-bottom: 90px !important;
+  }
+  .job-post-footer {
+    padding: 10px 8px 14px 8px;
+  }
+}
 {% endblock %}
 
 {% block content %}
@@ -79,14 +123,16 @@
         <h2>{{ offer.title }}</h2>
         <div class="on-demand-tag">Instant</div>
         <p>{{ offer.description }}</p>
-        <span class="job-meta">Commission: RM{{ offer.commission }}</span><br>
-        <span class="job-meta">
-          Posted by:
-          <a href="{{ url_for('profile', usr=offer.creator.username) }}">{{ offer.creator.username }}</a>
-        </span>
-        <a href="{{ url_for('offer_details', offer_id=offer.id) }}">
-          <button class="take-button">See Details</button>
-        </a>
+        <div class="job-post-footer">
+          <span class="job-meta">Commission: RM{{ offer.commission }}</span>
+          <span class="job-meta">
+            Posted by:
+            <a href="{{ url_for('profile', usr=offer.creator.username) }}">{{ offer.creator.username }}</a>
+          </span>
+          <a href="{{ url_for('offer_details', offer_id=offer.id) }}">
+            <button class="take-button">See Details</button>
+          </a>
+        </div>
       </div>
       {% endfor %}
   </div>
@@ -102,20 +148,22 @@
         <h2>{{ offer.title }}</h2>
         <div class="listing-tag">Negotiate</div>
         <p>{{ offer.description }}</p>
-        <span class="job-meta">Salary Range: RM{{ offer.salary_range }}</span><br>
-        <span class="job-meta">
-          Posted by:
-          <a href="{{ url_for('profile', usr=offer.creator.username) }}">{{ offer.creator.username }}</a>
-        </span>
-        {% if offer.responder %}
-        <span class="job-meta">
-          Taken by:
-          <a href="{{ url_for('profile', usr=offer.responder.username) }}">{{ offer.responder.username }}</a>
-        </span>
-        {% endif %}
-        <a href="{{ url_for('offer_details', offer_id=offer.id) }}">
-          <button class="take-button">See Details</button>
-        </a>
+        <div class="job-post-footer">
+          <span class="job-meta">Salary Range: RM{{ offer.salary_range }}</span>
+          <span class="job-meta">
+            Posted by:
+            <a href="{{ url_for('profile', usr=offer.creator.username) }}">{{ offer.creator.username }}</a>
+          </span>
+          {% if offer.responder %}
+          <span class="job-meta">
+            Taken by:
+            <a href="{{ url_for('profile', usr=offer.responder.username) }}">{{ offer.responder.username }}</a>
+          </span>
+          {% endif %}
+          <a href="{{ url_for('offer_details', offer_id=offer.id) }}">
+            <button class="take-button">See Details</button>
+          </a>
+        </div>
       </div>
       {% endfor %}
   </div>
