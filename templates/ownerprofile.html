@@ -398,6 +398,54 @@
     width: 100%;
   }
   
+/* Harmonize Offer Post Card Styles with Job Post Card Styles */
+.offer-container .offer-post {
+  flex: 0 0 250px !important;
+  height: 350px !important;
+  background: #fff !important;
+  border: 1.5px solid #a3e6ff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 180, 247, 0.10) !important;
+  transition: box-shadow 0.2s, border-color 0.2s !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 15px !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+/* On hover, match job-post hover effect */
+.offer-container .offer-post:hover {
+  box-shadow: 0 6px 18px rgba(0, 180, 247, 0.18) !important;
+  border-color: #00b4f7 !important;
+}
+
+/* Offer post title style */
+.offer-post h2 {
+  color: #222 !important;
+  font-size: 1.2rem !important;
+  margin-bottom: 10px !important;
+  margin-top: 0 !important;
+  font-weight: bold !important;
+}
+
+/* Offer post description: single line, ellipsis, like job-post */
+.offer-post p {
+  flex-grow: 1 !important;
+  margin-bottom: 8px !important;
+  color: #555 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-size: 1rem !important;
+}
+
+/* Make job-footer always stick to bottom for offer-post too */
+.offer-post .job-footer {
+  display: block !important;
+  margin-top: auto !important;
+}
+
 {% endblock %}
 
 {% block content %}
