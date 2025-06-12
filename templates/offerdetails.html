@@ -4,6 +4,12 @@
 <div class="job-details-container">
   <header class="job-header">
     <span class="label-looking-for">Offering To&gt;</span>
+    {% if offer.picture %}
+      <div style="display: flex; justify-content: flex-start; margin: 16px 0 8px 0;">
+        <img src="{{ url_for('static', filename=offer.picture.split('static/', 1)[1]) }}" alt="Offer Picture" style="max-width: 400px; max-height: 300px; border-radius: 8px; border: 1px solid #ccc;">
+      </div>
+      <hr style="margin: 16px 0;">
+    {% endif %}
     <h1 class="job-title">{{ offer.title }}</h1>
   </header>
 
