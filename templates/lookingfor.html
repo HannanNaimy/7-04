@@ -257,57 +257,72 @@
     }
   });
 
+  // Get post counts from server context (ensure always integer)
+  var onDemandCount = Number("{{ on_demand_count|default(0)|int }}");
+  var notOnDemandCount = Number("{{ not_on_demand_count|default(0)|int }}");
+
   // Before form submission, validate and (if needed) update the title value.
-  document.getElementById("toStep2").addEventListener("click", function() {
-    var titleValue = titleInput.value;
-    if (titleValue.trim() === "" || titleValue === prefix) {
-      alert("Please fill in the job title.");
-      return;
-    }
-    if (titleValue.length > 50) {
-      alert("Job title must not exceed 50 characters.");
-      return;
-    }
-
-    var description = document.getElementById("jobDescription").value;
-    if (description.trim() === "") {
-      alert("Please fill in the job description.");
-      return;
-    }
-
-    var isOnDemand = document.getElementById("onDemandToggle").checked;
-    if (isOnDemand) {
-      var commission = document.getElementById("commission").value;
-      if (commission.trim() === "") {
-        alert("Please fill in the commission cost.");
+  var toStep2Btn = document.getElementById("toStep2");
+  if (toStep2Btn) {
+    toStep2Btn.addEventListener("click", function() {
+      var titleValue = titleInput.value;
+      if (titleValue.trim() === "" || titleValue === prefix) {
+        alert("Please fill in the job title.");
         return;
       }
-    } else {
-      var minSalary = document.getElementById("minSalary").value;
-      var maxSalary = document.getElementById("maxSalary").value;
-      if (minSalary.trim() === "" || maxSalary.trim() === "") {
-        alert("Please fill in both the minimum and maximum salary.");
+      if (titleValue.length > 50) {
+        alert("Job title must not exceed 50 characters.");
         return;
       }
-    }
-    
-    // Hide Step 1 and update progress.
-    document.getElementById("step1").style.display = "none";
-    document.getElementById("progress1").classList.remove("active");
 
-    if (isOnDemand) {
-      document.getElementById("step2").style.display = "block";
-      document.getElementById("progress2").classList.add("active");
-    } else {
+      var description = document.getElementById("jobDescription").value;
+      if (description.trim() === "") {
+        alert("Please fill in the job description.");
+        return;
+      }
+
+      var isOnDemand = document.getElementById("onDemandToggle").checked;
+      if (isOnDemand) {
+        // Check on-demand post count BEFORE proceeding to payment step
+        if (onDemandCount >= 3) {
+          alert("You have reached the maximum limit of 3 Instant (on-demand) posts.");
+          return;
+        }
+        var commission = document.getElementById("commission").value;
+        if (commission.trim() === "") {
+          alert("Please fill in the commission cost.");
+          return;
+        }
+      } else {
+        var minSalary = document.getElementById("minSalary").value;
+        var maxSalary = document.getElementById("maxSalary").value;
+        if (minSalary.trim() === "" || maxSalary.trim() === "") {
+          alert("Please fill in both the minimum and maximum salary.");
+          return;
+        }
+      }
+
+      // Hide Step 1 and update progress.
+      document.getElementById("step1").style.display = "none";
+      document.getElementById("progress1").classList.remove("active");
+
+      if (isOnDemand) {
+        document.getElementById("step2").style.display = "block";
+        document.getElementById("progress2").classList.add("active");
+      } else {
+        document.getElementById("jobDetailsForm").submit();
+      }
+    });
+  }
+
+  // Defensive: Only add event listener if button exists
+  var simulatePaymentBtn = document.getElementById("simulatePayment");
+  if (simulatePaymentBtn) {
+    simulatePaymentBtn.addEventListener("click", function() {
+      document.getElementById("step2").style.display = "none";
+      document.getElementById("progress2").classList.remove("active");
       document.getElementById("jobDetailsForm").submit();
-    }
-  });
-
-  // Payment simulation code.
-  document.getElementById("simulatePayment").addEventListener("click", function() {
-    document.getElementById("step2").style.display = "none";
-    document.getElementById("progress2").classList.remove("active");
-    document.getElementById("jobDetailsForm").submit();
-  });
+    });
+  }
 </script>
 {% endblock %}
