@@ -724,13 +724,13 @@ def historyPage():
 
     events = []
 
-    # Gather job event data (existing implementation)
+    # Gather JobPost events (Looking for / Job actions)
     created_jobs = JobPost.query.filter_by(user_id=g.user.id).all()
     for job in created_jobs:
         events.append({
             "date": job.date_created,
-            "text": f"You created the job '{job.title}'.",  # Removed the duplicate date
-            "payment_transfer": "-"  # No payment transfer for created jobs
+            "text": f"You created the job '{job.title}'.",
+            "payment_transfer": "-"
         })
 
     taken_jobs = JobPost.query.filter_by(taken_by=g.user.id).all()
@@ -738,10 +738,11 @@ def historyPage():
         if job.date_taken:
             events.append({
                 "date": job.date_taken,
-                "text": f"You took the job '{job.title}'.",  # Removed duplicate date information
-                "payment_transfer": "-"  # No payment transfer for taken jobs
+                "text": f"You took the job '{job.title}'.",
+                "payment_transfer": "-"
             })
 
+    # Completed jobs: now adding two payment transfer events
     completed_jobs = JobPost.query.filter(
         JobPost.creator_confirmed == True,
         JobPost.taker_confirmed == True,
@@ -749,22 +750,50 @@ def historyPage():
     ).all()
     for job in completed_jobs:
         if job.date_completed:
+            # Payment transfer from User (job creator) to Escrow
             events.append({
                 "date": job.date_completed,
-                "text": f"Job '{job.title}' was completed.",  # Removed duplicate date information
+                "text": f"Job '{job.title}' was completed.",
+                "payment_transfer": f"Transferred from {job.creator.username} to Escrow: Rm{job.commission}" if job.commission else "-"
+            })
+            # Payment transfer from Escrow to Admin (job taker)
+            events.append({
+                "date": job.date_completed,
+                "text": f"Job '{job.title}' was completed.",
                 "payment_transfer": f"Transferred from Escrow to {job.taker.username}: Rm{job.commission}" if job.commission else "-"
             })
 
+    # Payment events with fallback for the date field
     payments = Payment.query.filter_by(user_id=g.user.id).all()
     for payment in payments:
         if payment.transfer_info:
+            event_date = payment.date_added if payment.date_added is not None else datetime.utcnow()
             events.append({
-                "date": payment.date_created,
-                "text": f"Payment method '{payment.method_name}' processed.",
+                "date": event_date,
+                "text": f"Payment method '{payment.type}' processed.",
                 "payment_transfer": payment.transfer_info
             })
 
-    # Apply date filter
+    # OfferPost events (Offering to jobs)
+    # Offers created by you (as the offer creator)
+    offer_posts = OfferPost.query.filter_by(user_id=g.user.id).all()
+    for offer in offer_posts:
+        events.append({
+            "date": offer.date_created if hasattr(offer, 'date_created') and offer.date_created else datetime.utcnow(),
+            "text": f"You created an offer '{offer.title}'.",
+            "payment_transfer": "-"
+        })
+
+    # Offers where you are the responder (i.e. you accepted an offer)
+    accepted_offers = OfferPost.query.filter_by(accepted_by=g.user.id).all()
+    for offer in accepted_offers:
+        events.append({
+            "date": offer.date_created if hasattr(offer, 'date_created') and offer.date_created else datetime.utcnow(),
+            "text": f"You accepted the offer '{offer.title}'.",
+            "payment_transfer": "-"
+        })
+
+    # Apply date filter if provided
     start_date_str = request.args.get('start_date')
     end_date_str = request.args.get('end_date')
 
