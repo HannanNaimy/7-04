@@ -14,7 +14,7 @@ class Config:
 
     # Profile Picture Upload Configuration
     UPLOAD_FOLDER = os.path.join("static", "profile_pictures")
-    POST_PICTURE_FOLDER = os.path.join("static", "postpicture")
+    POST_PICTURE_FOLDER = os.path.join("upload", "postpicture")
     ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
     MAX_POST_PIC_SIZE = 2 * 1024 * 1024  # 2MB
 

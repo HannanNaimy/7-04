@@ -127,7 +127,7 @@
       {% for offer in on_demand_offers %}
       <div class="job-post{% if g.user and offer.creator.username == g.user.username %} highlight-border{% endif %}">
         {% if offer.picture %}
-          <img src="{{ url_for('static', filename=offer.picture|replace('static/', '')) }}" alt="Offer Picture" class="post-image" />
+          <img src="{{ url_for('static', filename=offer.picture) }}" alt="Offer Picture" class="post-image" />
           <hr class="post-divider"/>
         {% endif %}
         <h2>{{ offer.title }}</h2>
@@ -152,7 +152,7 @@
       {% for offer in listing_offers %}
       <div class="job-post{% if g.user and offer.creator.username == g.user.username %} highlight-border{% endif %}">
         {% if offer.picture %}
-          <img src="{{ url_for('static', filename=offer.picture|replace('static/', '')) }}" alt="Offer Picture" class="post-image" />
+          <img src="{{ url_for('static', filename=offer.picture) }}" alt="Offer Picture" class="post-image" />
           <hr class="post-divider"/>
         {% endif %}
         <h2>{{ offer.title }}</h2>

@@ -16,6 +16,8 @@ app.config.from_object(Config)
 # Ensure upload folders exist for profile and post pictures
 if not os.path.exists(app.config["UPLOAD_FOLDER"]):
     os.makedirs(app.config["UPLOAD_FOLDER"])
+# Change POST_PICTURE_FOLDER to use 'upload/postpicture'
+app.config["POST_PICTURE_FOLDER"] = os.path.join("upload", "postpicture")
 if not os.path.exists(app.config["POST_PICTURE_FOLDER"]):
     os.makedirs(app.config["POST_PICTURE_FOLDER"])
 
@@ -375,9 +377,14 @@ def lookingFor():
                     flash("Image exceeds 2MB size limit.", "error")
                     return redirect(url_for("lookingFor"))
                 filename = secure_filename(file.filename)
-                picture_path = os.path.join(app.config["POST_PICTURE_FOLDER"], filename)
-                file.save(picture_path)
-                picture_path = picture_path.replace("\\", "/")  # For Windows path
+                # Save to upload/postpicture and store relative path for static serving
+                save_folder = app.config["POST_PICTURE_FOLDER"]
+                if not os.path.exists(save_folder):
+                    os.makedirs(save_folder)
+                save_path = os.path.join(save_folder, filename)
+                file.save(save_path)
+                # Store as 'postpicture/filename' for url_for('static', filename=...)
+                picture_path = f"postpicture/{filename}"
 
         if on_demand:
             commission_input = request.form.get('commission')
@@ -403,7 +410,7 @@ def lookingFor():
             on_demand=on_demand,
             salary_range=salary_range_value,
             user_id=user_id,
-            picture=picture_path  # assumes JobPost has a 'picture' field
+            picture=picture_path  # now stores 'postpicture/filename'
         )
         
         db.session.add(new_post)
@@ -474,9 +481,14 @@ def offeringTo():
                     flash("Image exceeds 2MB size limit.", "error")
                     return redirect(url_for("offeringTo"))
                 filename = secure_filename(file.filename)
-                picture_path = os.path.join(app.config["POST_PICTURE_FOLDER"], filename)
-                file.save(picture_path)
-                picture_path = picture_path.replace("\\", "/")  # For Windows path
+                # Save to upload/postpicture and store relative path for static serving
+                save_folder = app.config["POST_PICTURE_FOLDER"]
+                if not os.path.exists(save_folder):
+                    os.makedirs(save_folder)
+                save_path = os.path.join(save_folder, filename)
+                file.save(save_path)
+                # Store as 'postpicture/filename' for url_for('static', filename=...)
+                picture_path = f"postpicture/{filename}"
 
         if on_demand:
             commission_input = request.form.get('commission')
@@ -502,7 +514,7 @@ def offeringTo():
             on_demand=on_demand,
             salary_range=salary_range_value,
             user_id=user_id,
-            picture=picture_path  # assumes OfferPost has a 'picture' field
+            picture=picture_path  # now stores 'postpicture/filename'
         )
         
         db.session.add(new_offer)
