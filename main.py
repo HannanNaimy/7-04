@@ -16,9 +16,9 @@ app.config.from_object(Config)
 # Ensure upload folders exist for profile and post pictures
 profile_picture_folder = os.path.join(app.root_path, "static", "profile_pictures")
 if not os.path.exists(profile_picture_folder):
-    os.makedirs(profile_picture_folder)
+    os.makedirs(profile_picture_folder, exist_ok=True)
 if not os.path.exists(app.config["POST_PICTURE_FOLDER"]):
-    os.makedirs(os.path.join(app.root_path, app.config["POST_PICTURE_FOLDER"]))
+    os.makedirs(os.path.join(app.root_path, app.config["POST_PICTURE_FOLDER"]), exist_ok=True)
 
 db.init_app(app)
 mail = Mail(app)
@@ -379,7 +379,7 @@ def lookingFor():
                 # Save to mysite/static/postpicture using absolute path
                 post_picture_folder = os.path.join(app.root_path, "static", "postpicture")
                 if not os.path.exists(post_picture_folder):
-                    os.makedirs(post_picture_folder)
+                    os.makedirs(post_picture_folder, exist_ok=True)
                 abs_picture_path = os.path.join(post_picture_folder, filename)
                 file.save(abs_picture_path)
                 # Store relative path for Flask static serving
@@ -483,7 +483,7 @@ def offeringTo():
                 # Save to mysite/static/postpicture using absolute path
                 post_picture_folder = os.path.join(app.root_path, "static", "postpicture")
                 if not os.path.exists(post_picture_folder):
-                    os.makedirs(post_picture_folder)
+                    os.makedirs(post_picture_folder, exist_ok=True)
                 abs_picture_path = os.path.join(post_picture_folder, filename)
                 file.save(abs_picture_path)
                 # Store relative path for Flask static serving
@@ -994,7 +994,7 @@ def profilePic():
     # Use explicit static/profile_pictures path
     profile_picture_folder = os.path.join(app.root_path, "static", "profile_pictures")
     if not os.path.exists(profile_picture_folder):
-        os.makedirs(profile_picture_folder)
+        os.makedirs(profile_picture_folder, exist_ok=True)
     abs_filepath = os.path.join(profile_picture_folder, filename)
     file.save(abs_filepath)
     # Store relative path for Flask static serving
