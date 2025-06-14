@@ -453,6 +453,7 @@
   <!-- Profile Header with Picture and Greeting -->
   <div class="profile-info">
     <div class="profile-pic-container">
+      {# Show user's profile picture if available, else show default #}
       {% if g_user and g_user.profile_picture %}
         {% set relative_path = g_user.profile_picture %}
         {% if relative_path.startswith('static/') %}
@@ -479,6 +480,7 @@
     </ul>
   </div>
 
+  <!-- Listed Jobs Section -->
   <div class="listed-posts">
     <h2 class="label">Looking For Listed</h2>
     <div class="listed-container">
@@ -506,6 +508,7 @@
               </span>
             </div>
             <div class="job-options">
+              <!-- Delete job post form -->
               <form action="{{ url_for('deleteJob', job_id=job.id) }}" method="POST" style="display:inline;">
                 <button type="submit" class="delete-button" onclick="return confirm('Are you sure you want to delete this post?');">Delete</button>
               </form>
@@ -517,7 +520,7 @@
     </div>
   </div>
 
-  <!-- Section: Ongoing posts -->
+  <!-- Ongoing Jobs Section -->
   <div class="listed-posts">
     <h2 class="label">Instant-Jobs Taken</h2>
     <!-- Subsection: Created by You -->
@@ -551,6 +554,7 @@
               </span>
             </div>
             <div class="job-options">
+              <!-- Check status form -->
               <form action="{{ url_for('jobStatus', job_id=job.id) }}" method="GET" style="display:inline;">
                 <button type="submit" class="take-button">Check Status</button>
               </form>
@@ -591,6 +595,7 @@
               </span>
             </div>
             <div class="job-options">
+              <!-- Check status form -->
               <form action="{{ url_for('jobStatus', job_id=job.id) }}" method="GET" style="display:inline;">
                 <button type="submit" class="take-button">Check Status</button>
               </form>
@@ -602,6 +607,7 @@
     </div>
   </div>
   
+  <!-- Completed Jobs Section -->
   <div class="listed-posts">
     <h2 class="label">Instant-Jobs Completed</h2>
     <!-- Subsection: Created by You -->
@@ -704,6 +710,7 @@
               </span>
             </div>
             <div class="job-options">
+              <!-- Delete offer post form -->
               <form action="{{ url_for('deleteOffer', offer_id=offer.id) }}" method="POST" style="display:inline;">
                 <button type="submit" class="delete-button" onclick="return confirm('Are you sure you want to delete this offer?');">Delete</button>
               </form>
@@ -749,6 +756,7 @@
               </span>
             </div>
             <div class="job-options">
+              <!-- Check offer status form -->
               <form action="{{ url_for('offerStatus', offer_id=offer.id) }}" method="GET" style="display:inline;">
                 <button type="submit" class="take-button">Check Status</button>
               </form>
@@ -789,6 +797,7 @@
               </span>
             </div>
             <div class="job-options">
+              <!-- Check offer status form -->
               <form action="{{ url_for('offerStatus', offer_id=offer.id) }}" method="GET" style="display:inline;">
                 <button type="submit" class="take-button">Check Status</button>
               </form>

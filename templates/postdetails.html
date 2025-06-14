@@ -4,6 +4,7 @@
 <div class="job-details-container">
   <header class="job-header">
     <span class="label-looking-for">Looking For&gt;</span>
+    {# Show job picture if available #}
     {% if job.picture %}
       <div style="display: flex; justify-content: flex-start; margin: 16px 0 8px 0;">
         <img src="{{ url_for('static', filename=job.picture.split('static/', 1)[1]) }}" alt="Job Picture" style="max-width: 400px; max-height: 300px; border-radius: 8px; border: 1px solid #ccc;">
@@ -19,6 +20,7 @@
   
   <footer class="job-footer">
     <p class="job-commission">
+      {# Show commission or salary range depending on job type #}
       {% if job.on_demand %}
         Commission: RM{{ job.commission }}
       {% else %}
@@ -26,11 +28,12 @@
       {% endif %}
     </p>
     {% if job.on_demand %}
+      {# For on-demand jobs, show Take button #}
       <form action="{{ url_for('take_job', job_id=job.id) }}" method="POST">
         <button class="job-take-button" type="submit">Take</button>
       </form>
     {% else %}
-      <!-- Contact button that triggers the modal -->
+      {# For negotiate jobs, show Contact button to open modal #}
       <button class="job-contact-button" onclick="document.getElementById('contactModal').style.display='block';">
         Contact
       </button>
@@ -38,7 +41,7 @@
   </footer>
 </div>
 
-<!-- Pass the job creator to the contacts modal -->
+{# Pass the job creator to the contacts modal #}
 {% set usr = job.creator %}
 {% include "contacts.html" %}
 

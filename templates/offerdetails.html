@@ -4,6 +4,7 @@
 <div class="job-details-container">
   <header class="job-header">
     <span class="label-looking-for">Offering To&gt;</span>
+    {# Show offer picture if available #}
     {% if offer.picture %}
       <div style="display: flex; justify-content: flex-start; margin: 16px 0 8px 0;">
         <img src="{{ url_for('static', filename=offer.picture.split('static/', 1)[1]) }}" alt="Offer Picture" style="max-width: 400px; max-height: 300px; border-radius: 8px; border: 1px solid #ccc;">
@@ -19,6 +20,7 @@
   
   <footer class="job-footer">
     <p class="job-commission">
+      {# Show commission or salary range depending on offer type #}
       {% if offer.on_demand %}
         Commission: RM{{ offer.commission }}
       {% else %}
@@ -26,7 +28,7 @@
       {% endif %}
     </p>
     {% if offer.on_demand %}
-      {# For on‑demand offers – show the Take button; if creator then submit form immediately #}
+      {# For on-demand offers, show Take button or payment simulation modal #}
       {% if g.user and offer.creator.id == g.user.id %}
         <form id="creatorTakeOfferForm" action="{{ url_for('take_offer', offer_id=offer.id) }}" method="POST" style="display:inline;">
           <button type="submit" class="job-take-button">Take</button>
@@ -36,7 +38,7 @@
         <button class="job-take-button" id="openTakeOfferModal">Take</button>
       {% endif %}
     {% else %}
-      {# For non on‑demand offers, show the Contact button that opens the contacts modal #}
+      {# For non on-demand offers, show the Contact button that opens the contacts modal #}
       <button class="job-contact-button"
               onclick="document.getElementById('contactModal').style.display='block';">
         Contact
@@ -49,9 +51,9 @@
 {% set usr = offer.creator %}
 {% include "contacts.html" %}
 
-{# Only include the payment modal if this is an on‑demand offer #}
+{# Only include the payment modal if this is an on-demand offer #}
 {% if offer.on_demand %}
-<!-- Payment Modal for Taking the Offer (only relevant for on‑demand offers and non-creators) -->
+<!-- Payment Modal for Taking the Offer (only relevant for on-demand offers and non-creators) -->
 <div id="takeOfferModal" class="modal" style="display:none;">
   <div class="modal-content">
     <span class="close" id="closeTakeOfferModal">&times;</span>
@@ -67,6 +69,7 @@
 
 <script>
   // === Modal Controls for Payment Simulation ===
+  // Handles opening and closing of the payment modal for taking an offer
   var takeOfferModal = document.getElementById("takeOfferModal");
   var openTakeOfferModal = document.getElementById("openTakeOfferModal");
   var closeTakeOfferModal = document.getElementById("closeTakeOfferModal");
