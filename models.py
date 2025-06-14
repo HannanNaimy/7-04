@@ -18,7 +18,7 @@ class User(db.Model):
     discord_username = db.Column(db.String(50), nullable=True)
     profile_picture = db.Column(db.String(150), nullable=True, default='static/profiles/default.png')
 
-    # Relationship to Payment methods
+    # Relationship to Payment methods (one-to-many)
     payments = db.relationship('Payment', backref='user', lazy=True)
 
 class JobPost(db.Model):
@@ -29,7 +29,7 @@ class JobPost(db.Model):
     on_demand = db.Column(db.Boolean, nullable=False, default=False)
     salary_range = db.Column(db.String(50), nullable=True)
     
-    # Date fields:
+    # Date fields for job lifecycle
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
     date_taken = db.Column(db.DateTime, nullable=True)
     date_completed = db.Column(db.DateTime, nullable=True)
@@ -39,16 +39,16 @@ class JobPost(db.Model):
     taken_by = db.Column(db.Integer, db.ForeignKey('user.id', name="fk_jobpost_taken_by"), nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', name="fk_jobpost_user"), nullable=False)
     
-    # Relationships
+    # Relationships to User: creator and taker
     creator = db.relationship('User', foreign_keys=[user_id], backref=db.backref('job_posts', lazy=True))
     taker = db.relationship('User', foreign_keys=[taken_by], post_update=True)
     
-    # Confirmation flags:
+    # Confirmation flags for job completion
     creator_confirmed = db.Column(db.Boolean, default=False)
     taker_confirmed = db.Column(db.Boolean, default=False)
     
-    # New picture field for JobPost
-    picture = db.Column(db.String(200), nullable=True)  # Path to post picture, can be null
+    # Path to post picture, can be null
+    picture = db.Column(db.String(200), nullable=True)
     
     @property
     def is_complete(self):
@@ -68,22 +68,21 @@ class OfferPost(db.Model):
     accepted_by = db.Column(db.Integer, db.ForeignKey('user.id', name="fk_offerpost_accepted_by"), nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', name="fk_offerpost_user"), nullable=False)
     
-    # Relationships
+    # Relationships to User: creator and responder
     creator = db.relationship('User', foreign_keys=[user_id], backref=db.backref('offer_posts', lazy=True))
     responder = db.relationship('User', foreign_keys=[accepted_by], post_update=True)
     
-    # Added confirmation flags:
+    # Confirmation flags for offer completion
     creator_confirmed = db.Column(db.Boolean, default=False)
     responder_confirmed = db.Column(db.Boolean, default=False)
     
-    # New picture field for OfferPost
-    picture = db.Column(db.String(200), nullable=True)  # Path to post picture, can be null
+    # Path to post picture, can be null
+    picture = db.Column(db.String(200), nullable=True)
     
     @property
     def is_complete(self):
         """Offer is complete only when both the creator and the responder have confirmed."""
         return self.creator_confirmed and self.responder_confirmed
-
 
 class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -91,9 +90,9 @@ class Payment(db.Model):
     id_value = db.Column(db.String(100), nullable=False)
     is_main = db.Column(db.Boolean, default=False)  # Marks if this record is the main payment method
     date_added = db.Column(db.DateTime, default=datetime.utcnow)
-    transfer_info = db.Column(db.String(200), nullable=True)  # New column for payment transfer
+    transfer_info = db.Column(db.String(200), nullable=True)  # Info about payment transfer
 
-    # Associate payment method with a specific user
+    # Associate payment method with a specific user (foreign key)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', name="fk_payment_user"), nullable=False)
 
     def __repr__(self):
