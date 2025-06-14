@@ -142,13 +142,7 @@
     <!-- Display current profile picture -->
     <div class="current-profile-pic mb-3">
       {% if g_user and g_user.profile_picture %}
-        {# If the stored path starts with "static/", remove it so that url_for can work correctly #}
-        {% set pic_path = g_user.profile_picture %}
-        {% if pic_path.startswith("static/") %}
-          {% set relative_path = pic_path[7:] %}
-        {% else %}
-          {% set relative_path = pic_path %}
-        {% endif %}
+        {% set relative_path = g_user.profile_picture|replace('static/', '') %}
         <img src="{{ url_for('static', filename=relative_path) }}" alt="Profile Picture" class="profile-pic">
       {% else %}
         <img src="{{ url_for('static', filename='profile_pictures/default.png') }}" alt="Profile Picture" class="profile-pic">

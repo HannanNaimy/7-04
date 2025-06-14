@@ -7,7 +7,7 @@
     {# Show job picture if available #}
     {% if job.picture %}
       <div style="display: flex; justify-content: flex-start; margin: 16px 0 8px 0;">
-        <img src="{{ url_for('static', filename=job.picture.split('static/', 1)[1]) }}" alt="Job Picture" style="max-width: 400px; max-height: 300px; border-radius: 8px; border: 1px solid #ccc;">
+        <img src="{{ url_for('static', filename=job.picture|replace('static/', '')) }}" alt="Job Picture" style="max-width: 400px; max-height: 300px; border-radius: 8px; border: 1px solid #ccc;">
       </div>
       <hr style="margin: 16px 0;">
     {% endif %}

@@ -51,7 +51,7 @@
 
     {% if offer.picture %}
       <div style="display: flex; justify-content: flex-start; margin-bottom: 24px;">
-        <img src="{{ url_for('static', filename=offer.picture.split('static/', 1)[1]) }}" alt="Offer Picture" style="max-width: 400px; max-height: 300px; border-radius: 8px; border: 1px solid #ccc;">
+        <img src="{{ url_for('static', filename=offer.picture|replace('static/', '')) }}" alt="Offer Picture" style="max-width: 400px; max-height: 300px; border-radius: 8px; border: 1px solid #ccc;">
       </div>
     {% endif %}
 

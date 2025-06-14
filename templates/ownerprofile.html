@@ -453,12 +453,8 @@
   <!-- Profile Header with Picture and Greeting -->
   <div class="profile-info">
     <div class="profile-pic-container">
-      {# Show user's profile picture if available, else show default #}
       {% if g_user and g_user.profile_picture %}
-        {% set relative_path = g_user.profile_picture %}
-        {% if relative_path.startswith('static/') %}
-          {% set relative_path = relative_path[7:] %}
-        {% endif %}
+        {% set relative_path = g_user.profile_picture|replace('static/', '') %}
         <img src="{{ url_for('static', filename=relative_path) }}" alt="Profile Picture" class="profile-pic">
       {% else %}
         <img src="{{ url_for('static', filename='profile_pictures/default.png') }}" alt="Profile Picture" class="profile-pic">

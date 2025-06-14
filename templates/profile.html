@@ -75,10 +75,7 @@
     <!-- Profile picture container -->
     <div class="profile-pic-container">
       {% if usr.profile_picture %}
-        {% set pic = usr.profile_picture %}
-        {% if pic.startswith('static/') %}
-          {% set pic = pic[7:] %}
-        {% endif %}
+        {% set pic = usr.profile_picture|replace('static/', '') %}
         <img src="{{ url_for('static', filename=pic) }}" alt="Profile Picture" class="profile-pic">
       {% else %}
         <img src="{{ url_for('static', filename='profile_pictures/default.png') }}" alt="Profile Picture" class="profile-pic">
