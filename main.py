@@ -982,6 +982,7 @@ def profilePic():
     filename = secure_filename(file.filename)
     filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
     file.save(filepath)
+    filepath = filepath.replace("\\", "/")  # Ensure universal path separator
 
     # Update user profile picture in the database
     g.user.profile_picture = filepath
