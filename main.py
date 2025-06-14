@@ -62,9 +62,9 @@ def register():
             return render_template("register.html", email=email, username=username)
         
         # This checks if the email entered is mmu domain or not
-        #if not re.match(r"^[a-zA-Z0-9._%+-]+@[\w.]*mmu.edu.my$", email):
-            #flash("Email must be from MMU domain!", "error")
-            #return redirect(url_for("register"))
+        if not re.match(r"^[a-zA-Z0-9._%+-]+@[\w.]*mmu.edu.my$", email):
+            flash("Email must be from MMU domain!", "error")
+            return redirect(url_for("register"))
         # This checks if the email & username entered is already in the database or not
         existing_email = User.query.filter_by(email=email).first()
         existing_username = User.query.filter_by(username=username).first()
