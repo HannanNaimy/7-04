@@ -14,10 +14,11 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 # Ensure upload folders exist for profile and post pictures
-if not os.path.exists(app.config["UPLOAD_FOLDER"]):
-    os.makedirs(app.config["UPLOAD_FOLDER"])
+profile_picture_folder = os.path.join(app.root_path, "static", "profile_pictures")
+if not os.path.exists(profile_picture_folder):
+    os.makedirs(profile_picture_folder)
 if not os.path.exists(app.config["POST_PICTURE_FOLDER"]):
-    os.makedirs(app.config["POST_PICTURE_FOLDER"])
+    os.makedirs(os.path.join(app.root_path, app.config["POST_PICTURE_FOLDER"]))
 
 db.init_app(app)
 mail = Mail(app)
@@ -375,13 +376,14 @@ def lookingFor():
                     flash("Image exceeds 2MB size limit.", "error")
                     return redirect(url_for("lookingFor"))
                 filename = secure_filename(file.filename)
-                # Save to static/post_picture (PythonAnywhere: mysite/static/post_picture)
-                post_picture_folder = os.path.join("static", "post_picture")
+                # Save to mysite/static/postpicture using absolute path
+                post_picture_folder = os.path.join(app.root_path, "static", "postpicture")
                 if not os.path.exists(post_picture_folder):
                     os.makedirs(post_picture_folder)
-                picture_path = os.path.join(post_picture_folder, filename)
-                file.save(picture_path)
-                picture_path = picture_path.replace("\\", "/")  # For Windows path
+                abs_picture_path = os.path.join(post_picture_folder, filename)
+                file.save(abs_picture_path)
+                # Store relative path for Flask static serving
+                picture_path = f"postpicture/{filename}"
 
         if on_demand:
             commission_input = request.form.get('commission')
@@ -478,13 +480,14 @@ def offeringTo():
                     flash("Image exceeds 2MB size limit.", "error")
                     return redirect(url_for("offeringTo"))
                 filename = secure_filename(file.filename)
-                # Save to static/post_picture (PythonAnywhere: mysite/static/post_picture)
-                post_picture_folder = os.path.join("static", "post_picture")
+                # Save to mysite/static/postpicture using absolute path
+                post_picture_folder = os.path.join(app.root_path, "static", "postpicture")
                 if not os.path.exists(post_picture_folder):
                     os.makedirs(post_picture_folder)
-                picture_path = os.path.join(post_picture_folder, filename)
-                file.save(picture_path)
-                picture_path = picture_path.replace("\\", "/")  # For Windows path
+                abs_picture_path = os.path.join(post_picture_folder, filename)
+                file.save(abs_picture_path)
+                # Store relative path for Flask static serving
+                picture_path = f"postpicture/{filename}"
 
         if on_demand:
             commission_input = request.form.get('commission')
@@ -988,13 +991,14 @@ def profilePic():
         return redirect(url_for("editProfile"))
 
     filename = secure_filename(file.filename)
-    # Save to static/profile_pictures/
-    profile_picture_folder = os.path.join("static", "profile_pictures")
+    # Use explicit static/profile_pictures path
+    profile_picture_folder = os.path.join(app.root_path, "static", "profile_pictures")
     if not os.path.exists(profile_picture_folder):
         os.makedirs(profile_picture_folder)
-    filepath = os.path.join(profile_picture_folder, filename)
-    file.save(filepath)
-    filepath = filepath.replace("\\", "/")  # Ensure universal path separator
+    abs_filepath = os.path.join(profile_picture_folder, filename)
+    file.save(abs_filepath)
+    # Store relative path for Flask static serving
+    filepath = f"profile_pictures/{filename}"
 
     # Update user profile picture in the database
     g.user.profile_picture = filepath
