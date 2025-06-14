@@ -375,7 +375,11 @@ def lookingFor():
                     flash("Image exceeds 2MB size limit.", "error")
                     return redirect(url_for("lookingFor"))
                 filename = secure_filename(file.filename)
-                picture_path = os.path.join(app.config["POST_PICTURE_FOLDER"], filename)
+                # Save to static/post_picture (PythonAnywhere: mysite/static/post_picture)
+                post_picture_folder = os.path.join("static", "post_picture")
+                if not os.path.exists(post_picture_folder):
+                    os.makedirs(post_picture_folder)
+                picture_path = os.path.join(post_picture_folder, filename)
                 file.save(picture_path)
                 picture_path = picture_path.replace("\\", "/")  # For Windows path
 
@@ -474,7 +478,11 @@ def offeringTo():
                     flash("Image exceeds 2MB size limit.", "error")
                     return redirect(url_for("offeringTo"))
                 filename = secure_filename(file.filename)
-                picture_path = os.path.join(app.config["POST_PICTURE_FOLDER"], filename)
+                # Save to static/post_picture (PythonAnywhere: mysite/static/post_picture)
+                post_picture_folder = os.path.join("static", "post_picture")
+                if not os.path.exists(post_picture_folder):
+                    os.makedirs(post_picture_folder)
+                picture_path = os.path.join(post_picture_folder, filename)
                 file.save(picture_path)
                 picture_path = picture_path.replace("\\", "/")  # For Windows path
 
@@ -980,7 +988,11 @@ def profilePic():
         return redirect(url_for("editProfile"))
 
     filename = secure_filename(file.filename)
-    filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+    # Save to static/profile_pictures/
+    profile_picture_folder = os.path.join("static", "profile_pictures")
+    if not os.path.exists(profile_picture_folder):
+        os.makedirs(profile_picture_folder)
+    filepath = os.path.join(profile_picture_folder, filename)
     file.save(filepath)
     filepath = filepath.replace("\\", "/")  # Ensure universal path separator
 
