@@ -100,6 +100,7 @@
   <div class="jobs-header" style="display: flex; align-items: center; justify-content: space-between;">
     <h1>Looking For...</h1>
     <div>
+      {# --- Create Post Button: disables or alerts if user reached post limits --- #}
       {% if on_demand_count >= 3 and not_on_demand_count >= 7 %}
         <a href="javascript:void(0)" class="create-post-button" style="pointer-events:none;opacity:0.6;" title="You have reached the maximum for both types of posts.">Create Post</a>
       {% elif on_demand_count >= 3 %}
@@ -119,9 +120,9 @@
       Posts with red highlights means it's yours
     </span>
   </div>
+  {# --- Split jobs into on-demand and negotiate for display --- #}
   {% set on_demand_jobs = jobs | selectattr('on_demand', 'equalto', True) | list %}
   {% set listing_jobs = jobs | rejectattr('on_demand', 'equalto', True) | list %}
-
   <!-- Section: Instant Jobs -->
   <div class="jobs-listings">
     {% for job in on_demand_jobs %}
@@ -189,7 +190,7 @@
       <li id="progress2" style="display: none;">Step 2: Payment</li>
     </ul>
 
-    <!-- Create Job Form -->
+    <!-- Create Job Form (multi-step for instant jobs) -->
     <form id="jobDetailsForm" action="/lookingFor" method="POST" enctype="multipart/form-data">
       <!-- Step 1: Job Details -->
       <div id="step1">
@@ -232,7 +233,7 @@
         <button type="button" id="toStep2">Submit Job Details</button>
       </div>
       
-      <!-- Step 2: Payment -->
+      <!-- Step 2: Payment (only for instant jobs) -->
       <div id="step2" style="display: none;">
         <h2>Payment</h2>
         <p>Please scan the QR code below to pay the commission amount.</p>
@@ -304,12 +305,12 @@
   // Toggle instant switch to show/hide commission vs. salary fields.
   document.getElementById("onDemandToggle").addEventListener("change", function() {
     if (this.checked) {
-      console.log("Instant is ON");
+      // Show commission, hide salary range, show payment step
       document.getElementById("commissionGroup").style.display = "block";
       document.getElementById("salaryRangeGroup").style.display = "none";
       document.getElementById("progress2").style.display = "list-item";
     } else {
-      console.log("Instant is OFF");
+      // Show salary range, hide commission, hide payment step
       document.getElementById("commissionGroup").style.display = "none";
       document.getElementById("salaryRangeGroup").style.display = "block";
       document.getElementById("progress2").style.display = "none";
