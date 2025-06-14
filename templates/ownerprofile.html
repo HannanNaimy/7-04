@@ -490,7 +490,7 @@
         {% for job in listed_jobs %}
         <div class="job-post">
           {% if job.picture %}
-            <img src="{{ url_for('static', filename=job.picture.split('static/', 1)[1]) }}" alt="Job Picture" class="post-image" />
+            <img src="{{ url_for('static', filename=job.picture|replace('static/', '')) }}" alt="Job Picture" class="post-image" />
             <hr class="post-divider"/>
           {% endif %}
           <h2>{{ job.title }}</h2>
@@ -532,7 +532,7 @@
         {% for job in ongoing_created_jobs %}
         <div class="job-post">
           {% if job.picture %}
-            <img src="{{ url_for('static', filename=job.picture.split('static/', 1)[1]) }}" alt="Job Picture" class="post-image" />
+            <img src="{{ url_for('static', filename=job.picture|replace('static/', '')) }}" alt="Job Picture" class="post-image" />
             <hr class="post-divider"/>
           {% endif %}
           <h2>{{ job.title }}</h2>
@@ -573,7 +573,7 @@
         {% for job in ongoing_taken_jobs %}
         <div class="job-post">
           {% if job.picture %}
-            <img src="{{ url_for('static', filename=job.picture.split('static/', 1)[1]) }}" alt="Job Picture" class="post-image" />
+            <img src="{{ url_for('static', filename=job.picture|replace('static/', '')) }}" alt="Job Picture" class="post-image" />
             <hr class="post-divider"/>
           {% endif %}
           <h2>{{ job.title }}</h2>
@@ -619,7 +619,7 @@
         {% for job in completed_created_jobs %}
         <div class="job-post">
           {% if job.picture %}
-            <img src="{{ url_for('static', filename=job.picture.split('static/', 1)[1]) }}" alt="Job Picture" class="post-image" />
+            <img src="{{ url_for('static', filename=job.picture|replace('static/', '')) }}" alt="Job Picture" class="post-image" />
             <hr class="post-divider"/>
           {% endif %}
           <h2>{{ job.title }}</h2>
@@ -654,7 +654,7 @@
         {% for job in completed_taken_jobs %}
         <div class="job-post">
           {% if job.picture %}
-            <img src="{{ url_for('static', filename=job.picture.split('static/', 1)[1]) }}" alt="Job Picture" class="post-image" />
+            <img src="{{ url_for('static', filename=job.picture|replace('static/', '')) }}" alt="Job Picture" class="post-image" />
             <hr class="post-divider"/>
           {% endif %}
           <h2>{{ job.title }}</h2>
@@ -692,7 +692,7 @@
         {% for offer in listed_offer_posts %}
         <div class="offer-post">
           {% if offer.picture %}
-            <img src="{{ url_for('static', filename=offer.picture.split('static/', 1)[1]) }}" alt="Offer Picture" class="post-image" />
+            <img src="{{ url_for('static', filename=offer.picture|replace('static/', '')) }}" alt="Offer Picture" class="post-image" />
             <hr class="post-divider"/>
           {% endif %}
           <h2>{{ offer.title }}</h2>
@@ -734,7 +734,7 @@
         {% for offer in accepted_offer_posts_created %}
         <div class="offer-post">
           {% if offer.picture %}
-            <img src="{{ url_for('static', filename=offer.picture.split('static/', 1)[1]) }}" alt="Offer Picture" class="post-image" />
+            <img src="{{ url_for('static', filename=offer.picture|replace('static/', '')) }}" alt="Offer Picture" class="post-image" />
             <hr class="post-divider"/>
           {% endif %}
           <h2>{{ offer.title }}</h2>
@@ -775,7 +775,7 @@
         {% for offer in accepted_offer_posts_taken %}
         <div class="offer-post">
           {% if offer.picture %}
-            <img src="{{ url_for('static', filename=offer.picture.split('static/', 1)[1]) }}" alt="Offer Picture" class="post-image" />
+            <img src="{{ url_for('static', filename=offer.picture|replace('static/', '')) }}" alt="Offer Picture" class="post-image" />
             <hr class="post-divider"/>
           {% endif %}
           <h2>{{ offer.title }}</h2>
@@ -821,7 +821,7 @@
         {% for offer in completed_offer_posts_created %}
         <div class="offer-post">
           {% if offer.picture %}
-            <img src="{{ url_for('static', filename=offer.picture.split('static/', 1)[1]) }}" alt="Offer Picture" class="post-image" />
+            <img src="{{ url_for('static', filename=offer.picture|replace('static/', '')) }}" alt="Offer Picture" class="post-image" />
             <hr class="post-divider"/>
           {% endif %}
           <h2>{{ offer.title }}</h2>
@@ -856,7 +856,7 @@
         {% for offer in completed_offer_posts_taken %}
         <div class="offer-post">
           {% if offer.picture %}
-            <img src="{{ url_for('static', filename=offer.picture.split('static/', 1)[1]) }}" alt="Offer Picture" class="post-image" />
+            <img src="{{ url_for('static', filename=offer.picture|replace('static/', '')) }}" alt="Offer Picture" class="post-image" />
             <hr class="post-divider"/>
           {% endif %}
           <h2>{{ offer.title }}</h2>
