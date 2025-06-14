@@ -1,4 +1,3 @@
-
 import os, re, random
 from sqlalchemy import or_
 from flask import Flask, redirect, url_for, render_template, flash, make_response, g, session, request
@@ -9,13 +8,14 @@ from werkzeug.utils import secure_filename
 from datetime import datetime
 from models import db, User, JobPost, Payment, OfferPost
 from config import Config
+
+# --- Flask App and Config Setup ---
 app = Flask(__name__) 
 app.config.from_object(Config)
 
-# Ensure upload folder exists
+# Ensure upload folders exist for profile and post pictures
 if not os.path.exists(app.config["UPLOAD_FOLDER"]):
     os.makedirs(app.config["UPLOAD_FOLDER"])
-
 if not os.path.exists(app.config["POST_PICTURE_FOLDER"]):
     os.makedirs(app.config["POST_PICTURE_FOLDER"])
 
@@ -23,27 +23,27 @@ db.init_app(app)
 mail = Mail(app)
 migrate = Migrate(app, db)
 
-
+# --- Utility Functions ---
 def allowed_file(filename):
+    # Check if file extension is allowed
     return "." in filename and filename.rsplit(".", 1)[1].lower() in app.config["ALLOWED_EXTENSIONS"]
 
 @app.before_request
 def load_logged_in_user():
+    # Load user from session before each request
     user_id = session.get("user_id")
     if user_id is None:
         g.user = None
     else:
         g.user = User.query.get(user_id)
-
     app.jinja_env.globals["g_user"] = g.user if g.user else None
- 
-# Guest Page
+
+# --- Guest Page ---
 @app.route("/")
 def guest():
     return render_template("guest.html")
 
-# Register Page
-
+# --- Register Page ---
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if g.user:
@@ -93,8 +93,7 @@ def register():
 
     return render_template("register.html")
 
-# OTP Page
-
+# --- OTP Page ---
 @app.route("/OTP", methods=["GET", "POST"])
 def otp():
     if request.method == "POST":
@@ -122,8 +121,7 @@ def otp():
 
     return render_template("otp.html")
 
-# Login Page
-    
+# --- Login Page ---
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if g.user:
@@ -151,6 +149,7 @@ def login():
     
     return render_template("login.html")
 
+# --- Forgot Password Page ---
 @app.route("/forgotPassword", methods=["GET", "POST"])
 def forgotPassword():
     if request.method == "POST":
@@ -180,7 +179,7 @@ def forgotPassword():
     
     return render_template("forgotpassword.html")
 
-# Reset Code Page
+# --- Reset Code Page ---
 @app.route("/resetCode", methods=["GET", "POST"])
 def resetCode():
     if request.method == "POST":
@@ -199,6 +198,7 @@ def resetCode():
     
     return render_template("resetcode.html")
 
+# --- New Password Page ---
 @app.route("/newPassword", methods=["GET", "POST"])
 def newPassword():
     if request.method == "POST":
@@ -230,8 +230,7 @@ def newPassword():
     return render_template("newpassword.html")
 
 
-# Profile Page
-
+# --- Profile Page ---
 @app.route("/profile/<usr>", methods=["GET"])
 def profile(usr):
     if "user_id" not in session:
@@ -244,7 +243,8 @@ def profile(usr):
         return redirect(url_for("login"))
 
     if user.id == session.get("user_id"):
-        # Listed posts: jobs created by you and still available.
+        # --- Job Posts queries for profile owner ---
+        # Listed jobs: jobs created by you and still available.
         listed_jobs = JobPost.query.filter_by(user_id=user.id, taken=False).all()
 
         # Ongoing jobs: taken but not completed (i.e. either confirmation flag is not True)
@@ -277,7 +277,7 @@ def profile(usr):
             JobPost.taker_confirmed == True
         ).all()
 
-        # Offer Posts queries
+        # --- Offer Posts queries for profile owner ---
         # Offers created by user and not yet accepted
         listed_offer_posts = OfferPost.query.filter_by(user_id=user.id, accepted=False).all()
 
@@ -327,10 +327,10 @@ def profile(usr):
                        completed_offer_posts_taken=completed_offer_posts_taken)
 
     else:
-        # Pass the user instance to the template so that 'user.profile_picture' is defined.
+        # Render profile for other users
         return render_template("profile.html", usr=user)
 
-# Looking For Page  
+# --- Looking For Page (Job Posting) ---
 @app.route("/lookingFor", methods=["GET", "POST"])
 def lookingFor():
     if not g.user:
@@ -429,6 +429,7 @@ def lookingFor():
                            on_demand_count=on_demand_count,
                            not_on_demand_count=not_on_demand_count)
 
+# --- Offering To Page (Offer Posting) ---
 @app.route("/offeringTo", methods=["GET", "POST"])
 def offeringTo():
     if not g.user:
@@ -527,7 +528,7 @@ def offeringTo():
                            not_on_demand_count=not_on_demand_count)
  
 
-# Job Status Page   
+# --- Job Status Page (Confirmation) ---
 @app.route("/jobStatus/<int:job_id>", methods=["GET", "POST"])
 def jobStatus(job_id):
     if not g.user:
@@ -582,7 +583,7 @@ def jobStatus(job_id):
     response.headers["Expires"] = "0"
     return response
 
-# Offer Status Page
+# --- Offer Status Page (Confirmation) ---
 @app.route("/offerStatus/<int:offer_id>", methods=["GET", "POST"])
 def offerStatus(offer_id):
     if not g.user:
@@ -637,7 +638,7 @@ def offerStatus(offer_id):
     response.headers["Expires"] = "0"
     return response
 
-# Job Details Page
+# --- Job Details Page ---
 @app.route("/postDetails/<int:job_id>")
 def post_details(job_id):
     job = JobPost.query.get_or_404(job_id)
@@ -648,12 +649,14 @@ def offer_details(offer_id):
     offer = OfferPost.query.get_or_404(offer_id)
     return render_template("offerdetails.html", offer=offer)
 
+# --- Disabled Job Creation Route ---
 @app.route("/createjob_disabled")
 def createJobDisabled():
     # This route only flashes a message and then redirects
     flash("You have reached the maximum limit of 3 job listings.", "error")
     return redirect(url_for("lookingFor"))
 
+# --- Edit Payment Methods Page ---
 @app.route('/editpaymentmethods', methods=['GET', 'POST'])
 def edit_payment_methods():
     if not g.user:
@@ -712,6 +715,7 @@ def edit_payment_methods():
     saved_payments = Payment.query.filter_by(user_id=g.user.id).order_by(Payment.date_added.desc()).all()
     return render_template("payment.html", saved_payments=saved_payments)
 
+# --- History Page (Events Timeline) ---
 @app.route("/history")
 def historyPage():
     if not g.user:
@@ -780,8 +784,7 @@ def historyPage():
 
     return render_template("history.html", events=events, sort_order=sort_order)
 
-#Set Main Payment
-
+# --- Set Main Payment Method ---
 @app.route('/setmain/<int:payment_id>', methods=['POST'])
 def set_main(payment_id):
     payment_to_set = Payment.query.get(payment_id)
@@ -804,7 +807,7 @@ def set_main(payment_id):
     return redirect("/editpaymentmethods")
 
 
-# Take Job Function
+# --- Take Job Function ---
 @app.route("/take/<int:job_id>", methods=["POST"])
 def take_job(job_id):
     if not g.user:
@@ -859,7 +862,7 @@ def take_offer(offer_id):
     flash("Offer accepted! The listing has been removed.", "success")
     return redirect(url_for("offeringTo"))
 
-# Delete Job Function
+# --- Delete Job Function ---
 @app.route("/deletejob/<int:job_id>", methods=["POST"])
 def deleteJob(job_id):
     # Ensure that a user is logged in
@@ -885,7 +888,7 @@ def deleteJob(job_id):
     flash("Job post deleted successfully.", "success")
     return redirect(url_for("profile", usr=g.user.username))
 
-# Delete Offer Function
+# --- Delete Offer Function ---
 @app.route("/deleteoffer/<int:offer_id>", methods=["POST"])
 def deleteOffer(offer_id):
     # Ensure that a user is logged in
@@ -911,7 +914,7 @@ def deleteOffer(offer_id):
     flash("Offer post deleted successfully.", "success")
     return redirect(url_for("profile", usr=g.user.username))
 
-# User Search Function
+# --- User Search Function ---
 @app.route("/search", methods=["GET"])
 def search():
     # Retrieve the username from the query parameter 'q'
@@ -926,7 +929,7 @@ def search():
     return redirect(url_for("profile", usr=username))
 
 
-# Profile Picture Upload Function
+# --- Profile Picture Upload Function ---
 @app.route("/profilePic", methods=["POST"])
 def profilePic():
     if not g.user:
@@ -958,13 +961,14 @@ def profilePic():
     flash("Profile picture updated successfully!", "success")
     return redirect(url_for("editProfile"))
 
-# Logout Function
+# --- Logout Function ---
 @app.route("/logout")
 def logout():
     session.clear()
     flash("You have been logged out.", "success")
     return redirect(url_for("guest"))  
 
+# --- Edit Profile Page ---
 @app.route("/editProfile", methods=["GET", "POST"])
 def editProfile():
     if not g.user:
@@ -995,6 +999,7 @@ def editProfile():
                          instagram_username=g.user.instagram_username,
                          discord_username=g.user.discord_username)
 
+# --- Change Username Page ---
 @app.route("/changeUsername", methods=["GET", "POST"])
 def changeUsername():
     if not g.user:
